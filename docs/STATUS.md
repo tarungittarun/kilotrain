@@ -30,15 +30,22 @@ sources: 2026-10-11 done, next 2026-11-11 (or on gate FAIL) · competitors: due 
 open-data S4: monthly until admitted or abandoned twice (next 2026-11-11) · RISK.md: 2026-11-11 ·
 RUNBOOK.md: on install/rollback change.
 
-## HANDOFF 2026-10-11 (session 1)
-- Milestone state: M0 EXITED (verdicts in docs/spike-verdicts.md). M1 NEXT.
-- Artefact ids: probe run 2026-10-11T21:02:29Z; fixtures poc/fixtures/s1_ntes,
-  poc/fixtures/s2_erail (2); repo head = first commit on branch kilo/patient-lantern-jgg.
-- Resume line: STATUS.md first NEXT row = S1-* (story files), then M1-1.
-- Blockers: M2-0 blocked on a captured payload (no parser without a capture, §7.4). Unblock
-  paths: (a) read the CI probe verdict once the `checks` job runs on this commit — if S1 or S2
-  answers from runners, capture there; (b) needs-device capture from motorola edge 50 neo.
-- Rules that must NOT be re-litigated: no key/backend/fabricated values (§3); four provenance
-  labels from one label() function (§3.2); EMPTY ≠ FAILURE (§3.3); no parser without a capture
-  (§7.4); commit date ≠ data vintage (§10.8); one push per round, read the run before the next
-  push (§9.7); humans never run builds (§14.1).
+## HANDOFF 2026-10-11 (session 1 end)
+- Milestone state: **M1 EXITED for its exit criterion** ("no time without a provenance label,
+  enforced by a test": unit-screens 38176954520 / 38179889632 / 38178953739 PASS) and **SHIPPED**
+  (rolling `latest-apk`: app-debug.apk 9,511,991 bytes 2026-10-11T21:42:19Z, permanent URL in
+  RUNBOOK). M2 is the open milestone.
+- Artefact ids: CI runs read this session: 38175068398, 38175814758, 38176954520, 38177316587,
+  38177316606, 38178541224/33/12/34, 38178953739/684/787/830, 38179889524/533/555/632.
+- Resume line: STATUS.md first DOING row = S1-1 (owner reads the M1-01 story + TEST_CARD); the
+  only open owner-action is M2-0 (name the second station code after SMET; one capture).
+- Blockers: M2 needs one captured payload from S1 or S2 (CI says: S1 blocked-by-network 0/3,
+  S2 throttle-only; no parser without a capture, 7.4). Unblock: a pasted export from the phone
+  (14.3) = Settings->enable diagnostics->open the NTES app for SMET-><route>->Save->paste text.
+- Rules that must NOT be re-litigated: no key/backend/fabricated values (3); four labels from
+  one label() (3.2); EMPTY != COULD_NOT_LOOK (3.3); no parser without a capture (7.4); commit
+  date != data vintage (10.8); one push per round and read the run (9.7); humans never run
+  builds (14.1); never a fake pass (11.1).
+- Standing note: L3 is UNTESTED on CI runners with a reason (QA row 12); do not re-spend rounds
+  on `avdmanager` until a self-hosted emulator-able runner exists or an owner needs-device row
+  is open.

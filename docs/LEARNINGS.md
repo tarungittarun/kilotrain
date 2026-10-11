@@ -30,6 +30,11 @@
    the job**: the L3 job waited 18+ minutes because the emulator never appeared. Every wait in
    CI is now bounded with a stated reason on miss (10.8: no diagnostic may outrank the user's
    request - a hung job hides evidence instead of producing it).
+10. **When a CI tool fails silently, instrument the exit code and the file it should have
+    written.** `avdmanager create avd` exiting 0 while writing nothing cost four rounds; the
+    moment the step checked for `$HOME/.android/avd/opentrack_test.ini` it failed WITH THE
+    REASON in 34 s. And a failing job that repeats a red herring on every push is worse than an
+    honest "untested, with a reason" verdict (11.1).
 9. **A chained comparator silently lets an earlier rule win** where it shouldn't
    (`catchable.then(nearestAsc).then(recentDesc)` ordered the gone group by oldest-first).
    The display-order rule is now one explicit comparator that groups catchable-vs-gone before

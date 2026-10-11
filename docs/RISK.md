@@ -8,4 +8,5 @@
 | no local toolchain | compile defects reach CI only | certain | CI is the verifier (§9.6); never claim local green | every round |
 | release secrets missing | owner stays on older APK | medium | pipeline publishes debug + states why (11.4) | release job log |
 | owner's phone behind AdGuard private DNS blocks a source | L7 surprises | medium | L7 reserved for real egress; probe from device when a row needs it | needs-device row |
+| L3 emulator cannot be created on CI runners | M4 alarm proofs stay UNPROVEN on CI | certain | job reports "untested, with a reason" (never a fake pass); re-try on a self-hosted runner or accept L7-only proof for alarms; alarm tests must then be named and honest | an emulator-able runner OR an owner needs-device row |
 | key/backend creep | violates §3.1 | low | ADR gate (7.5); §14.6 deliverable is the honest version | any ADR proposing a key |

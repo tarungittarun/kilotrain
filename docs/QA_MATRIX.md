@@ -17,7 +17,7 @@ phone (reserved for what only a phone can witness).
 | 9 | fetch→parse→store→UI with local mock, no railway egress | L4 | BLOCKED-with-reason | no source has a captured payload (ADR 0002); no parser exists to prove; QA row stays open until M2's capture |
 | 10 | migration failure clears cache and says so | L1 | GREEN | OpenTrackStoreTest.upgradeClearsCacheRatherThanShowingStaleAsFresh |
 | 11 | known-truths gate verdict recorded in artefact; build stays green on data contradiction | L6 | GREEN | gate verdict in CI (checks job) + gate_selftest asserts it never exits non-zero on data |
-| 12 | instrumented L3 verdict (KVM present on runners) | L3 | FAILED WITH REASON (run 38178541234): "no adb device appeared within 240 s" - the AVD was never created because I hardcoded cmdline-tools/latest for avdmanager; the runner ships a versioned dir. Fixed by deriving avdmanager from the same sdkmanager dir; next run pending | emulator.log tail quoted in run log |
+| 12 | instrumented L3 verdict (KVM present on runners) | L3 | UNTESTED, WITH A REASON (4 measured runs: 38178953830, 38179369449, 38179767383, 38179889555): /dev/kvm exists but `avdmanager create avd` exits 0 after its hardware prompt and writes NO AVD dir ($HOME/.android/avd absent), so no emulator ever boots; both system-image families tried. Job is continue-on-error with a verdict summary - never a fake pass | create_avd.log in the run artefact |
 | 13 | owner phone: real TLS/egress, Doze alarm, look and feel | L7 | deferred to M4/M6 | needs-device row when opened |
 
 Waived rows (with reason) will be listed here; none waived yet.
