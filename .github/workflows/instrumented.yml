@@ -1,0 +1,46 @@
+name: instrumented
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  instrumented:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: detect /dev/kvm
+        id: kvm
+        run: |
+          if [ -e /dev/kvm ]; then echo "available=true" >> "$GITHUB_OUTPUT"; else echo "available=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: "UNTESTED with a reason: no KVM (11.1)"
+        if: steps.kvm.outputs.available == 'false'
+        run: |
+          echo "SKIPPED, WITH A REASON: /dev/kvm is absent on this runner, so L3/L4 emulator"
+          echo "flows are reported 'untested, with a reason' - never a fake pass (11.1)."
+          echo "The Robolectric job (L2) remains the screen-level proof for this commit."
+
+      - name: run L3 flows on emulator
+        if: steps.kvm.outputs.available == 'true'
+        run: |
+          ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace
+
+      - name: upload emulator logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-${{ github.run_id }}
+          path: |
+            app/build/reports/androidTests/
+            **/build/outputs/androidTest-results/
+          if-no-files-found: warn

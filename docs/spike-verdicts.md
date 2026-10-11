@@ -14,11 +14,15 @@ blocked-by-network | blocked-by-shape.
 ## Phone-visible change
 NONE. This is research, not progress (KICKOFF §14.5). SAY SO.
 
-## What decides the next branch (M2)
-The same probe now runs in CI (`checks` job + weekly). Its verdict for S1/S2 from GitHub runners —
-reachable or blocked — decides whether M2's live pair search can be built here or waits for a
-capture from the owner's phone (needs-device row in STATUS.md). No parser is written before a
-capture exists, whichever branch is taken.
+## What decides the next branch (M2) — MEASURED 2026-10-11, CI run 38175068398
+The probe now runs in CI. The CI run's captured results answer the branch question that M0 left
+open — read from artefact `probe-capture-38175068398`, not assumed:
+- **S1 from GitHub runners: blocked-by-network, 0/3 samples, every one a ~20 s timeout.** The
+  brief's "TLS dies from CI-hosted runners" record is CONFIRMED for S1.
+- **S2 from CI: blocked-by-shape, identical to sandbox** (throttle control messages).
+
+Therefore **M2 opens only with a captured payload from the owner's phone** (needs-device row
+below), or with a new CI measurement. No parser is written before a capture exists (7.4).
 
 ## Gate discipline proven by this run
 - The probe's first pass reported S2 "usable-but-labelled" because tildes were present — WRONG;

@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "generated": "2026-10-11T21:06:29Z",
+  "generated_note": "build timestamp, NOT a data vintage",
+  "source_admitted": [],
+  "data_vintage": null,
+  "trains": [],
+  "honest_note": "no source admitted; the app must render unverified/empty states, never fabricated rows"
+}

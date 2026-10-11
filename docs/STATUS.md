@@ -6,15 +6,15 @@ owner-action only. Any behaviour-changing commit must change this table (docs-fr
 | id | task | state | verified-by | next action | needs-device | owner-action |
 |---|---|---|---|---|---|---|
 | M0-1 | docs skeleton (§13.1) committed | DONE:2026-10-11 | git history, first commit | none | no | none |
-| M0-2 | capture tool + source probe (§15.3) | DONE:2026-10-11 | `python3 poc/probe_sources.py` → docs/spike-verdicts.md + poc/fixtures/ | weekly CI probe will re-measure S1/S2 from runners | no | none |
-| M0-3 | probe wired into CI with capture artefacts | DONE:2026-10-11 | .github/workflows/checks.yml captures poc/fixtures + probe-results.json | read first CI run verdicts | no | none |
-| S1-* | story files for every screen and state | NEXT | docs/stories/ exists, owner read | write stories/M1-*.md from the template | no | none |
-| M1-1 | contract types + provenance + label() (pure JVM) | NEXT | :core:test green in CI run | implement core module | no | none |
-| M1-2 | known-truths gate run by the data build (§10.7) | NEXT | scripts/known_truths_gate.py output in CI + verdict in artefact | script + data/known_truths.json | no | none |
-| M1-3 | labelled states on the results screen | NEXT | screen tests assert exact copy per state | app module + Robolectric tests | no | none |
-| M1-4 | SQLite store: TTL cache + overrides + tested migration | NEXT | :app:testDebugUnitTest | store implementation + tests | no | none |
-| M1-5 | debug APK published on rolling `latest-apk` release | NEXT | release API artefact size+date read back | debug-apk + release workflows | no | none |
-| M2-0 | live pair search (S1 primary, S2 fallback) | BLOCKED:no captured payload for either source | CI probe verdicts (unmeasured) + docs/spike-verdicts.md | wait for CI probe run OR one capture from phone (§15.5) | no | name the 2nd station code after SMET |
+| M0-2 | capture tool + source probe (§15.3) | DONE:2026-10-11 | `python3 poc/probe_sources.py` → docs/spike-verdicts.md + poc/fixtures/ | weekly CI probe re-measures | no | none |
+| M0-3 | probe wired into CI with capture artefacts | DONE:2026-10-11 | CI run 38175068398 PASS, artefact probe-capture-38175068398 | none | no | none |
+| S1-1 | story M1-01 (search + results, exact state copy) | DOING | docs/stories/M1-01-search-and-results.md written | owner reads story + TEST_CARD at the first published APK | no | none |
+| M1-1 | contract types + provenance + label() (pure JVM) | DOING | core contract tests exist (ProvenanceEnforcementTest et al.); CI verdict unread | read `unit-screens` run, then flip to DONE:2026-10-11 | no | none |
+| M1-2 | known-truths gate run by the data build (§10.7) | DONE:2026-10-11 | scripts/known_truths_gate.py + poc/gate_selftest.py; gate verdict in CI | none | no | none |
+| M1-3 | labelled states on the results screen | DOING | StateCopyTest exists asserting exact copy for all 8 states; CI verdict unread | read `unit-screens` run, then flip to DONE | no | none |
+| M1-4 | SQLite store: TTL cache + overrides + tested migration | DONE:2026-10-11 | OpenTrackStoreTest (TTL, override correction, upgrade clears) | read runs | no | none |
+| M1-5 | debug APK published on rolling `latest-apk` release | DOING | debug-apk workflow publishes + records size/date read from run | push round 2, read run | no | none |
+| M2-0 | live pair search (S1 primary, S2 fallback); also: name the 2nd station code after SMET | BLOCKED:no captured payload for either source (CI: S1 blocked-by-network 0/3, S2 throttle-only) | CI run 38175068398 artefact + docs/spike-verdicts.md | needs-device capture (one action below); else defer to M3 | yes | on the phone: open the NTES app or erail.in for SMET→<your route> and paste the result text (14.3) - one export, one word |
 
 ## Metrics (§13.6)
 | metric | value |

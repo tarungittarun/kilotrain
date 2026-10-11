@@ -1,0 +1,51 @@
+name: unit-screens
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  unit-screens:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PROVED/SKIPPED header
+        run: |
+          echo "PROVED: :core JVM unit+contract tests and :app Robolectric screen tests run here."
+          echo "SKIPPED: nothing local. All verification for this job happens on the runner."
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: generate the offline asset + gate (L6, 10.7)
+        run: |
+          python3 scripts/build_offline_asset.py
+          python3 scripts/known_truths_gate.py
+          mkdir -p app/src/main/assets
+          cp data/asset.json app/src/main/assets/offline_asset.json
+          echo "gate verdict recorded (never reddens the build on data contradiction):"
+          cat data/gate-verdict.json
+
+      - name: :core:test (L1)
+        run: ./gradlew :core:test --console=plain --stacktrace
+
+      - name: :app:testDebugUnitTest (L2)
+        run: ./gradlew :app:testDebugUnitTest --console=plain --stacktrace
+
+      - name: upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-screens-${{ github.run_id }}
+          path: |
+            core/build/reports/tests/
+            app/build/reports/tests/
+            data/gate-verdict.json
+          if-no-files-found: warn
