@@ -1,4 +1,4 @@
-package in.opentrack.app.asset
+package io.opentrack.app.asset
 
 import io.opentrack.core.contract.label
 import org.junit.Assert.assertEquals

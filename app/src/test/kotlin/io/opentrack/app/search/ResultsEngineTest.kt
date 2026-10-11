@@ -1,4 +1,4 @@
-package in.opentrack.app.search
+package io.opentrack.app.search
 
 import androidx.test.core.app.ApplicationProvider
 import io.opentrack.app.asset.OfflineAsset

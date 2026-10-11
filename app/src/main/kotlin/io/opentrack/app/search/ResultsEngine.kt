@@ -1,4 +1,4 @@
-package in.opentrack.app.search
+package io.opentrack.app.search
 
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.store.OpenTrackStore
