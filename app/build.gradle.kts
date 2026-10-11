@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "in.opentrack.app"
+    namespace = "io.opentrack.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "in.opentrack.app"
+        applicationId = "io.opentrack.app"
         minSdk = 24
         targetSdk = 35
         versionCode = versionCodeFrom("2.0.0")
