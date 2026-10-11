@@ -44,7 +44,7 @@ class ProvenanceEnforcementTest {
     /** The failure type cannot masquerade as an answer. */
     @Test
     fun failureIsNotAListing() {
-        val listingMethods = PairListing::class.java.methods.map { it.name }
-        assertTrue(listingMethods.none { it.equals("failure") && it.returnType == PairListing::class.java })
+        val listingMethods = PairListing::class.java.methods
+        assertTrue(listingMethods.none { it.name == "failure" && it.returnType == PairListing::class.java })
     }
 }

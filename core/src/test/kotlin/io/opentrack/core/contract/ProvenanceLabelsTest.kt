@@ -10,7 +10,7 @@ class ProvenanceLabelsTest {
     @Test
     fun timetableRendersTimetable() {
         val p = Provenance(ProvenanceKind.TIMETABLE, "offline asset", 1_700_000_000_000)
-        assertEquals("timetable", p.label(now = 1_700_000_000_000 + 90L * 24 * 3600 * 1000))
+        assertEquals("timetable", p.label(nowMillis = 1_700_000_000_000 + 90L * 24 * 3600 * 1000))
     }
 
     @Test
@@ -38,20 +38,20 @@ class ProvenanceLabelsTest {
     fun fetchedAtZeroNeverClaimsFreshness() {
         val p = Provenance(ProvenanceKind.LIVE, "NTES", 0)
         assertTrue(p.isLeastTrusted)
-        assertEquals("timetable", p.label(now = 1_700_000_000_000))
+        assertEquals("timetable", p.label(nowMillis = 1_700_000_000_000))
     }
 
     @Test
     fun negativeFetchedAtIsAlsoLeastTrusted() {
         val p = Provenance(ProvenanceKind.CACHED, "erail.in", -5)
         assertTrue(p.isLeastTrusted)
-        assertEquals("timetable", p.label(now = 1_700_000_000_000))
+        assertEquals("timetable", p.label(nowMillis = 1_700_000_000_000))
     }
 
     /** A clock skewed behind the feed still shows an age, never a negative one. */
     @Test
     fun clockSkewNeverRendersNegativeAge() {
         val p = Provenance(ProvenanceKind.LIVE, "NTES", 1_700_000_000_000)
-        assertEquals("live data under a minute old", p.label(now = 1_700_000_000_000 - 30_000))
+        assertEquals("live data under a minute old", p.label(nowMillis = 1_700_000_000_000 - 30_000))
     }
 }
