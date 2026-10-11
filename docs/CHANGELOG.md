@@ -1,6 +1,14 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.2.0 (rolling `latest-apk`) — LIVE TRAIN-NUMBER SEARCH (S2, keyless, captured)
+- **On screen:** type a train number (e.g. 56269) -> "show train" returns the CURRENT identity,
+  departure, arrival, duration and run-days from erail.in, labelled `via erail.in` with the
+  feed's own stamp ("as of 2026-10-06 16:57"). When the live source cannot answer, the labelled
+  2016 fallback appears and the note names the exact failure.
+- **Not yet:** per-stop ACTUAL arrival/departure (needs the NTES capture; ADR 0008) and live
+  station-pair search (pair endpoint throttled).
+
 ## 2.1.0 (rolling `latest-apk`) — M2 FALLBACK PAIR SEARCH (functional, labelled)
 - **On screen:** SMET→MYS now returns **56269 · Shimoga Mysore Passenger — 10:30 · timetable**,
   plus the note that the data is a 2016-vintage fallback, not the railway's current timetable.

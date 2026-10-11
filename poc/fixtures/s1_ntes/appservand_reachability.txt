@@ -1,5 +1,5 @@
 # source=s1_ntes name=appservand_reachability
-# captured=2026-10-11T21:02:29Z url=https://enquiry.indianrail.gov.in/crisns/AppServAnd
-# status=200 elapsed_s=0.364
+# captured=2026-10-11T23:16:36Z url=https://enquiry.indianrail.gov.in/crisns/AppServAnd
+# status=200 elapsed_s=0.531
 # redaction: first 0 bytes of body; signature below, no further values
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 0, ";": 0, "|": 0, "~": 0}, "fields_per_line_head": [], "fields_per_line_histogram": {}, "first_line_len": 0, "kind": "text", "line_count": 0, "max_line_len": 0, "nonempty_lines": 0, "sha256_head": "e3b0c44298fc1c14"}

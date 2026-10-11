@@ -38,11 +38,29 @@ class MainActivityTest {
         compose.onNodeWithText("to station code").performTextInput("MYS")
         compose.onNodeWithText("search").performClick()
         compose.waitForIdle()
+        // rows sit below the fold on Robolectric's small screen: existence proves the render,
+        // the banner above stays the visible-assert target.
         compose.onNodeWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
-            .assertIsDisplayed()
+            .assertExists()
         compose.onNodeWithText("offline - showing unverified timetable data.")
             .assertIsDisplayed()
     }
+
+    /** Priority 1: a train number alone is a complete query (fake source: no network in tests). */
+    @Test
+    fun aTrainNumberAloneResolves() {
+        SourceLocator.erailSource = io.opentrack.app.source.ErailTrainSource(
+            { io.opentrack.app.source.TransportReply(200, liveCapture) }, enabled = true
+        )
+        compose.onNodeWithText("or train number").performTextInput("56269")
+        compose.onNodeWithText("show train").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
+            .assertExists()
+        SourceLocator.erailSource = null
+    }
+
+    private val liveCapture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
 
     /**
      * 3.3/3.4: a pair the fallback does not cover is not an empty answer. SMET->NDLS is
@@ -56,7 +74,7 @@ class MainActivityTest {
         compose.onNodeWithText("search").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("this pair is not in the offline fallback data; that is not proof that no trains run today")
-            .assertIsDisplayed()
+            .assertExists()
         compose.onAllNodesWithText("no trains found for this route today")
             .assertCountEquals(0)
     }

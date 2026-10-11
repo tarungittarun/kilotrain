@@ -36,6 +36,7 @@ fun ResultsScreen(viewModel: ResultsViewModel) {
     val ui by viewModel.state.collectAsState()
     var from by rememberSaveable { mutableStateOf("") }
     var to by rememberSaveable { mutableStateOf("") }
+    var trainNumber by rememberSaveable { mutableStateOf("") }
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -56,6 +57,19 @@ fun ResultsScreen(viewModel: ResultsViewModel) {
                 modifier = Modifier.padding(top = 8.dp),
             ) {
                 Text("search")
+            }
+
+            OutlinedTextField(
+                value = trainNumber,
+                onValueChange = { trainNumber = it },
+                label = { Text("or train number") },
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+            )
+            Button(
+                onClick = { viewModel.searchByNumber(trainNumber.trim()) },
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                Text("show train")
             }
 
             val banner = StateCopy.banner(screenStateOf(ui.state), ui.bannerSource, age = null)

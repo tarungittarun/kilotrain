@@ -1,0 +1,35 @@
+{
+  "csr_feed_stamp_seen": false,
+  "delimiter_counts": {
+    "\t": 1,
+    ",": 44,
+    ";": 0,
+    "|": 0,
+    "~": 0
+  },
+  "fields_per_line_head": [
+    1,
+    1,
+    1,
+    4,
+    6,
+    4,
+    16,
+    13,
+    4,
+    4
+  ],
+  "fields_per_line_histogram": {
+    "1": 5,
+    "4": 4,
+    "6": 1,
+    "13": 1,
+    "16": 1
+  },
+  "first_line_len": 0,
+  "kind": "text",
+  "line_count": 14,
+  "max_line_len": 579,
+  "nonempty_lines": 12,
+  "sha256_head": "bdda822716e6b193"
+}

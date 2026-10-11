@@ -1,6 +1,9 @@
 package io.opentrack.app.search
 
 import io.opentrack.app.asset.OfflineAsset
+import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.FeatureFlags
+import io.opentrack.app.source.TrainLookup
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
 import io.opentrack.core.contract.Provenance
@@ -25,6 +28,7 @@ class ResultsEngine(
     private val asset: OfflineAsset,
     private val store: OpenTrackStore,
     private val clock: Clock,
+    private val erailSource: ErailTrainSource? = null,
 ) {
     data class Outcome(
         val state: UiStateName,
@@ -39,7 +43,7 @@ class ResultsEngine(
         }
         val cached = store.freshCache(from, to, CACHE_TTL_MS)
         if (cached != null) {
-            val rows = renderCachePayload(cached.payload)
+            val rows = renderCachePayload(cached.payload, cached.fetchedAtMillis)
             if (rows != null) {
                 return Outcome(UiStateName.CACHED, rows, "offline cache",
                     "cached from an earlier lookup")
@@ -73,7 +77,91 @@ class ResultsEngine(
         )
     }
 
-    private fun renderCachePayload(payload: String): List<RowView>? = try {
+    /** Priority 1+2+3: search by train number. Live S2 first (when its flag is on and it
+     * answers), the labelled fallback second - and the fallback NEVER pretends to be live. */
+    fun lookupByNumber(number: String): Outcome {
+        if (!asset.schemaCompatible) {
+            return Outcome(UiStateName.PROTOCOL_CHANGED, emptyList(), "offline asset", asset.degradeMessage)
+        }
+        val normalised = number.trim()
+        val live = erailSource?.takeIf { FeatureFlags.ERAIL_TRAIN_NUMBER }?.fetch(normalised)
+        if (live is TrainLookup.Live) {
+            val p = live.payload
+            val provenance = Provenance(ProvenanceKind.VIA_SOURCE, p.source, p.feedStampMillis)
+            return Outcome(
+                state = UiStateName.LIVE,
+                rows = listOf(
+                    RowView(
+                        number = p.number,
+                        name = p.name,
+                        timeDue = p.departureMinutesOfDay?.let { formatMinutes(it) },
+                        provenanceLabel = provenance.label(clock.nowMillis()),
+                    )
+                ),
+                bannerSource = p.source,
+                note = "as of ${formatStamp(p.feedStampMillis)} (the feed's own stamp, not this phone's clock)",
+            )
+        }
+        val failureDetail = if (live is TrainLookup.Failed) {
+            "live source unreachable: ${live.failure} - ${live.detail}"
+        } else null
+
+        val hits = asset.trains.filter { it.number == normalised }
+        if (hits.isEmpty()) {
+            return Outcome(
+                UiStateName.OFFLINE_UNVERIFIED, emptyList(), null,
+                listOfNotNull(
+                    failureDetail,
+                    "no train with that number is in the offline fallback data; that is not proof the number is wrong",
+                ).joinToString(". "),
+            )
+        }
+        val rows = hits.map { t ->
+            RowView(
+                number = t.number,
+                name = t.name,
+                timeDue = t.departure.ifBlank { null },
+                provenanceLabel = t.toIdentity().provenance.label(clock.nowMillis()),
+            )
+        }
+        return Outcome(
+            state = UiStateName.OFFLINE_UNVERIFIED,
+            rows = rows,
+            bannerSource = "offline fallback",
+            note = listOfNotNull(
+                failureDetail,
+                "unverified 2016-vintage fallback timetable - not the railway's current timetable",
+            ).joinToString(". "),
+        )
+    }
+
+    private fun formatMinutes(minutes: Int): String =
+        "%02d:%02d".format(minutes / 60, minutes % 60)
+
+    private fun formatStamp(millis: Long): String {
+        val days = Math.floorDiv(millis, 86_400_000L)
+        val rem = millis - days * 86_400_000L - (5 * 60 + 30) * 60_000L // back to IST wall clock
+        var secsOfDay = rem / 1000
+        var d = days
+        if (secsOfDay < 0) { secsOfDay += 86_400; d -= 1 }
+        val (y, m, day) = civilFromDays(d)
+        return "%04d-%02d-%02d %02d:%02d".format(y, m, day, secsOfDay / 3600, (secsOfDay % 3600) / 60)
+    }
+
+    private fun civilFromDays(days: Long): Triple<Int, Int, Int> {
+        var z = days + 719_468L
+        val era = (if (z >= 0) z else z - 146_096) / 146_097
+        val doe = z - era * 146_097
+        val yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365
+        val y = yoe + era * 400
+        val doy = doe - (365 * yoe + yoe / 4 - yoe / 100)
+        val mp = (5 * doy + 2) / 153
+        val day = (doy - (153 * mp + 2) / 5 + 1).toInt()
+        val month = (if (mp < 10) mp + 3 else mp - 9).toInt()
+        return Triple((if (month <= 2) y + 1 else y).toInt(), month, day)
+    }
+
+    private fun renderCachePayload(payload: String, fetchedAtMillis: Long): List<RowView>? = try {
         val obj = JSONObject(payload)
         val rows = obj.optJSONArray("rows") ?: return null
         buildList {
@@ -82,7 +170,7 @@ class ResultsEngine(
                 val number = r.optString("number", "")
                 val name = r.optString("name", "")
                 if (number.isBlank() || name.isBlank()) continue
-                val provenance = Provenance(ProvenanceKind.CACHED, "offline cache", 0)
+                val provenance = Provenance(ProvenanceKind.CACHED, "offline cache", fetchedAtMillis)
                 add(
                     RowView(
                         number = number,

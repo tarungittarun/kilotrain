@@ -3,6 +3,8 @@ package io.opentrack.app.search
 import androidx.test.core.app.ApplicationProvider
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
+import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.TrainLookup
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
 import org.junit.After
@@ -107,6 +109,51 @@ class ResultsEngineTest {
         val numbers = asset.trains.map { it.number }
         assertTrue("06228 (retired prefix) must never ship", numbers.none { it == "06228" })
         assertNull(asset.trains.firstOrNull { it.number.startsWith("0") }?.number)
+    }
+
+    /** Priority 1: a train number alone is a complete query. */
+    @Test
+    fun aTrainNumberAloneResolves() {
+        val outcome = ResultsEngine(asset, store, clock).lookupByNumber("56269")
+        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
+        assertEquals(1, outcome.rows.size)
+        assertEquals("Shimoga Mysore Passenger", outcome.rows.first().name)
+        assertEquals("SMET", outcome.bannerSource)
+    }
+
+    /** 3.3/3.4: absence from an incomplete fallback is not a denial of the train's existence. */
+    @Test
+    fun aNumberMissingFromTheFallbackIsNeverADenial() {
+        val outcome = ResultsEngine(asset, store, clock).lookupByNumber("99999")
+        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
+        assertTrue(outcome.rows.isEmpty())
+        assertEquals("no train with that number is in the offline fallback data; that is not proof the number is wrong",
+            outcome.note)
+    }
+
+    /** Priority 3's first half: the live answer carries the feed's own stamp as its age. */
+    @Test
+    fun liveNumberSearchLabelsViaTheSourceWithTheFeedStamp() {
+        val capture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
+        val source = ErailTrainSource({ io.opentrack.app.source.TransportReply(200, capture) }, enabled = true)
+        clock.now = 1_800_000_000_000L // 2027-01-11-ish; the stamp is Oct 2026, so 'via' + age can be asserted
+        val outcome = ResultsEngine(asset, store, clock, source).lookupByNumber("56269")
+        assertEquals(ResultsEngine.UiStateName.LIVE, outcome.state)
+        assertEquals("erail.in", outcome.bannerSource)
+        assertEquals("via erail.in", outcome.rows.single().provenanceLabel)
+        assertEquals("10:20", outcome.rows.single().timeDue)
+        assertTrue(outcome.note!!.startsWith("as of 2026-10-06"))
+    }
+
+    /** When the live source cannot answer, the labelled fallback appears with the reason named. */
+    @Test
+    fun liveFailureFallsBackToTheLabelledAsset() {
+        val source = ErailTrainSource({ io.opentrack.app.source.TransportReply(200, "~~~~~Please try again after some time.") }, enabled = true)
+        val outcome = ResultsEngine(asset, store, clock, source).lookupByNumber("56269")
+        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
+        assertEquals("timetable", outcome.rows.single().provenanceLabel)
+        assertTrue(outcome.note!!.contains("live source unreachable: SHAPE_UNKNOWN"))
+        assertTrue(outcome.note!!.contains("2016-vintage"))
     }
 
     @Test

@@ -26,3 +26,8 @@ Waived rows (with reason) will be listed here; none waived yet.
 | 16 | a pair missing from the fallback is never an empty answer (3.3/3.4) | L1/L2 | GREEN | aPairMissingFromTheFallbackIsNeverAnEmptyAnswer + MainActivityTest.anUnknownPairSaysSoInsteadOfClaimingNoTrains |
 | 17 | retired 0-prefix numbers never ship in the asset | build | GREEN | asset_selftest transform tests; 176 dropped from the pinned input |
 | 18 | asset <= 6 MB gzipped (6.7) | build | GREEN | checks job budget step: 116844 bytes measured |
+
+| 19 | live train-number parse against the CAPTURED payload (7.2) | L1 | GREEN | ErailTrainParserTest.parsesTheCapturedPayload + ErailTrainSourceTest.capturedPayloadBecomesALiveLookup |
+| 20 | live failure names itself and falls back to the labelled asset | L1/L2 | GREEN | liveFailureFallsBackToTheLabelledAsset |
+| 21 | freshness comes from the feed stamp, never the device clock (10.3) | L1 | GREEN | feedStampIsParsedAsFixedIST |
+| 22 | throttle body is SHAPE_UNKNOWN, never a parse (LEARNINGS 1) | L1 | GREEN | throttleBodyIsShapeUnknownNotATrain |

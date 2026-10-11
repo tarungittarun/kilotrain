@@ -3,6 +3,7 @@ package io.opentrack.app.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.opentrack.app.asset.OfflineAsset
+import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +16,7 @@ class ResultsViewModel(
     private val asset: OfflineAsset,
     private val store: OpenTrackStore,
     private val clock: Clock,
+    private val erailSource: ErailTrainSource? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -31,9 +33,22 @@ class ResultsViewModel(
 
     /** Never blocks the first render on a network call (3.8/6.7): we only read local data. */
     fun search(from: String, to: String) {
+        launch(from, to) { engine, f, t -> engine.lookup(f, t) }
+    }
+
+    /** Priority 1: a train number is a complete query on its own. */
+    fun searchByNumber(number: String) {
+        launch(number, number) { engine, n, _ -> engine.lookupByNumber(n) }
+    }
+
+    private fun launch(
+        a: String,
+        b: String,
+        block: (ResultsEngine, String, String) -> ResultsEngine.Outcome,
+    ) {
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {
-                ResultsEngine(asset, store, clock).lookup(from, to)
+                block(ResultsEngine(asset, store, clock, erailSource), a, b)
             }
             _state.value = UiState(outcome.state, outcome.rows, outcome.bannerSource, outcome.note)
         }

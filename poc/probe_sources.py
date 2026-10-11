@@ -118,7 +118,7 @@ def _signature_text(text: str) -> dict:
         "delimiter_counts": delim_counts,
         "fields_per_line_head": fields_per_line[:10],
         "fields_per_line_histogram": dict(collections.Counter(fields_per_line)),
-        "csr_feed_stamp_seen": bool(re.search(r"\d{4}-\d{2}-\d{2}-\d{1,2}-\d{1,2}-\d{1,2}", text)),
+        "csr_feed_stamp_seen": bool(re.search(r"\d{4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}", text)),
         "sha256_head": hashlib.sha256(text.encode("utf-8", "replace")).hexdigest()[:16],
     }
 
@@ -222,6 +222,11 @@ def probe_s2_erail(fixtures_dir: str) -> dict:
     candidates = [
         (base, "documented_base_path"),
         (base + "?l=SMET&c=NDLS", "l_c_pair_smet_ndls"),
+        # The brief records that S2 also gives identity+schedule BY NUMBER; the number endpoint is
+        # not named in the brief, so the probe MEASURES candidate shapes and records verdicts
+        # (7.4: capture before parsing). These are measurement candidates, not assumed APIs.
+        (base + "?TrainNo=56269", "trainno_param"),
+        ("https://erail.in/rail/getTrainList.aspx?TrainNo=56269", "gettrainlist_path"),
     ]
     attempts = []
     for url, name in candidates:
@@ -237,12 +242,13 @@ def probe_s2_erail(fixtures_dir: str) -> dict:
             entry["fixture"] = write_fixture(fixtures_dir, "s2_erail", name, detail, sig)
         attempts.append(entry)
     answered = [a for a in attempts if a["ok"] and a.get("status") == 200]
-    real_data = [
+    number_ok = [
         a for a in answered
-        if not a.get("throttled_or_control_message")
+        if a["name"] == "trainno_param"
+        and not a.get("throttled_or_control_message")
         and a["signature"].get("csr_feed_stamp_seen")
-        and a["signature"].get("delimiter_counts", {}).get("~", 0) > 0
     ]
+    real_data = number_ok
     result = {
         "source": "S2 erail.in",
         "measured": NOW_ISO,
@@ -253,8 +259,10 @@ def probe_s2_erail(fixtures_dir: str) -> dict:
         result["reason"] = "no 2xx from either probed path after one retry each"
     elif real_data:
         result["verdict"] = USABLE_LABELLED
-        result["reason"] = ("2xx with tilde-separated rows AND the documented feed stamp; "
-                            "label `via erail.in` + feed stamp; second witness only")
+        result["reason"] = ("train-number endpoint answers with the documented shape (tilde rows + "
+                            "feed stamp; capture committed at poc/fixtures/s2_erail/trainno_param.txt); "
+                            "label `via erail.in` with the feed stamp as the age. The PAIR endpoint "
+                            "still answers throttle control messages from every measured environment")
     else:
         signatures = {a["signature"].get("sha256_head") for a in answered}
         result["verdict"] = BLOCKED_SHAPE
