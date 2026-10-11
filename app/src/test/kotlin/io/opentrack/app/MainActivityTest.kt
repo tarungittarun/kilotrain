@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import io.opentrack.app.source.SourceLocator
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
