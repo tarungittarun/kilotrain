@@ -26,7 +26,7 @@ class StateCopyTest {
 
     @Test
     fun offlineUnverifiedCopy() {
-        assertEquals("offline - showing unverified timetable data. No source answered.",
+        assertEquals("offline - showing unverified timetable data.",
             StateCopy.banner(ScreenState.OFFLINE_UNVERIFIED, source = null, age = null))
     }
 

@@ -12,8 +12,8 @@ android {
         applicationId = "io.opentrack.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = versionCodeFrom("2.0.0")
-        versionName = "2.0.0"
+        versionCode = versionCodeFrom("2.1.0")
+        versionName = "2.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

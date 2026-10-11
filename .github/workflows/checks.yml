@@ -41,6 +41,12 @@ jobs:
         run: |
           python3 scripts/build_offline_asset.py
           python3 scripts/known_truths_gate.py
+          python3 poc/asset_selftest.py
+          # 6.7: shipped offline asset <= 6 MB gzipped
+          GZ=$(gzip -c data/asset.json | wc -c)
+          echo "asset gzipped bytes: $GZ (budget 6291456)"
+          if [ "$GZ" -gt 6291456 ]; then echo "FAIL budget: asset exceeds 6 MB gzipped"; exit 1; fi
+          echo "PASS budget: asset within 6 MB gzipped"
           echo "NOTE: gate verdict FAIL is recorded, never a red build (10.7)"
 
       - name: source probe with capture (15.3)

@@ -1,21 +1,24 @@
-package io.opentrack.app.search
+package in.opentrack.app.search
 
-import io.opentrack.core.contract.Clock
-import io.opentrack.core.contract.PairListing
-import io.opentrack.core.contract.PairLookup
-import io.opentrack.core.contract.Provenance
-import io.opentrack.core.contract.ProvenanceKind
-import io.opentrack.core.contract.SourceFailure
-import io.opentrack.core.contract.label
-import io.opentrack.core.parse.ShapeSignature
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.store.OpenTrackStore
+import io.opentrack.core.contract.Clock
+import io.opentrack.core.contract.Provenance
+import io.opentrack.core.contract.ProvenanceKind
+import io.opentrack.core.contract.TrainIdentity
+import io.opentrack.core.parse.ShapeSignature
+import org.json.JSONObject
 
 /**
- * The M1 search path: honest, sourceless-by-design cold start. No source is admitted yet, so
- * the ONLY data on screen is the offline asset, and the only possible states are the asset's
- * freshness or COULD_NOT_LOOK / PROTOCOL_CHANGED when a flag-enabled source misbehaves.
- * Live sources arrive in M2 with a captured payload; until then flags are OFF (12.6).
+ * The M2 search path over the labelled cold-start fallback (ADR 0007): S3 identity data, 2016
+ * vintage, permanently labelled `timetable`. Live sources arrive when a captured payload exists
+ * (ADR 0002); until then their flags stay OFF (12.6).
+ *
+ * Honesty rules enforced HERE, not by review:
+ *  * 3.3/3.4: a pair ABSENT from the fallback is NOT an empty answer - the fallback is incomplete,
+ *    so "no trains today" would be a fabrication. Missing pairs render as OFFLINE_UNVERIFIED.
+ *  * 3.2: every row carries its label from the single label() function.
+ *  * 10.8: a build stamp is never a data vintage; the asset's measured vintage travels with it.
  */
 class ResultsEngine(
     private val asset: OfflineAsset,
@@ -34,81 +37,79 @@ class ResultsEngine(
             return Outcome(UiStateName.PROTOCOL_CHANGED, emptyList(), "offline asset", asset.degradeMessage)
         }
         val cached = store.freshCache(from, to, CACHE_TTL_MS)
-        val listing: PairLookup = if (cached != null) {
-            renderFromJson(cached.payload, from, to) ?: return Outcome(
-                UiStateName.COULD_NOT_LOOK, emptyList(), "offline cache",
-                "the rows on this phone could not be read"
-            )
-        } else {
-            assetRows(from, to)
-        }
-        return when (listing) {
-            is PairLookup.Answered -> {
-                val rows = listing.listing.rows.map { identity ->
-                    RowView(
-                        number = identity.number,
-                        name = identity.name,
-                        timeDue = null, // no minutes are shipped in M1's honest empty asset
-                        provenanceLabel = identity.provenance.label(clock.nowMillis()),
-                    )
-                }
-                if (rows.isEmpty()) {
-                    // The asset holds nothing: that is NOT an answer of "no trains exist" (3.3).
-                    Outcome(UiStateName.OFFLINE_UNVERIFIED, emptyList(), null,
-                        "no admitted source has published data yet; this is not an empty answer")
-                } else {
-                    Outcome(
-                        state = if (cached != null) UiStateName.CACHED else UiStateName.OFFLINE_UNVERIFIED,
-                        rows = rows,
-                        bannerSource = listing.listing.provenance.source,
-                        note = listing.listing.note,
-                    )
-                }
+        if (cached != null) {
+            val rows = renderCachePayload(cached.payload)
+            if (rows != null) {
+                return Outcome(UiStateName.CACHED, rows, "offline cache",
+                    "cached from an earlier lookup")
             }
-            is PairLookup.CouldNotLook -> Outcome(
-                UiStateName.COULD_NOT_LOOK, emptyList(), "offline cache", listing.failure.detail
-            )
+            return Outcome(UiStateName.COULD_NOT_LOOK, emptyList(), "offline cache",
+                "the rows saved on this phone could not be read")
         }
-    }
 
-    private fun assetRows(from: String, to: String): PairLookup {
-        val matching = asset.trains.filter {
-            it.fromStation == from && it.toStation == to
-        }
-        return PairLookup.Answered(
-            PairListing(
-                fromStation = from,
-                toStation = to,
-                rows = matching,
-                provenance = Provenance(ProvenanceKind.TIMETABLE, "offline asset", 0),
-                note = if (matching.isEmpty()) null else "unverified timetable data",
+        val hits = asset.lookupByPair(from, to)
+        if (hits.isEmpty()) {
+            // NOT an empty answer: an incomplete fallback must not claim "no trains exist" (3.3/3.4).
+            return Outcome(
+                UiStateName.OFFLINE_UNVERIFIED, emptyList(), null,
+                "this pair is not in the offline fallback data; that is not proof that no trains run today",
             )
+        }
+        val rows = hits.map { t ->
+            RowView(
+                number = t.number,
+                name = t.name,
+                timeDue = t.departure.ifBlank { null },
+                provenanceLabel = t.toIdentity().provenance.label(clock.nowMillis()),
+            )
+        }
+        store.putCache(from, to, cachePayloadFor(hits), clock.nowMillis())
+        return Outcome(
+            state = UiStateName.OFFLINE_UNVERIFIED,
+            rows = rows,
+            bannerSource = "offline fallback",
+            note = "unverified 2016-vintage fallback timetable - not the railway's current timetable",
         )
     }
 
-    /** Cache payloads are written by this app only; unreadable ones are a named failure. */
-    private fun renderFromJson(payload: String, from: String, to: String): PairLookup? = try {
-        val obj = org.json.JSONObject(payload)
-        val rows = obj.optJSONArray("rows")
-        val identities = buildList {
-            if (rows != null) for (i in 0 until rows.length()) {
+    private fun renderCachePayload(payload: String): List<RowView>? = try {
+        val obj = JSONObject(payload)
+        val rows = obj.optJSONArray("rows") ?: return null
+        buildList {
+            for (i in 0 until rows.length()) {
                 val r = rows.optJSONObject(i) ?: continue
+                val number = r.optString("number", "")
+                val name = r.optString("name", "")
+                if (number.isBlank() || name.isBlank()) continue
+                val provenance = Provenance(ProvenanceKind.CACHED, "offline cache", 0)
                 add(
-                    io.opentrack.core.contract.TrainIdentity(
-                        number = r.optString("number", ""),
-                        name = r.optString("name", ""),
-                        fromStation = r.optString("from", ""),
-                        toStation = r.optString("to", ""),
-                        provenance = Provenance(ProvenanceKind.CACHED, "offline cache", 0),
+                    RowView(
+                        number = number,
+                        name = name,
+                        timeDue = r.optString("departure").takeIf { it.isNotBlank() },
+                        provenanceLabel = provenance.label(clock.nowMillis()),
                     )
                 )
             }
         }
-        PairLookup.Answered(
-            PairListing(from, to, identities, Provenance(ProvenanceKind.CACHED, "offline cache", 0))
-        )
-    } catch (e: Exception) { // named: corrupt cache payload is a PARSE failure, never an empty answer
+    } catch (e: Exception) { // named: corrupt cache payload is a read failure, never an empty answer
         null
+    }
+
+    private fun cachePayloadFor(hits: List<io.opentrack.app.asset.AssetTrain>): String {
+        val arr = org.json.JSONArray()
+        hits.forEach { t ->
+            arr.put(
+                JSONObject().apply {
+                    put("number", t.number)
+                    put("name", t.name)
+                    put("departure", t.departure)
+                    put("from", t.fromStation)
+                    put("to", t.toStation)
+                }
+            )
+        }
+        return JSONObject().put("rows", arr).toString()
     }
 
     data class RowView(
@@ -123,13 +124,19 @@ class ResultsEngine(
     }
 
     companion object {
-        val CACHE_TTL_MS: Long = 6 * 60 * 60 * 1000L // FreshnessTtl.CACHE_MS
-        val SOURCE_FAILURES = SourceFailure.values().toList()
+        val CACHE_TTL_MS: Long = io.opentrack.core.contract.FreshnessTtl.CACHE_MS
+        val SOURCE_FAILURES = io.opentrack.core.contract.SourceFailure.values().toList()
 
         /** Sources stay off until a capture exists (ADR 0002); the flag defaults honest (12.6). */
         val ENABLED_SOURCES: Map<String, Boolean> = mapOf("s1_ntes" to false, "s2_erail" to false)
 
         /** Shape guard used before any parse (7.4): throttle-shaped bodies never parse. */
         fun shapeRefusesBody(signature: ShapeSignature): Boolean = !signature.looksLikeTrainsPayload()
+
+        /** Identity must never be cleaned up into something the railway does not use (3.4). */
+        fun namePreserved(raw: String): String = raw.trim()
+
+        /** 10.3: 4-letter codes are never truncated anywhere in this path. */
+        fun codePreserved(code: String): String = code.trim().uppercase()
     }
 }

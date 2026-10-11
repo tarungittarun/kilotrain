@@ -1,13 +1,10 @@
-package io.opentrack.app.search
+package in.opentrack.app.search
 
 import androidx.test.core.app.ApplicationProvider
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
-import io.opentrack.core.contract.Provenance
-import io.opentrack.core.contract.ProvenanceKind
-import io.opentrack.core.contract.TrainIdentity
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -28,10 +25,11 @@ class ResultsEngineTest {
         override fun nowMillis(): Long = now
     }
 
-    private fun identity(number: String, from: String, to: String) = TrainIdentity(
-        number, "name-$number", from, to,
-        Provenance(ProvenanceKind.VIA_SOURCE, "erail.in", clock.now),
-    )
+    private val asset: OfflineAsset by lazy {
+        OfflineAssetCodec.parse(
+            java.io.File("src/test/resources/s3_asset_sample.json").readText()
+        )
+    }
 
     @Before
     fun setUp() {
@@ -40,56 +38,75 @@ class ResultsEngineTest {
     }
 
     @After
-    fun tearDown() {
-        store.close()
-    }
+    fun tearDown() = store.close()
 
     @Test
-    fun emptyAdmissionFreeAssetIsNotAnEmptyAnswer() {
-        val engine = ResultsEngine(OfflineAssetCodec.emptyAsset(), store, clock)
-        val outcome = engine.lookup("SMET", "NDLS")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
-        assertTrue(outcome.rows.isEmpty())
-        assertEquals("no admitted source has published data yet; this is not an empty answer", outcome.note)
-    }
-
-    @Test
-    fun assetRowsAreLabelledAndProvenanced() {
-        val asset = OfflineAsset(
-            schemaVersion = OfflineAssetCodec.SUPPORTED_SCHEMA,
-            trains = listOf(identity("16228", "SMET", "NDLS")),
-            schemaCompatible = true,
-            degradeMessage = null,
-        )
-        val outcome = ResultsEngine(asset, store, clock).lookup("SMET", "NDLS")
+    fun theOwnerRouteReturnsItsLabelledRow() {
+        val outcome = ResultsEngine(asset, store, clock).lookup("SMET", "MYS")
         assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
         assertEquals(1, outcome.rows.size)
-        assertEquals("via erail.in", outcome.rows.first().provenanceLabel)
-        assertNull(outcome.rows.first().timeDue) // no minutes invented (3.4)
+        val row = outcome.rows.first()
+        assertEquals("56269", row.number)
+        assertEquals("Shimoga Mysore Passenger", row.name)
+        assertEquals("10:30", row.timeDue)
+        assertEquals("timetable", row.provenanceLabel) // 3.2: never looks live
+        assertTrue(outcome.note!!.contains("2016")) // 10.8: vintage stated with the rows
+    }
+
+    /** 3.3/3.4: an incomplete fallback must never produce an empty answer. */
+    @Test
+    fun aPairMissingFromTheFallbackIsNeverAnEmptyAnswer() {
+        val outcome = ResultsEngine(asset, store, clock).lookup("NDLS", "BCT")
+        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
+        assertTrue(outcome.rows.isEmpty())
+        assertEquals("this pair is not in the offline fallback data; that is not proof that no trains run today",
+            outcome.note)
+    }
+
+    @Test
+    fun aSecondPairAlsoResolves() {
+        val outcome = ResultsEngine(asset, store, clock).lookup("JBP", "NDLS")
+        assertEquals(1, outcome.rows.size)
+        assertEquals("12192", outcome.rows.first().number)
+    }
+
+    @Test
+    fun aRepeatSearchServesTheCacheWithItsOwnLabel() {
+        ResultsEngine(asset, store, clock).lookup("SMET", "MYS")
+        val second = ResultsEngine(asset, store, clock).lookup("SMET", "MYS")
+        assertEquals(ResultsEngine.UiStateName.CACHED, second.state)
+        assertEquals("56269", second.rows.first().number)
+        assertEquals("cached under a minute", second.rows.first().provenanceLabel)
     }
 
     @Test
     fun schemaMismatchDegradesWithAMessageProtocolChanged() {
-        val asset = OfflineAsset(99, emptyList(), false, "older format")
-        val outcome = ResultsEngine(asset, store, clock).lookup("SMET", "NDLS")
+        val broken = OfflineAsset(99, emptyList(), false, "older format")
+        val outcome = ResultsEngine(broken, store, clock).lookup("SMET", "MYS")
         assertEquals(ResultsEngine.UiStateName.PROTOCOL_CHANGED, outcome.state)
         assertEquals("older format", outcome.note)
     }
 
     @Test
-    fun freshCacheRendersCachedState() {
-        store.putCache("SMET", "NDLS", """{"rows":[{"number":"16228","name":"n","from":"SMET","to":"NDLS"}]}""", clock.now)
-        val outcome = ResultsEngine(OfflineAssetCodec.emptyAsset(), store, clock).lookup("SMET", "NDLS")
-        assertEquals(ResultsEngine.UiStateName.CACHED, outcome.state)
-        assertEquals(1, outcome.rows.size)
+    fun emptyAssetIsNotAnEmptyAnswerEither() {
+        val outcome = ResultsEngine(OfflineAssetCodec.emptyAsset(), store, clock).lookup("SMET", "MYS")
+        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
+        assertEquals("this pair is not in the offline fallback data; that is not proof that no trains run today",
+            outcome.note)
+    }
+
+    /** 10.3: station codes keep all four letters through the path. */
+    @Test
+    fun fourLetterCodesSurviveTheLookup() {
+        assertEquals("SMET", ResultsEngine.codePreserved(" smet "))
+        assertEquals("MYS", ResultsEngine.codePreserved("mys"))
     }
 
     @Test
-    fun expiredCacheIsAMissNotALie() {
-        store.putCache("SMET", "NDLS", """{"rows":[{"number":"16228","name":"n","from":"SMET","to":"NDLS"}]}""", clock.now)
-        clock.now += ResultsEngine.CACHE_TTL_MS + 1_000
-        val outcome = ResultsEngine(OfflineAssetCodec.emptyAsset(), store, clock).lookup("SMET", "NDLS")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
+    fun theRetiredPrefixTrainIsNotInTheFallback() {
+        val numbers = asset.trains.map { it.number }
+        assertTrue("06228 (retired prefix) must never ship", numbers.none { it == "06228" })
+        assertNull(asset.trains.firstOrNull { it.number.startsWith("0") }?.number)
     }
 
     @Test

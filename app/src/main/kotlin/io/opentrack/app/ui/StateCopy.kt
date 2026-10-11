@@ -16,7 +16,7 @@ object StateCopy {
         ScreenState.LIVE_STALE -> "live data ${age ?: "age unknown"} old (may be behind)"
         ScreenState.CACHED -> "cached ${age ?: "age unknown"}"
         ScreenState.OFFLINE_UNVERIFIED ->
-            "offline - showing unverified timetable data. No source answered."
+            "offline - showing unverified timetable data."
         ScreenState.ANSWERED_EMPTY -> "no trains found for this route today"
         ScreenState.COULD_NOT_LOOK ->
             "could not reach ${source ?: "the source"}. showing what is already on screen."

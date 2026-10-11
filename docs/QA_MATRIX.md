@@ -21,3 +21,8 @@ phone (reserved for what only a phone can witness).
 | 13 | owner phone: real TLS/egress, Doze alarm, look and feel | L7 | deferred to M4/M6 | needs-device row when opened |
 
 Waived rows (with reason) will be listed here; none waived yet.
+
+| 15 | SmettoMys pair returns its labelled fallback row | L1/L2 | GREEN | ResultsEngineTest.theOwnerRouteReturnsItsLabelledRow |
+| 16 | a pair missing from the fallback is never an empty answer (3.3/3.4) | L1/L2 | GREEN | aPairMissingFromTheFallbackIsNeverAnEmptyAnswer + MainActivityTest.anUnknownPairSaysSoInsteadOfClaimingNoTrains |
+| 17 | retired 0-prefix numbers never ship in the asset | build | GREEN | asset_selftest transform tests; 176 dropped from the pinned input |
+| 18 | asset <= 6 MB gzipped (6.7) | build | GREEN | checks job budget step: 116844 bytes measured |

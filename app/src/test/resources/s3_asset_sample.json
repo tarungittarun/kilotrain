@@ -1,0 +1,15 @@
+{
+  "schema": 2,
+  "generated": "2026-10-11T22:50:00Z",
+  "generated_note": "build timestamp, NOT a data vintage",
+  "source_admitted": ["S3 datameet/railways (labelled cold-start fallback)"],
+  "source": "datameet/railways@e0c538a1 (S3, cold-start fallback only, permanently labelled)",
+  "data_vintage": "2016-08-08 (repo commit date of the pin)",
+  "provenance_kind": "timetable",
+  "dropped": {"retired_prefix": 1, "incomplete": 0, "geometry_only": 0},
+  "trains": [
+    {"number": "56269", "name": "Shimoga Mysore Passenger", "from": "SMET", "to": "MYS", "departure": "10:30", "arrival": "16:55", "type": "Pass", "zone": "SWR"},
+    {"number": "12192", "name": "Jabalpur-New Delhi Superfast Express", "from": "JBP", "to": "NDLS", "departure": "17:45", "arrival": "11:40", "type": "SF", "zone": "WCR"}
+  ],
+  "honest_note": "2016-vintage fallback identity data; not the railway's current timetable"
+}

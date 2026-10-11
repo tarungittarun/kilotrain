@@ -15,7 +15,8 @@ owner-action only. Any behaviour-changing commit must change this table (docs-fr
 | M1-4 | SQLite store: TTL cache + overrides + tested migration | DONE:2026-10-11 | OpenTrackStoreTest (TTL, override correction, upgrade clears) | read runs | no | none |
 | M1-5 | debug APK published on rolling `latest-apk` release | DONE:2026-10-11 | debug-apk run 38177316606 PASS; release API: app-debug.apk 9,511,991 bytes 2026-10-11T21:42:19Z | none | no | none |
 | M1-6 | M1 exit criterion: no time without a provenance label, enforced by a test | DONE:2026-10-11 | unit-screens 38176954520 PASS: ProvenanceEnforcementTest + StateCopyTest + ResultsEngineTest | none | no | none |
-| M2-0 | live pair search (S1 primary, S2 fallback); also: name the 2nd station code after SMET | BLOCKED:no captured payload for either source (CI: S1 blocked-by-network 0/3, S2 throttle-only) | CI run 38175068398 artefact + docs/spike-verdicts.md | needs-device capture (one action below); else defer to M3 | yes | on the phone: open the NTES app or erail.in for SMET→<your route> and paste the result text (14.3) - one export, one word |
+| M2-0 | live pair search (S1 primary, S2 fallback) | BLOCKED:no captured payload for either source (CI: S1 blocked-by-network 0/3, S2 throttle-only; sandbox S2 throttled with cookies warmed) | docs/spike-verdicts.md + ADR 0002 | needs-device capture: paste one SMET→MYS export from the NTES app | yes | none - the 2nd station is now known: MYS (owner confirmed by installing the APK) |
+| M2-1 | pair search over the labelled S3 fallback (SMET→MYS) | DOING | ResultsEngineTest.theOwnerRouteReturnsItsLabelledRow + aPairMissingFromTheFallbackIsNeverAnEmptyAnswer | read unit-screens run | no | none |
 
 ## Metrics (§13.6)
 | metric | value |

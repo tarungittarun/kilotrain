@@ -1,6 +1,13 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.1.0 (rolling `latest-apk`) — M2 FALLBACK PAIR SEARCH (functional, labelled)
+- **On screen:** SMET→MYS now returns **56269 · Shimoga Mysore Passenger — 10:30 · timetable**,
+  plus the note that the data is a 2016-vintage fallback, not the railway's current timetable.
+  A pair the fallback does not cover says so instead of claiming "no trains found".
+- **Still open:** live sources (S1/S2) are blocked and unparsed (ADR 0002/0007); the vintage
+  label stays until a capture lands.
+
 ## 2.0.0 (rolling `latest-apk`) — M1 HONEST COLD START
 - **On screen:** search two station codes; the screen shows labelled, sourced rows or says
   exactly what it could not look up. Today: "offline - showing unverified timetable data. No
