@@ -1,6 +1,7 @@
 package io.opentrack.core.domain
 
 import io.opentrack.core.contract.TrainIdentity
+import kotlin.math.abs
 
 /**
  * Display order and run-choice are TWO decisions served by TWO comparators (6.5). This class

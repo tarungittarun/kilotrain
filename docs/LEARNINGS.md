@@ -21,3 +21,7 @@
    M1 round before any claim of green; fixed by installing platform 35 + build-tools directly
    with the runner's own `sdkmanager`. Enforced by: every gradle job uses that step; the failure
    log is quoted in STATUS's metrics (defect caught before the owner saw it).
+7. **A package name may not start with a Kotlin hard keyword** (`in`), and no local gate here
+   can catch it: this machine has no Kotlin compiler. `:core:compileKotlin` failed on every file
+   with "Package name must be a '.'-separated identifier list". Fixed by `in.opentrack` ->
+   `io.opentrack`. Enforced by: the compile itself, in CI, on every push.
