@@ -1,4 +1,3 @@
-## Theme.OpenTrack - Material3, dark-theme contrast checked (10.5).
 <resources>
     <style name="Theme.OpenTrack" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>
