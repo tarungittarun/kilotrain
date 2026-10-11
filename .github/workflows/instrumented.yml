@@ -43,9 +43,9 @@ jobs:
         run: |
           SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
           AVDM="$(dirname "$SDKM")/avdmanager"
-          "$SDKM" "system-images;android-34;default;x86_64" "emulator"
+          "$SDKM" "system-images;android-34;google_apis;x86_64" "emulator"
           echo "no" | "$AVDM" create avd -n opentrack_test \
-            -k "system-images;android-34;default;x86_64" --force > create_avd.log 2>&1
+            -k "system-images;android-34;google_apis;x86_64" --force > create_avd.log 2>&1
           RC=$?
           echo "avdmanager create exit=$RC"; cat create_avd.log
           ls -la "$HOME/.android/avd" 2>&1 || true
