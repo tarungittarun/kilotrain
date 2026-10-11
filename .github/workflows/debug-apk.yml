@@ -8,6 +8,8 @@ on:
 jobs:
   debug-apk:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 11.3: the rolling release is created/updated by the pipeline
     steps:
       - uses: actions/checkout@v4
 

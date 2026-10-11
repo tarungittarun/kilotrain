@@ -8,6 +8,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 11.3/11.4: version-tag assets are attached by the pipeline
     steps:
       - uses: actions/checkout@v4
 

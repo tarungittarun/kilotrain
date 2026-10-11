@@ -29,6 +29,7 @@ jobs:
         id: kvm
         run: |
           if [ -e /dev/kvm ]; then echo "available=true" >> "$GITHUB_OUTPUT"; else echo "available=false" >> "$GITHUB_OUTPUT"; fi
+          echo "kvm available: $(cat "$GITHUB_OUTPUT")"
 
       - name: "UNTESTED with a reason: no KVM (11.1)"
         if: steps.kvm.outputs.available == 'false'
@@ -37,17 +38,30 @@ jobs:
           echo "flows are reported 'untested, with a reason' - never a fake pass (11.1)."
           echo "The Robolectric job (L2) remains the screen-level proof for this commit."
 
-      - name: run L3 flows on emulator
+      - name: create + boot AVD (L3)
         if: steps.kvm.outputs.available == 'true'
         run: |
-          ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace
+          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
+          "$SDKM" "system-images;android-34;default;x86_64" "emulator"
+          echo "no" | "$ANDROID_HOME"/cmdline-tools/latest/bin/avdmanager create avd \
+            -n opentrack_test -k "system-images;android-34;default;x86_64" -d pixel
+          nohup "$ANDROID_HOME"/emulator/emulator -avd opentrack_test -no-window -no-audio -no-boot-anim \
+            > emulator.log 2>&1 &
+          "$ANDROID_HOME"/platform-tools/adb wait-for-device
+          "$ANDROID_HOME"/platform-tools/adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 2; done'
+          echo "PROVED: emulator booted (sys.boot_completed)"
 
-      - name: upload emulator logs
+      - name: run L3 flows on emulator
+        if: steps.kvm.outputs.available == 'true'
+        run: ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace
+
+      - name: upload emulator + test logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: instrumented-${{ github.run_id }}
           path: |
             app/build/reports/androidTests/
-            **/build/outputs/androidTest-results/
+            app/build/outputs/androidTest-results/
+            emulator.log
           if-no-files-found: warn
