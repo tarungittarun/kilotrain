@@ -47,8 +47,15 @@ jobs:
             -n opentrack_test -k "system-images;android-34;default;x86_64" -d pixel
           nohup "$ANDROID_HOME"/emulator/emulator -avd opentrack_test -no-window -no-audio -no-boot-anim \
             > emulator.log 2>&1 &
-          "$ANDROID_HOME"/platform-tools/adb wait-for-device
-          "$ANDROID_HOME"/platform-tools/adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 2; done'
+          # BOUNDED waits only (10.8: a diagnostic may never outrank the user's request):
+          # 240 s to see a device, 240 s more to see it boot; a miss is a stated reason, not a hang.
+          timeout 240 "$ANDROID_HOME"/platform-tools/adb wait-for-device \
+            || { echo "SKIPPED, WITH A REASON: no adb device appeared within 240 s"; \
+                 tail -20 emulator.log || true; exit 1; }
+          timeout 240 "$ANDROID_HOME"/platform-tools/adb shell \
+            'for i in $(seq 1 120); do [[ -n $(getprop sys.boot_completed) ]] && exit 0; sleep 2; done; exit 1' \
+            || { echo "SKIPPED, WITH A REASON: emulator did not report boot_completed within 240 s"; \
+                 tail -20 emulator.log || true; exit 1; }
           echo "PROVED: emulator booted (sys.boot_completed)"
 
       - name: run L3 flows on emulator
