@@ -45,10 +45,14 @@ jobs:
           AVDM="$(dirname "$SDKM")/avdmanager"
           "$SDKM" "system-images;android-34;default;x86_64" "emulator"
           echo "no" | "$AVDM" create avd -n opentrack_test \
-            -k "system-images;android-34;default;x86_64" -d pixel --force > create_avd.log 2>&1 \
-            || { echo "SKIPPED, WITH A REASON: avdmanager create failed"; cat create_avd.log; exit 1; }
-          cat create_avd.log
-          ls -la "$HOME/.android/avd" || true
+            -k "system-images;android-34;default;x86_64" --force > create_avd.log 2>&1
+          RC=$?
+          echo "avdmanager create exit=$RC"; cat create_avd.log
+          ls -la "$HOME/.android/avd" 2>&1 || true
+          if [ "$RC" != "0" ] || [ ! -f "$HOME/.android/avd/opentrack_test.ini" ]; then
+            echo "SKIPPED, WITH A REASON: AVD create did not produce $HOME/.android/avd/opentrack_test.ini"
+            exit 1
+          fi
           nohup "$ANDROID_HOME"/emulator/emulator -avd opentrack_test -no-window -no-audio -no-boot-anim \
             > emulator.log 2>&1 &
           # BOUNDED waits only (10.8: a diagnostic may never outrank the user's request):
