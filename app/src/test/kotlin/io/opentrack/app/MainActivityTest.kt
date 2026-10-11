@@ -38,9 +38,11 @@ class MainActivityTest {
         compose.onNodeWithText("from station code").performTextInput("SMET")
         compose.onNodeWithText("to station code").performTextInput("MYS")
         compose.onNodeWithText("search").performClick()
-        compose.waitForIdle()
-        // rows sit below the fold on Robolectric's small screen: existence proves the render,
-        // the banner above stays the visible-assert target.
+        // the engine runs on Dispatchers.Default, outside the compose clock: wait for the state
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
             .assertExists()
         compose.onNodeWithText("offline - showing unverified timetable data.")
@@ -55,7 +57,10 @@ class MainActivityTest {
         )
         compose.onNodeWithText("or train number").performTextInput("56269")
         compose.onNodeWithText("show train").performClick()
-        compose.waitForIdle()
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
             .assertExists()
         SourceLocator.erailSource = null
@@ -73,7 +78,10 @@ class MainActivityTest {
         compose.onNodeWithText("from station code").performTextInput("SMET")
         compose.onNodeWithText("to station code").performTextInput("NDLS")
         compose.onNodeWithText("search").performClick()
-        compose.waitForIdle()
+        compose.waitUntil(5_000) {
+            compose.onAllNodesWithText("this pair is not in the offline fallback data; that is not proof that no trains run today")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText("this pair is not in the offline fallback data; that is not proof that no trains run today")
             .assertExists()
         compose.onAllNodesWithText("no trains found for this route today")

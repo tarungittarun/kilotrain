@@ -118,7 +118,7 @@ class ResultsEngineTest {
         assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
         assertEquals(1, outcome.rows.size)
         assertEquals("Shimoga Mysore Passenger", outcome.rows.first().name)
-        assertEquals("SMET", outcome.bannerSource)
+        assertEquals("offline fallback", outcome.bannerSource) // the number-only fallback path
     }
 
     /** 3.3/3.4: absence from an incomplete fallback is not a denial of the train's existence. */
