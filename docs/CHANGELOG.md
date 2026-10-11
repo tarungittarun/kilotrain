@@ -1,7 +1,22 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
-## Unreleased (M1 in CI)
+## 2.0.0 (rolling `latest-apk`) — M1 HONEST COLD START
+- **On screen:** search two station codes; the screen shows labelled, sourced rows or says
+  exactly what it could not look up. Today: "offline - showing unverified timetable data. No
+  source answered." — no fabricated trains. Install link (permanent):
+  https://github.com/tarungittarun/kilotrain/releases/download/latest-apk/app-debug.apk
+- **Artefact:** app-debug.apk, 9,511,991 bytes, 2026-10-11T21:42:19Z, READ from the release API.
+- **What CI proved (run ids, quoted):** unit-screens 38176954520 PASS 2m19s (L1 contract incl.
+  ProvenanceEnforcementTest; L2 exact copy of all 8 states); checks 38177316587 PASS 2m18s;
+  debug-apk 38177316606 PASS 2m10s and published the artefact; instrumented verdict read from
+  the current round's run (see QA_MATRIX row 12).
+- **Defects caught before you saw anything:** 10 (probe verdict, throttle fixture, docs-gate
+  table parse, gate claim-kind, setup-android action, gradlew scripts, `in.opentrack` package
+  keyword, abs import, test-param/returnType, comparator chain + 2 test constants, + CI
+  permissions + bounded emulator wait). None reached a phone.
+- **Still broken / open:** M2 live pair search blocked on a captured payload (ADR 0002);
+  release signing pending secrets (11.4).
 - **On screen:** the first phone-visible change: a search screen that shows only labelled,
   sourced rows and says plainly when it cannot look anything up. Today's build ships an
   admission-free (honest-empty) offline asset, so a search shows "offline - showing unverified

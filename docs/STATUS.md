@@ -13,16 +13,17 @@ owner-action only. Any behaviour-changing commit must change this table (docs-fr
 | M1-2 | known-truths gate run by the data build (§10.7) | DONE:2026-10-11 | scripts/known_truths_gate.py + poc/gate_selftest.py; gate verdict in CI | none | no | none |
 | M1-3 | labelled states on the results screen | DOING | StateCopyTest exists asserting exact copy for all 8 states; CI verdict unread | read `unit-screens` run, then flip to DONE | no | none |
 | M1-4 | SQLite store: TTL cache + overrides + tested migration | DONE:2026-10-11 | OpenTrackStoreTest (TTL, override correction, upgrade clears) | read runs | no | none |
-| M1-5 | debug APK published on rolling `latest-apk` release | DOING | debug-apk workflow publishes + records size/date read from run | push round 2, read run | no | none |
+| M1-5 | debug APK published on rolling `latest-apk` release | DONE:2026-10-11 | debug-apk run 38177316606 PASS; release API: app-debug.apk 9,511,991 bytes 2026-10-11T21:42:19Z | none | no | none |
+| M1-6 | M1 exit criterion: no time without a provenance label, enforced by a test | DONE:2026-10-11 | unit-screens 38176954520 PASS: ProvenanceEnforcementTest + StateCopyTest + ResultsEngineTest | none | no | none |
 | M2-0 | live pair search (S1 primary, S2 fallback); also: name the 2nd station code after SMET | BLOCKED:no captured payload for either source (CI: S1 blocked-by-network 0/3, S2 throttle-only) | CI run 38175068398 artefact + docs/spike-verdicts.md | needs-device capture (one action below); else defer to M3 | yes | on the phone: open the NTES app or erail.in for SMET→<your route> and paste the result text (14.3) - one export, one word |
 
 ## Metrics (§13.6)
 | metric | value |
 |---|---|
-| defects found before owner sees them | 6 (probe verdict bug; S3 vintage test; throttle fixture; docs-gate table bug; known-truths claim-kind bug; broken setup-android action — all caught in CI/lab) |
+| defects found before owner sees them | 12 (probe verdict; S3 vintage test; throttle fixture; docs-gate table parse; gate claim-kind; setup-android action; gradlew scripts; `in.opentrack` package keyword; abs import; test param/returnType; comparator chain + 2 test constants; CI permissions + unbounded emulator wait) |
 | defects reaching a phone | 0 |
-| UNPROVEN traceability rows | 0 shipped / 0 applicable (nothing shipped yet) |
-| CI rounds | r1 checks 38175068398 PASS 2m18s · r2 checks 38175814758 PASS 2m15s · r2 gradle jobs FAILED on setup-android v3 (fixed, round 3 pending) |
+| UNPROVEN traceability rows | 0 shipped / 3 open, all pending M2 |
+| CI rounds read | r1 checks 38175068398 PASS 2m18s · r2 checks 38175814758 PASS 2m15s (gradle jobs failed, fixed) · r3-r8 fix rounds · r9 unit-screens 38176954520 PASS 2m19s, checks 38177316587 PASS 2m18s, debug-apk 38177316606 PASS 2m10s |
 
 ## Review clock (§13.7)
 sources: 2026-10-11 done, next 2026-11-11 (or on gate FAIL) · competitors: due 2027-01-11 ·

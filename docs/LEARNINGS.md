@@ -25,3 +25,12 @@
    can catch it: this machine has no Kotlin compiler. `:core:compileKotlin` failed on every file
    with "Package name must be a '.'-separated identifier list". Fixed by `in.opentrack` ->
    `io.opentrack`. Enforced by: the compile itself, in CI, on every push.
+8. **GITHUB_TOKEN is read-only by default** - the release publish failed with HTTP 403 until the
+   jobs declared `permissions: contents: write`. And **an unbounded `adb wait-for-device` hangs
+   the job**: the L3 job waited 18+ minutes because the emulator never appeared. Every wait in
+   CI is now bounded with a stated reason on miss (10.8: no diagnostic may outrank the user's
+   request - a hung job hides evidence instead of producing it).
+9. **A chained comparator silently lets an earlier rule win** where it shouldn't
+   (`catchable.then(nearestAsc).then(recentDesc)` ordered the gone group by oldest-first).
+   The display-order rule is now one explicit comparator that groups catchable-vs-gone before
+   any ordering (6.5). Caught by its own named test in CI.

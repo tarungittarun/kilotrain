@@ -42,9 +42,11 @@ jobs:
         if: steps.kvm.outputs.available == 'true'
         run: |
           SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
+          AVDM="$(dirname "$SDKM")/avdmanager"
           "$SDKM" "system-images;android-34;default;x86_64" "emulator"
-          echo "no" | "$ANDROID_HOME"/cmdline-tools/latest/bin/avdmanager create avd \
-            -n opentrack_test -k "system-images;android-34;default;x86_64" -d pixel
+          echo "no" | "$AVDM" create avd -n opentrack_test \
+            -k "system-images;android-34;default;x86_64" -d pixel --force
+          "$SDKM" --list_avds || true
           nohup "$ANDROID_HOME"/emulator/emulator -avd opentrack_test -no-window -no-audio -no-boot-anim \
             > emulator.log 2>&1 &
           # BOUNDED waits only (10.8: a diagnostic may never outrank the user's request):
