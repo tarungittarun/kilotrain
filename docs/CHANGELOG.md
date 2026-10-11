@@ -1,7 +1,14 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
-## 2.2.0 (rolling `latest-apk`) — LIVE TRAIN-NUMBER SEARCH (S2, keyless, captured)
+## 2.2.0 (rolling `latest-apk`) — LIVE TRAIN-NUMBER SEARCH (S2, keyless, captured) — TESTED
+- **On screen:** type a train number (e.g. 56269) -> "show train" returns the CURRENT identity,
+  departure, arrival, duration and run-days from erail.in, labelled `via erail.in` with the
+  feed's own stamp ("as of 2026-10-06 16:57"). When the live source cannot answer, the labelled
+  2016 fallback appears and the note names the exact failure.
+- **Engineer confirmation (not CI alone):** live request 2026-10-11T23:32:27Z parsed to
+  56269 · SMET MYS FAST PASS · SMET->MYS · 10.20/16.30 · runDays 1111111; CI run 38184388238
+  passes 46 tests including the parser against the committed capture.
 - **On screen:** type a train number (e.g. 56269) -> "show train" returns the CURRENT identity,
   departure, arrival, duration and run-days from erail.in, labelled `via erail.in` with the
   feed's own stamp ("as of 2026-10-06 16:57"). When the live source cannot answer, the labelled

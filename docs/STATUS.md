@@ -17,7 +17,7 @@ owner-action only. Any behaviour-changing commit must change this table (docs-fr
 | M1-6 | M1 exit criterion: no time without a provenance label, enforced by a test | DONE:2026-10-11 | unit-screens 38176954520 PASS: ProvenanceEnforcementTest + StateCopyTest + ResultsEngineTest | none | no | none |
 | M2-0 | live pair search (S1 primary, S2 fallback) | BLOCKED:no captured payload for either source (CI: S1 blocked-by-network 0/3, S2 throttle-only; sandbox S2 throttled with cookies warmed) | docs/spike-verdicts.md + ADR 0002 | needs-device capture: paste one SMET→MYS export from the NTES app | yes | none - the 2nd station is now known: MYS (owner confirmed by installing the APK) |
 | M2-1 | pair search over the labelled S3 fallback (SMET→MYS) | DONE:2026-10-11 | ResultsEngineTest.theOwnerRouteReturnsItsLabelledRow + aPairMissingFromTheFallbackIsNeverAnEmptyAnswer | none | no | none |
-| M2-2 | LIVE train-number search via S2 (ADR 0008) | DOING | ErailTrainParserTest + ErailTrainSourceTest + liveNumberSearchLabelsViaTheSourceWithTheFeedStamp | read unit-screens run | no | none |
+| M2-2 | LIVE train-number search via S2 (ADR 0008) | DONE:2026-10-11 | unit-screens 38184388238 PASS (46 tests) + LIVE re-verification 2026-10-11T23:32:27Z: TrainNo=56269 -> 56269 SMET MYS FAST PASS, SMET->MYS, 10.20/16.30, runDays 1111111, stamp 2026-10-06 16:57 IST | none | no | none |
 | M3-0 | per-stop ACTUAL arrival/departure + schedule (priority 3) | BLOCKED:no NTES (S1) capture - only S1 publishes per-stop actuals | docs/spike-verdicts.md + ADR 0008 | needs-device capture: NTES app -> train 56269 -> running status -> paste text/screenshot (14.3) | yes | none |
 
 ## Metrics (§13.6)
@@ -32,6 +32,19 @@ owner-action only. Any behaviour-changing commit must change this table (docs-fr
 sources: 2026-10-11 done, next 2026-11-11 (or on gate FAIL) · competitors: due 2027-01-11 ·
 open-data S4: monthly until admitted or abandoned twice (next 2026-11-11) · RISK.md: 2026-11-11 ·
 RUNBOOK.md: on install/rollback change.
+
+## HANDOFF 2026-10-11 (session 2, after M2 live)
+- Milestone state: M1 EXITED and shipped; M2 PARTIAL: live train-number search DONE (tested and
+  re-verified live by the engineer at 23:32 UTC), pair search on the labelled fallback.
+- Artefact ids: runs read this session: 38182204401, 38183246830?, 38183747303/308/314/293,
+  38183903524/552/582, 38184051284/287/290/292, 38184215382/445/500/658, 38184388195/221/238/241.
+  Rolling release: app-debug.apk 9,677,233 bytes 2026-10-11T23:30:52Z (READ from the release API).
+- Resume line: STATUS.md first DOING row (none open for M2-2; next is M3-0's capture), else the
+  owner's assurance on M2-2, then M3 when its capture lands.
+- Blockers: M3-0 blocked on ONE NTES capture (the only source that publishes per-stop actuals).
+  Unblock: NTES app -> 56269 -> running status -> paste the text/screenshot (14.3).
+- Rules that must NOT be re-litigated: (as session 1) + the pair endpoint stays flag-OFF until a
+  capture exists (7.4); the feed stamp is IST wall time and UTC = stamp - 5:30 (test-enforced).
 
 ## HANDOFF 2026-10-11 (session 1 end)
 - Milestone state: **M1 EXITED for its exit criterion** ("no time without a provenance label,
