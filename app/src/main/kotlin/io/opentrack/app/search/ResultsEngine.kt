@@ -6,6 +6,7 @@ import io.opentrack.core.contract.Clock
 import io.opentrack.core.contract.Provenance
 import io.opentrack.core.contract.ProvenanceKind
 import io.opentrack.core.contract.TrainIdentity
+import io.opentrack.core.contract.label
 import io.opentrack.core.parse.ShapeSignature
 import org.json.JSONObject
 
