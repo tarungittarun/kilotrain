@@ -1,7 +1,6 @@
 package io.opentrack.core.contract
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -45,7 +44,7 @@ class ContractTypesTest {
         val forward = TrainIdentity("16221", "X", "SMET", "NDLS", prov)
         val reverseKeyed = TrainIdentity("16221", "X", "NDLS", "SMET", prov)
         assertTrue(forward.conflictsWith(reverseKeyed))
-        assertFalse(forward.disagreesWith(reverseKeyed)) // conflict is about the route
+        assertTrue(forward.disagreesWith(reverseKeyed)) // same number, different endpoints
     }
 
     /** 10.3: 4-letter station codes are never truncated by the contract. */

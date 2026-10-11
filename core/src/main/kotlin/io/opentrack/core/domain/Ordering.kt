@@ -30,12 +30,19 @@ object ProximityRunChoice {
 /** DECISION SERVED: display order only - still-catchable first, nearest departure on top,
  * already-gone below most-recent-first. */
 object RowDisplayOrder {
-    private val catchableFirst = compareByDescending<DepartureRow> { it.stillCatchable }
-    private val nearestFirst = compareBy<DepartureRow> { it.minutesUntilDeparture }
-    private val goneMostRecentFirst = compareByDescending<DepartureRow> { it.minutesUntilDeparture }
-
-    val comparator: Comparator<DepartureRow> =
-        catchableFirst.then(nearestFirst).then(goneMostRecentFirst)
+    /**
+     * Written as ONE explicit comparator, not a chain of three: chaining an ascending
+     * nearest-first comparator with a descending most-recent-first one lets the first rule win
+     * inside the gone group too, which put the oldest departure on top. The decisions are
+     * grouped (catchable vs gone) BEFORE any ordering applies (6.5, 10.6).
+     */
+    val comparator: Comparator<DepartureRow> = Comparator { a, b ->
+        when {
+            a.stillCatchable != b.stillCatchable -> if (a.stillCatchable) -1 else 1
+            a.stillCatchable -> a.minutesUntilDeparture.compareTo(b.minutesUntilDeparture)
+            else -> b.minutesUntilDeparture.compareTo(a.minutesUntilDeparture)
+        }
+    }
 }
 
 /** A row ready for display; minutesUntilDeparture is signed (negative = already gone). */

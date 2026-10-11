@@ -17,15 +17,15 @@ class RunDaysTest {
 
     @Test
     fun knownDatesMapCorrectly() {
-        // 2026-10-11 is a Sunday (epoch day 20705)
-        assertEquals(0, RunDays.dayOfWeek(20705))
-        assertTrue(RunDays.runsOn(RunDays.SUNDAY, 20705))
-        assertFalse(RunDays.runsOn(RunDays.MONDAY, 20705))
+        // 2026-10-11 is a Sunday (epoch day 20737)
+        assertEquals(0, RunDays.dayOfWeek(20737))
+        assertTrue(RunDays.runsOn(RunDays.SUNDAY, 20737))
+        assertFalse(RunDays.runsOn(RunDays.MONDAY, 20737))
     }
 
     @Test
     fun allDaysRunsEverywhere() {
-        for (day in 20700L..20710L) {
+        for (day in 20735L..20740L) {
             assertTrue(RunDays.runsOn(RunDays.ALL_DAYS, day))
         }
     }
