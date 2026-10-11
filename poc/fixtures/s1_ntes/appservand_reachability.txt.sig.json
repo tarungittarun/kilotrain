@@ -1,0 +1,18 @@
+{
+  "csr_feed_stamp_seen": false,
+  "delimiter_counts": {
+    "\t": 0,
+    ",": 0,
+    ";": 0,
+    "|": 0,
+    "~": 0
+  },
+  "fields_per_line_head": [],
+  "fields_per_line_histogram": {},
+  "first_line_len": 0,
+  "kind": "text",
+  "line_count": 0,
+  "max_line_len": 0,
+  "nonempty_lines": 0,
+  "sha256_head": "e3b0c44298fc1c14"
+}

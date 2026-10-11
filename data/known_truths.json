@@ -1,0 +1,25 @@
+{
+  "schema": "known-truths/1",
+  "verified_by": "owner (PENDING)",
+  "verified_date": null,
+  "note": "Facts live OUTSIDE the codebase, dated and attributed. NO minutes (they legitimately move). Claims with status != verified are NOT asserted by the gate (suspected is not asserted, 10.7).",
+  "claims": [
+    {
+      "kind": "asset-pattern",
+      "id": "no-retired-0-prefix",
+      "rule": "no train number in the shipped asset uses the retired 0-prefix (e.g. 06228, 07301, 044078)",
+      "evidence": "2022-23 renumbering; 044078 observed in datameet/railways/trains.json head on 2026-10-11 while the repo commit date was the same day",
+      "status": "verified"
+    }
+  ],
+  "identity_claims": [
+    {
+      "kind": "train-identity",
+      "train": "16228",
+      "expect": {"name_contains": ""},
+      "evidence": "pending owner verification via pasted text from the official enquiry app (14.3)",
+      "status": "pending-evidence"
+    }
+  ],
+  "pair_presence_claims": []
+}

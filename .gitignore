@@ -1,0 +1,20 @@
+# build outputs and local IDE state never reach git (9.8)
+.gradle/
+build/
+local.properties
+*.iml
+.idea/
+captures/
+*.apk
+*.aab
+.externalNativeBuild/
+.cxx/
+
+# probe results are artefacts: the generator and fixtures are committed, the run output is not (9.8)
+poc/probe-results.json
+data/gate-verdict.json
+data/asset.json
+
+# python noise
+__pycache__/
+*.pyc

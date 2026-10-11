@@ -1,0 +1,60 @@
+name: checks
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PROVED/SKIPPED header
+        run: |
+          echo "PROVED: static gates below run on every push."
+          echo "SKIPPED: gradle compile/unit/screen/instrumented jobs - not created yet (M1);"
+          echo "         nothing here proves compile success (KICKOFF 9.6/11.7)."
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: py_compile all python
+        run: python3 -m compileall -q poc scripts && echo "PASS py_compile"
+
+      - name: bash -n shell scripts (if any)
+        run: |
+          found=0
+          for f in $(find . -name '*.sh' -not -path './.git/*'); do bash -n "$f" && found=1; done
+          [ "$found" = "1" ] && echo "PASS bash -n" || echo "SKIPPED bash -n: no shell scripts"
+
+      - name: docs-freshness gate (13.1/13.3)
+        run: python3 scripts/check_docs.py
+
+      - name: gate self-test (7.3)
+        run: python3 poc/gate_selftest.py
+
+      - name: build offline asset + known-truths gate (10.7)
+        run: |
+          python3 scripts/build_offline_asset.py
+          python3 scripts/known_truths_gate.py
+          echo "NOTE: gate verdict FAIL is recorded, never a red build (10.7)"
+
+      - name: source probe with capture (15.3)
+        run: python3 poc/probe_sources.py --out poc/probe-results.json
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: upload capture artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe-capture-${{ github.run_id }}
+          path: |
+            poc/fixtures/
+            poc/probe-results.json
+            data/gate-verdict.json
+          if-no-files-found: error

@@ -1,0 +1,76 @@
+name: weekly-data-watch
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"  # Mondays 03:00 UTC (12.1)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  weekly:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: rebuild asset + gate + probe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/build_offline_asset.py
+          python3 scripts/known_truths_gate.py
+          python3 poc/probe_sources.py --out poc/probe-results.json
+
+      - name: write weekly report (12.1)
+        run: |
+          WEEK_ID=$(date -u +%Y-week%V)
+          REPORT="docs/reports/${WEEK_ID}.md"
+          if [ -f "$REPORT" ]; then echo "SKIPPED report write: $REPORT exists (append-only, 12.1)"; else
+          {
+            echo "# weekly data watch ${WEEK_ID}"
+            echo
+            echo "run id: ${{ github.run_id }} · measured: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo
+            echo "| source | verdict | vintage | latency | agreement | ships? |"
+            echo "|---|---|---|---|---|---|"
+            python3 - <<'PY'
+          import json
+          data = json.load(open("poc/probe-results.json"))
+          notes = {
+            "S1 NTES/CRIS": "vintage unmeasured (no envelope capture); labelled fallback only",
+            "S2 erail.in": "vintage unmeasured (throttle payloads); second witness only",
+            "S3 GitHub dumps": "vintage: content-tested (retired-prefix pattern)",
+            "S4 open-data portals": "unadmitted pending ADR + owner consent",
+          }
+          for r in data["results"]:
+            src = r.get("source", "?")
+            lat = next((s.get("elapsed_s") for s in r.get("samples", []) if s.get("ok")), None)
+            if lat is None:
+              lat = next((a.get("elapsed_s") for a in r.get("attempts", []) if a.get("ok")), None)
+            ships = "no" if "blocked" in r.get("verdict", "") else "labelled-only"
+            print(f"| {src} | {r.get('verdict')} | {notes.get(src,'-')} | {lat if lat is not None else '-'}s | unmeasured | {ships} |")
+          PY
+          echo
+            echo "## known-truths gate verdict"
+            echo '```json'
+            cat data/gate-verdict.json
+            echo '```'
+          } > "$REPORT"
+          echo "wrote $REPORT"
+          fi
+
+      - name: commit report [skip ci]
+        run: |
+          git config user.name "kiloconnect[bot]"
+          git config user.email "240665456+kiloconnect[bot]@users.noreply.github.com"
+          git add docs/reports poc/fixtures || true
+          git diff --cached --quiet && echo "nothing to commit" || \
+            git commit -m "weekly data watch: append-only report + capture fixtures" && git push
