@@ -2,7 +2,6 @@ package io.opentrack.core.parse
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
@@ -17,7 +16,7 @@ class ErailTrainParserTest {
     @Test
     fun parsesTheCapturedPayload() {
         val payload = ErailTrainParser.parse(capture)
-        requireNotNull(payload)
+        checkNotNull(payload)
         assertEquals("56269", payload.number)
         assertEquals("SMET MYS FAST PASS", payload.name)
         assertEquals("SMET", payload.fromStation)
@@ -33,7 +32,7 @@ class ErailTrainParserTest {
     @Test
     fun feedStampIsParsedAsFixedIST() {
         val payload = ErailTrainParser.parse(capture)
-        requireNotNull(payload)
+        checkNotNull(payload)
         // 2026-10-06 16:57:24 IST = 2026-10-06 11:27:24 UTC
         val expected = ErailTrainParser.daysFromCivil(2026, 10, 6) * 86_400_000L +
             (11 * 60 + 27) * 60_000L + 24_000L
@@ -66,10 +65,5 @@ class ErailTrainParserTest {
         assertEquals(0L, ErailTrainParser.daysFromCivil(1970, 1, 1))
         assertEquals(20737L, ErailTrainParser.daysFromCivil(2026, 10, 11)) // a Sunday
         assertEquals(20454L, ErailTrainParser.daysFromCivil(2026, 1, 1))
-    }
-
-    private fun <T> requireNotNull(v: T?): T {
-        assertTrue("value must not be null", v != null)
-        return v!!
     }
 }
