@@ -22,7 +22,14 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - uses: android-actions/setup-android@v3
+      - name: install Android SDK components (AGP needs platforms;android-35)
+        run: |
+          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
+          echo "using sdkmanager: $SDKM"
+          yes | "$SDKM" --licenses > /dev/null 2>&1 || true
+          "$SDKM" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          echo "PROVED: SDK platform 35 + build-tools installed"
+        shell: bash
 
       - name: generate the offline asset + gate (L6, 10.7)
         run: |

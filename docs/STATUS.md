@@ -19,9 +19,10 @@ owner-action only. Any behaviour-changing commit must change this table (docs-fr
 ## Metrics (§13.6)
 | metric | value |
 |---|---|
-| defects found before owner sees them | 3 (probe verdict bug caught in-lab; probe S3 vintage test; throttle fixture) |
+| defects found before owner sees them | 6 (probe verdict bug; S3 vintage test; throttle fixture; docs-gate table bug; known-truths claim-kind bug; broken setup-android action — all caught in CI/lab) |
 | defects reaching a phone | 0 |
 | UNPROVEN traceability rows | 0 shipped / 0 applicable (nothing shipped yet) |
+| CI rounds | r1 checks 38175068398 PASS 2m18s · r2 checks 38175814758 PASS 2m15s · r2 gradle jobs FAILED on setup-android v3 (fixed, round 3 pending) |
 
 ## Review clock (§13.7)
 sources: 2026-10-11 done, next 2026-11-11 (or on gate FAIL) · competitors: due 2027-01-11 ·

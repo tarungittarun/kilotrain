@@ -16,3 +16,8 @@
 5. **No local toolchain here.** This machine has no JDK/Gradle/Android SDK (audit 2026-10-11), so
    nothing about compile success is ever claimed locally (§9.6/§11.7): CI decides, and reports
    quote the run.
+6. **`android-actions/setup-android@v3` is broken on current runners** (it fails installing the
+   retired `tools` SDK package: "Warning: Failed to find package 'tools'"). Caught by CI on the
+   M1 round before any claim of green; fixed by installing platform 35 + build-tools directly
+   with the runner's own `sdkmanager`. Enforced by: every gradle job uses that step; the failure
+   log is quoted in STATUS's metrics (defect caught before the owner saw it).
