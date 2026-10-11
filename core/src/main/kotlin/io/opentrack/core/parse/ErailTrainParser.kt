@@ -81,7 +81,8 @@ object ErailTrainParser {
             return null
         }
         val epochDay = daysFromCivil(year, month, day)
-        return epochDay * MILLIS_PER_DAY + hour * 3_600_000L + minute * 60_000L + second * 1000L + IST_OFFSET_MILLIS
+        // UTC = IST - 5:30 (the stamp is IST wall time; adding would make the feed look NEWER)
+        return epochDay * MILLIS_PER_DAY + hour * 3_600_000L + minute * 60_000L + second * 1000L - IST_OFFSET_MILLIS
     }
 
     /** Days since 1970-01-01 from a proleptic-Gregorian date (Hinnant's algorithm). */
