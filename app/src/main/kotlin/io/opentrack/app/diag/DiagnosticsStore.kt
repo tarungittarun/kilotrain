@@ -64,6 +64,26 @@ class DiagnosticsStore(
         return Intent.createChooser(intent, "Share diagnostics file")
     }
 
+    /**
+     * Saves the log into Downloads and returns a share intent for THAT file, so it can be attached
+     * in a chat or opened from a file manager (a content URI from another app is often refused).
+     */
+    fun saveAndShare(context: Context): Intent? {
+        val uri = DiagnosticsSaver.saveToDownloads(context, logFile) ?: run {
+            diagnostics.sourceFailure(mapOf("op" to "export", "failure" to "SAVE_FAILED",
+                "detail" to "the downloads folder refused the copy"))
+            return null
+        }
+        diagnostics.export(mapOf("mode" to "saved_file", "bytes" to logFile.length().toString(),
+            "target" to uri.toString()))
+        return Intent(Intent.ACTION_SEND).apply {
+            type = "application/x-ndjson"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_SUBJECT, "OpenTrack diagnostics")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+
     fun shareAsText(context: Context): Intent {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText("OpenTrack diagnostics", logText()))

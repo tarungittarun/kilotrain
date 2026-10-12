@@ -2,4 +2,5 @@
 <paths>
     <!-- only the diagnostics log is shareable, and only through this provider (3.6) -->
     <files-path name="diagnostics" path="diagnostics/" />
+    <external-path name="downloads" path="Download/" />
 </paths>

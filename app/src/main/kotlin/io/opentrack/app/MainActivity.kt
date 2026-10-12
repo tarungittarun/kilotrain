@@ -47,7 +47,10 @@ class MainActivity : ComponentActivity() {
             // no source passed here: the ViewModel resolves it at search time, so tests can
             // install a fake (SourceLocator) while production gets the real transport (3.1)
             diagnostics = diagnosticsStore.diagnostics,
-            ntesStatusSource = NtesRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }),
+            ntesStatusSource = NtesRunningStatusSource(
+                openConnection = { it.openConnection() as java.net.HttpURLConnection },
+                diagnostics = diagnosticsStore.diagnostics,
+            ),
         )
 
         setContent {

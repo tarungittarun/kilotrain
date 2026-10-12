@@ -2,6 +2,7 @@ package io.opentrack.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
+import android.content.Intent
 import androidx.compose.material3.Switch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.testTag
@@ -213,8 +214,10 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
                 )
             }
             Row(modifier = Modifier.padding(top = 4.dp)) {
-                TextButton(onClick = { context.startActivity(store.shareAsFile(context)) }) {
-                    Text("share as file")
+                TextButton(onClick = {
+                    store.saveAndShare(context)?.let { context.startActivity(Intent.createChooser(it, "Share diagnostics file")) }
+                }) {
+                    Text("save + share file")
                 }
                 TextButton(onClick = { context.startActivity(store.shareAsText(context)) }) {
                     Text("share as copy")

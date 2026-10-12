@@ -91,7 +91,6 @@ class ResultsViewModel(
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {
                 val source = ntesStatusSource ?: SourceLocator.ntesStatusSource
-                    ?: return@withContext null
                 ResultsEngine(
                     asset = asset,
                     store = store,

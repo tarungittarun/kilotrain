@@ -1,6 +1,7 @@
 package io.opentrack.app.source
 
 import io.opentrack.core.contract.SourceFailure
+import io.opentrack.core.diag.Diagnostics
 import io.opentrack.core.ntes.NtesCrypto
 import io.opentrack.core.ntes.NtesRunningStatus
 import io.opentrack.core.ntes.NtesRunningStatusParser
@@ -30,6 +31,7 @@ class NtesRunningStatusSource(
     private val openConnection: (URL) -> HttpURLConnection,
     private val clock: () -> Long = { System.currentTimeMillis() },
     private val enabled: Boolean = true,
+    private val diagnostics: Diagnostics? = null,
 ) {
     private val cache = TtlCache<String, NtesRunningStatus>(clock)
 
@@ -55,6 +57,10 @@ class NtesRunningStatusSource(
         val parsed = NtesRunningStatusParser.parse(body, clock(), viaCache = false)
             ?: decodeEncryptedFallback(body)?.let { NtesRunningStatusParser.parse(it, clock(), viaCache = false) }
         if (parsed == null) {
+            diagnostics?.sourceFailure(
+                mapOf("op" to "ntes_status", "failure" to "SHAPE_UNKNOWN", "detail" to "no trainFullStatus")
+                    + io.opentrack.core.diag.DiagnosticsCodec.signature(body)
+            )
             return NtesStatusResult.Failed(
                 SourceFailure.SHAPE_UNKNOWN,
                 "the response did not match the documented shape; the protocol may have changed (12.3)",
