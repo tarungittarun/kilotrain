@@ -40,6 +40,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true // the diagnostics header reports the exact build (ADR: diagnostics)
     }
 
     testOptions {

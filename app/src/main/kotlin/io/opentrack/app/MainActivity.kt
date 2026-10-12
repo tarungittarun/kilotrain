@@ -3,6 +3,7 @@ package io.opentrack.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import io.opentrack.app.BuildConfig
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
 import io.opentrack.app.diag.DiagnosticsStore
