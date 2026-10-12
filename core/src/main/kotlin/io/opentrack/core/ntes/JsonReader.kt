@@ -52,7 +52,7 @@ object JsonReader {
             return when (text[pos]) {
                 '{' -> readObject()
                 '[' -> readArray()
-                '"' -> JsonString(readString())
+                '"' -> JsonValue.JsonString(readString())
                 't' -> literal("true", JsonValue.JsonBoolean(true))
                 'f' -> literal("false", JsonValue.JsonBoolean(false))
                 'n' -> literal("null", JsonValue.JsonNull)
