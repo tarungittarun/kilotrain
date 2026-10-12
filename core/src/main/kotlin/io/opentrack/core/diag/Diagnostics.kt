@@ -77,7 +77,36 @@ object DiagnosticsCodec {
         "has_feed_stamp" to Regex("""\d{4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}""")
             .containsMatchIn(body).toString(),
         "throttle_marker" to body.contains("try again", ignoreCase = true).toString(),
-    )
+    ) + if (body.trimStart().startsWith("{")) jsonShape(body) else emptyMap()
+
+    /**
+     * For a JSON body: keys, nesting and array lengths - the structural signature that lets a
+     * parser be written against a real capture without moving a single timetable value into a log
+     * (7.4). Scalars are reported by TYPE only.
+     */
+    fun jsonShape(body: String): Map<String, String> {
+        val root = io.opentrack.core.ntes.JsonReader.parse(body)
+            as? io.opentrack.core.ntes.JsonValue.JsonObject ?: return emptyMap()
+        val shape = LinkedHashMap<String, String>()
+        fun walk(obj: io.opentrack.core.ntes.JsonValue.JsonObject, prefix: String, depth: Int) {
+            if (depth > 3) return
+            obj.getEntries().forEach { (k, v) ->
+                when (v) {
+                    is io.opentrack.core.ntes.JsonValue.JsonObject -> {
+                        shape["obj.${prefix}$k"] = "object"
+                        walk(v, "$k.", depth + 1)
+                    }
+                    is io.opentrack.core.ntes.JsonValue.JsonArray -> {
+                        shape["array.${prefix}$k.len"] = v.size.toString()
+                        v.getObjectAt(0)?.let { walk(it, "$k[].", depth + 1) }
+                    }
+                    else -> shape["leaf.${prefix}$k"] = v.javaClass.simpleName
+                }
+            }
+        }
+        walk(root, "", 1)
+        return shape
+    }
 
     private fun escape(s: String): String = s
         .replace("\\", "\\\\")

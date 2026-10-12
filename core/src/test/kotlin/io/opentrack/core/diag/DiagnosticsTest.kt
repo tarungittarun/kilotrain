@@ -61,3 +61,27 @@ class DiagnosticsTest {
         assertTrue(line.contains("\\\""))
     }
 }
+
+class DiagnosticsShapeTest {
+
+    @Test
+    fun jsonShapeReportsKeysNestingAndArrayLengthsWithoutValues() {
+        val body = """
+            {"trainNo":"16228","timeTable":[{"stnCode":"SMET","actArrTime":"23:05"}],
+             "delay":{"arrDelay":"10"}}
+        """.trimIndent()
+        val shape = DiagnosticsCodec.jsonShape(body)
+        assertEquals("object", shape["obj.delay"])
+        assertEquals("object", shape["obj.timeTable[]."])
+        assertEquals("1", shape["array.timeTable.len"])
+        // keys are structural facts; VALUES never enter the log
+        assertTrue(shape.keys.any { it.endsWith(".trainNo") })
+        assertFalse(shape.values.any { it == "16228" })
+        assertFalse(shape.values.any { it == "23:05" })
+    }
+
+    @Test
+    fun aNonJsonBodyHasNoShapeEntries() {
+        assertTrue(DiagnosticsCodec.jsonShape("~~~~~nope").isEmpty())
+    }
+}
