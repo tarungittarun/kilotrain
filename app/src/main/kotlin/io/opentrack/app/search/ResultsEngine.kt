@@ -4,9 +4,8 @@ import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailRouteSource
-import io.opentrack.app.source.LiveStatusLookup
 import io.opentrack.app.source.NtesRunningStatusSource
-import io.opentrack.app.source.NtesStatusResult
+import io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult
 import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.core.diag.Diagnostics
