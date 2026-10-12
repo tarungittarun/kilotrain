@@ -1,6 +1,14 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.7.0 (rolling `latest-apk`) — LIVE RUNNING STATUS (NTES)
+- **On screen:** each train row has a "live status" button: current station, last update, delay
+  (dep/arr), platform and next station, from the official NTES enquiry service - keyless. The line
+  states plainly that per-stop actual times are not published by this source yet (no capture
+  exists, and we do not invent times).
+- **Proven by your log:** SMET->SBC -> 7 current trains; stop times for 20652 (16 stops) and
+  16228 (27 stops).
+
 ## 2.6.0 (rolling `latest-apk`) — STOP TIMES + CONFIRMED LIVE PATHS
 - **On screen:** every search now uses LIVE, current sources: pair search (SMET->MYS returns the
   four current trains), train-number search, and a new "stop times" action per row showing the
