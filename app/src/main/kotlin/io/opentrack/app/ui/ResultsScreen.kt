@@ -139,10 +139,20 @@ fun ResultsScreen(
                                 trainNo = status.trainNo,
                                 currentStatus = status.currentStatus,
                                 provenanceLabel = label.label(System.currentTimeMillis()),
+                                sourceLabel = status.sourceLabel,
                             ),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(top = 8.dp),
                         )
+                    }
+                    if (status.attempts.size > 1) {
+                        item {
+                            Text(
+                                text = "tried: " + status.attempts.joinToString(" · "),
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier = Modifier.padding(bottom = 4.dp),
+                            )
+                        }
                     }
                     items(status.stops) { stop ->
                         Text(

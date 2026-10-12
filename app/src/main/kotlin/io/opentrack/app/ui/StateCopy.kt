@@ -43,7 +43,8 @@ object StateCopy {
         trainNo: String,
         currentStatus: String,
         provenanceLabel: String,
-    ): String = "train $trainNo · $currentStatus · $provenanceLabel"
+        sourceLabel: String,
+    ): String = "train $trainNo · $sourceLabel · $provenanceLabel\n$currentStatus"
 
     fun stopStatus(
         code: String,

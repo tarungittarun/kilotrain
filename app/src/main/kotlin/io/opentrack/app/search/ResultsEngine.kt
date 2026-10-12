@@ -213,21 +213,27 @@ class ResultsEngine(
         }
     }
 
-    /** Priority 3: per-stop ACTUAL vs SCHEDULED times from NTES (ADR 0012). */
+    /**
+     * Priority 3 (ADR 0013, multi-source ladder): the live-status screen tries EVERY keyless source
+     * in order and populates from whoever answers:
+     *   1. NTES mobile gateway, plain JSON queryType "6" (the documented shape);
+     *   2. NTES mobile gateway, encrypted envelope (ShowFullRunJson);
+     *   3. erail.in route (TRAINROUTE) - SCHEDULE only, clearly labelled as such.
+     * Every attempt is recorded, so a failure names the sources that were tried (7.4/12.3: never
+     * invent an actual time).
+     */
     fun liveStatus(trainNumber: String): StatusOutcome {
-        val result = ntesStatusSource?.fetch(trainNumber)
-            ?: return StatusOutcome.Unavailable("live status source not installed (12.6)")
-        diagnostics?.numberSearch(
-            mapOf("train_no" to trainNumber.trim(), "source" to "ntes_status") +
-                when (result) {
-                    is NtesStatusResult.Failed -> mapOf("failure" to result.failure.name, "detail" to result.detail)
-                    is NtesStatusResult.Live -> mapOf("wire" to "ok", "stops" to result.status.stops.size.toString())
-                }
-        )
-        return when (result) {
+        val attempts = mutableListOf<String>()
+        val ntes = ntesStatusSource?.fetch(trainNumber)
+        when (ntes) {
+            null -> attempts += "NTES: not installed"
             is NtesStatusResult.Live -> {
-                val s = result.status
-                StatusOutcome.Live(
+                diagnostics?.numberSearch(
+                    mapOf("train_no" to trainNumber.trim(), "source" to "ntes_status", "wire" to "ok",
+                        "stops" to ntes.status.stops.size.toString(), "cached" to ntes.status.viaCache.toString())
+                )
+                val s = ntes.status
+                return StatusOutcome.Live(
                     trainNo = s.trainNo ?: trainNumber,
                     currentStatus = s.currentStatus ?: "no status published right now",
                     stops = s.stops.map { stop ->
@@ -245,12 +251,59 @@ class ResultsEngine(
                     },
                     viaCache = s.viaCache,
                     fetchedAtMillis = s.fetchedAtMillis,
+                    sourceLabel = "NTES live running status",
+                    attempts = attempts,
                 )
             }
-            is NtesStatusResult.Failed -> StatusOutcome.Unavailable(
-                "could not get the live status (${result.failure}: ${result.detail})"
-            )
+            is NtesStatusResult.Failed -> {
+                attempts += "NTES: ${ntes.failure} - ${ntes.detail}"
+                diagnostics?.sourceFailure(
+                    mapOf("op" to "ntes_status", "failure" to ntes.failure.name, "detail" to ntes.detail)
+                )
+            }
         }
+
+        // rung 3: the published schedule, labelled as schedule - never as actuals
+        val route = erailRouteSource?.fetch(trainNumber)
+        when (route) {
+            is RouteLookupResult.Live -> {
+                attempts += "erail.in: schedule answered (${route.stops.size} stops)"
+                diagnostics?.route(
+                    mapOf("train_no" to trainNumber.trim(), "source" to "erail_route_fallback")
+                )
+                return StatusOutcome.Live(
+                    trainNo = trainNumber,
+                    currentStatus = "no live source answered - showing the published schedule only",
+                    stops = route.stops.map { stop ->
+                        StopStatus(
+                            code = stop.stationCode,
+                            name = stop.stationName,
+                            scheduledArrival = stop.arrival,
+                            scheduledDeparture = stop.departure,
+                            actualArrival = null,
+                            actualDeparture = null,
+                            arrivalDelayMinutes = null,
+                            departureDelayMinutes = null,
+                            isCurrentStation = false,
+                        )
+                    },
+                    viaCache = false,
+                    fetchedAtMillis = clock.nowMillis(),
+                    sourceLabel = "erail.in schedule (no live source answered)",
+                    attempts = attempts,
+                )
+            }
+            is RouteLookupResult.Failed -> attempts += "erail.in: ${route.failure} - ${route.detail}"
+            null -> attempts += "erail.in: not installed"
+        }
+
+        diagnostics?.sourceFailure(
+            mapOf("op" to "live_status", "failure" to "ALL_SOURCES_FAILED",
+                "detail" to attempts.joinToString(" | "))
+        )
+        return StatusOutcome.Unavailable(
+            "no live source answered from this phone. Tried: ${attempts.joinToString("; ")}"
+        )
     }
 
     data class StopStatus(
@@ -272,6 +325,8 @@ class ResultsEngine(
             val stops: List<StopStatus>,
             val viaCache: Boolean,
             val fetchedAtMillis: Long,
+            val sourceLabel: String,
+            val attempts: List<String>,
         ) : StatusOutcome
         data class Unavailable(val reason: String) : StatusOutcome
     }
