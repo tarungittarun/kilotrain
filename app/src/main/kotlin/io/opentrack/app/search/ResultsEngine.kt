@@ -360,10 +360,9 @@ class ResultsEngine(
             mapOf("op" to "live_status", "failure" to "ALL_SOURCES_FAILED",
                 "detail" to (outcome.attempts + rungs.map { it.name }).joinToString(" | "))
         )
-        StatusOutcome.Unavailable(
-            "no source answered first. Tried: " +
-                (if (outcome.attempts.isEmpty()) rungs.joinToString(", ") { it.name } else outcome.attempts.joinToString("; "))
-        )
+        val tried = rungs.joinToString(", ") { it.name } +
+            if (outcome.attempts.isEmpty()) "" else " | details: " + outcome.attempts.joinToString("; ")
+        StatusOutcome.Unavailable("no source answered first. Tried: $tried")
     }
 
     private fun statusFromNtes(
