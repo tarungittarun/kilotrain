@@ -48,7 +48,10 @@ class NtesRunningStatusSourceTest {
                         lastBody = String(b, off, len, Charsets.UTF_8)
                     }
                 }
-            override fun getResponseCode(): Int = response.first
+            override fun getResponseCode(): Int {
+                if (url.path.endsWith("/")) warmupMethod = "GET" else postCount++
+                return response.first
+            }
             override fun getInputStream() =
                 ByteArrayInputStream(response.second.toByteArray(Charsets.UTF_8))
             override fun getErrorStream(): java.io.InputStream? =
