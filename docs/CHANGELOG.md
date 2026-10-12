@@ -1,6 +1,17 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.10.0 (rolling `latest-apk`) — FIVE SOURCES, FIRST ANSWER WINS
+- **On screen:** "live status" now races FIVE keyless sources in parallel and displays the FIRST
+  answer the phone receives, naming the winner: 1) NTES mobile JSON (queryType 6 - per-stop
+  actuals), 2) NTES encrypted envelope (per-stop actuals), 3) erail.in TRAINROUTE (per-stop
+  schedule), 4) erail.in train-number payload (identity + endpoint times), 5) the labelled offline
+  asset. Slower rungs are cancelled the moment a faster one lands, and the screen lists what the
+  others said. If nothing answers it names every source tried.
+- **Fixed from your last log's evidence:** the erail schedule rung was never wired into the engine
+  ("not installed"), and NTES's masked 2xx-empty answer now falls through to the encrypted envelope
+  before reporting anything.
+
 ## 2.9.0 (rolling `latest-apk`) — ATTACHABLE DIAGNOSTICS + LIVE-STATUS LOGGING
 - **On screen:** the diagnostics panel's file button is now **"save + share file"**: it copies the
   log into the public **Downloads** folder as `opentrack-diagnostics-<time>.jsonl` and shares that
