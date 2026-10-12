@@ -6,6 +6,8 @@ import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult
+import io.opentrack.app.source.NtesRunningStatusSource
+import io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult.NtesStatusResult
 import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.core.diag.Diagnostics
