@@ -348,10 +348,13 @@ class ResultsEngine(
             diagnostics?.numberSearch(
                 mapOf("train_no" to train, "source" to "live_status_winner", "winner" to (outcome.winner ?: "?"))
             )
-            return@runBlocking winner.copy(
-                attempts = if (outcome.attempts.isEmpty()) listOf("answered first by ${outcome.winner}")
-                else outcome.attempts,
-            )
+            val winnerLive = winner as? StatusOutcome.Live
+            return@runBlocking if (winnerLive != null) {
+                winnerLive.copy(
+                    attempts = if (outcome.attempts.isEmpty()) listOf("answered first by ${outcome.winner}")
+                    else outcome.attempts,
+                )
+            } else winner
         }
         diagnostics?.sourceFailure(
             mapOf("op" to "live_status", "failure" to "ALL_SOURCES_FAILED",
