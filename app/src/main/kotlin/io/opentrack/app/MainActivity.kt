@@ -4,9 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import io.opentrack.app.asset.OfflineAsset
+import io.opentrack.app.asset.OfflineAssetCodec
 import io.opentrack.app.diag.DiagnosticsStore
-import io.opentrack.app.asset.OfflineAsset
-import io.opentrack.app.diag.DiagnosticsStoreCodec
 import io.opentrack.app.search.ResultsViewModel
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.app.ui.ResultsScreen
