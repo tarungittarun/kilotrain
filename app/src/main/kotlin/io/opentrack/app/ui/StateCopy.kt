@@ -27,11 +27,10 @@ object StateCopy {
     }
 
     /** Per-stop schedule line: only what the source states; an unstated time renders as an em dash. */
-    fun stop(code: String, name: String, arrival: String?, departure: String?, dayOffset: Int): String {
+    fun stop(code: String, name: String, arrival: String?, departure: String?): String {
         val arr = arrival ?: "—"
         val dep = departure ?: "—"
-        val day = if (dayOffset > 1) " (day $dayOffset)" else ""
-        return "$code $name — arr $arr · dep $dep$day"
+        return "$code $name — arr $arr · dep $dep"
     }
 
     /** Provenance-readable row line (10.5). */

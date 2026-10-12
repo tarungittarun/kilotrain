@@ -150,8 +150,6 @@ class ResultsEngine(
                         name = stop.stationName,
                         arrival = stop.arrival,
                         departure = stop.departure,
-                        dayOffset = stop.dayOffset,
-                        distanceKm = stop.distanceKm,
                     )
                 }
             )
@@ -171,8 +169,6 @@ class ResultsEngine(
         val name: String,
         val arrival: String?,
         val departure: String?,
-        val dayOffset: Int,
-        val distanceKm: Int?,
     )
 
     enum class UiStateName {

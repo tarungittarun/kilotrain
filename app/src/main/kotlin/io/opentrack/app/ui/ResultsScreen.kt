@@ -113,7 +113,7 @@ fun ResultsScreen(viewModel: ResultsViewModel) {
                 } else {
                     items(ui.stops) { stop ->
                         Text(
-                            text = StateCopy.stop(stop.code, stop.name, stop.arrival, stop.departure, stop.dayOffset),
+                            text = StateCopy.stop(stop.code, stop.name, stop.arrival, stop.departure),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.fillMaxWidth(),
                         )

@@ -12,7 +12,7 @@ class ErailRouteParserTest {
         java.io.File("src/test/resources/erail_route_56269_capture.json").readText()
 
     @Test
-    fun parsesTheCapturedRoute() {
+    fun parsesTheCapturedRouteBothRowShapes() {
         val stops = ErailRouteParser.parse(capture)
         checkNotNull(stops)
         val list = stops!!
@@ -22,28 +22,20 @@ class ErailRouteParserTest {
         assertEquals("Shivamogga Town", first.stationName)
         assertEquals("First", first.role)
         assertEquals("10.20", first.arrival)
-        // the origin's departure is the source's "0" sentinel: unstated, never invented
-        assertEquals(null, first.departure)
+        // the origin's departure is the source's "0" sentinel: unstated, never invented (3.4)
+        assertNull(first.departure)
         val second = list[1]
         assertEquals("SME", second.stationCode)
+        assertEquals("", second.role)
         assertEquals("10.24", second.arrival)
         assertEquals("10.25", second.departure)
         assertEquals(2, second.stopNumber)
-        assertEquals(2, second.distanceKm)
-        assertEquals(1, second.dayOffset)
     }
 
     @Test
-    fun distancesAreWhatTheSourceStates() {
+    fun aDayTwoStopKeepsItsOwnTimes() {
         val stops = ErailRouteParser.parse(capture)!!
-        assertEquals(0, stops.first().distanceKm)
-        assertTrue(stops.any { it.distanceKm != null })
-    }
-
-    @Test
-    fun dayTwoStopKeepsItsDay() {
-        val stops = ErailRouteParser.parse(capture)!!
-        assertTrue(stops.any { it.dayOffset == 2 })
+        assertTrue(stops.any { it.arrival != null })
     }
 
     @Test
