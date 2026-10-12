@@ -28,12 +28,12 @@ import org.json.JSONObject
  */
 class ResultsEngine(
     private val asset: OfflineAsset,
-    private val erailPairSource: ErailPairSource? = null,
-    /** Reserved for the live pair cache (TTL) - unused until a pair source is captured (ADR 0009);
-     *  deliberately NOT consulted for pairs today, so years-old rows can never surface as answers. */
+    /** Reserved for the live pair cache (TTL) - deliberately NOT consulted for pairs, so
+     *  years-old rows can never surface as answers (ADR 0009). */
     private val store: OpenTrackStore,
     private val clock: Clock,
     private val erailSource: ErailTrainSource? = null,
+    private val erailPairSource: ErailPairSource? = null,
 ) {
     data class Outcome(
         val state: UiStateName,
