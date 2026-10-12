@@ -32,6 +32,19 @@ sources: 2026-10-11 done, next 2026-11-11 (or on gate FAIL) · competitors: due 
 open-data S4: monthly until admitted or abandoned twice (next 2026-11-11) · RISK.md: 2026-11-11 ·
 RUNBOOK.md: on install/rollback change.
 
+## HANDOFF 2026-10-12 (session 3, owner's stale-data correction)
+- Owner tested TLGP->MYS, saw 2016-vintage rows as the answer, and flagged it. Fixed per ADR 0009:
+  pair search answers ONLY from a current source; otherwise "could not look this up. no old data
+  is shown in its place." Numbers still answer live via S2 (tested live 2026-10-11T23:32:27Z).
+- Milestone state: M1 shipped; M2 = live NUMBER search DONE + pair search honestly BLOCKED.
+- Artefact ids: runs read this session: 38204200987/988/990/993, 38204465084/088/103/106,
+  38204677455/461/464/466, 38204935966/997/008/993. Rolling release: app-debug.apk 9,677,241
+  bytes 2026-10-12T04:45:10Z (READ from the release API).
+- Resume line: the ONE open owner action (STATUS row M2-0): paste one NTES export; that unblocks
+  both live pair search and per-stop actuals.
+- Rules not to re-litigate: (previous handoffs) + ADR 0009 - labelled-stale is still stale; a pair
+  answer must come from a source measured today, or the screen says it could not look.
+
 ## HANDOFF 2026-10-11 (session 2, after M2 live)
 - Milestone state: M1 EXITED and shipped; M2 PARTIAL: live train-number search DONE (tested and
   re-verified live by the engineer at 23:32 UTC), pair search on the labelled fallback.
