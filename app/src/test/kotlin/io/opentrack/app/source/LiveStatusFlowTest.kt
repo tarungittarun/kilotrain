@@ -86,13 +86,19 @@ class LiveStatusFlowTest {
         }
 
         // the action in question: tap "live status" on the first train row
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("live status").fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onAllNodesWithText("live status")[0].performClick()
 
-        // scroll so the lazily-composed per-stop rows exist on the small test screen
+        // the request must be recorded immediately, whatever the screen shows next
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("live status").fetchSemanticsNodes().size >= 4
+            java.io.File(compose.activity.filesDir, "diagnostics/opentrack-diagnostics.jsonl")
+                .takeIf { it.exists() }?.readText()?.contains("ntes_status") == true
         }
-        compose.onNodeWithTag("results_list").performScrollToIndex(10)
+
+        // scroll so the lazily-composed per-stop rows exist on the small test screen
+        compose.onNodeWithTag("results_list").performScrollToIndex(12)
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText(
                 "SMET Shivamogga Town · sched 22:55/23:00 · actual 23:05/23:10 · late 10 min"
