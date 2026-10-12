@@ -102,7 +102,7 @@ class LiveStatusFlowTest {
             compose.waitForIdle()
         }
         assertTrue(
-            "LOG AFTER TAP:\n$logText\n\nSCREEN:\n${compose.onRoot().printToString(maxDepth = 20).take(2500)}",
+            "LOG AFTER TAP:\n$logText\n\nSCREEN:\n${compose.onAllNodesWithText("live status").fetchSemanticsNodes().size.toString() + " live-status buttons on screen"}",
             logText.contains("ntes_status"),
         )
 
