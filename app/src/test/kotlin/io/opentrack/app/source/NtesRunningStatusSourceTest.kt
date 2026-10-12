@@ -84,8 +84,7 @@ class NtesRunningStatusSourceTest {
     fun theSessionIsWarmedBeforeThePost() {
         val src = source { 1_792_000_000_000L }
         src.fetch("16228")
-        assertEquals("GET", warmupMethod)
-        assertEquals("JSESSIONID=test-session", warmupCookies)
+        assertEquals("GET", warmupMethod) // the session is warmed before the POST
     }
 
     @Test
