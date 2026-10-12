@@ -12,6 +12,7 @@ import io.opentrack.core.contract.Provenance
 import io.opentrack.core.contract.ProvenanceKind
 import io.opentrack.core.contract.TrainIdentity
 import io.opentrack.core.contract.label
+import io.opentrack.core.parse.ErailTrainParser
 import io.opentrack.core.parse.ShapeSignature
 import org.json.JSONObject
 
@@ -70,7 +71,7 @@ class ResultsEngine(
                 state = UiStateName.LIVE,
                 rows = rows,
                 bannerSource = response.trains.firstOrNull()?.source ?: "erail.in",
-                note = "as of ${formatStamp(response.feedStampMillis)} "
+                note = "as of ${ErailTrainParser.formatIstOfDay(response.feedStampMillis)} "
                     + "(${response.trains.size} trains between $from and $to, the feed's own stamp)",
             )
         }
@@ -109,7 +110,7 @@ class ResultsEngine(
                     )
                 ),
                 bannerSource = p.source,
-                note = "as of ${formatStamp(p.feedStampMillis)} (the feed's own stamp, not this phone's clock)",
+                note = "as of ${ErailTrainParser.formatIstOfDay(p.feedStampMillis)} (the feed's own stamp, not this phone's clock)",
             )
         }
         val failure = (live as? TrainLookup.Failed)
@@ -126,28 +127,6 @@ class ResultsEngine(
     private fun formatMinutes(minutes: Int): String =
         "%02d:%02d".format(minutes / 60, minutes % 60)
 
-    private fun formatStamp(millis: Long): String {
-        val days = Math.floorDiv(millis, 86_400_000L)
-        val rem = millis - days * 86_400_000L - (5 * 60 + 30) * 60_000L // back to IST wall clock
-        var secsOfDay = rem / 1000
-        var d = days
-        if (secsOfDay < 0) { secsOfDay += 86_400; d -= 1 }
-        val (y, m, day) = civilFromDays(d)
-        return "%04d-%02d-%02d %02d:%02d".format(y, m, day, secsOfDay / 3600, (secsOfDay % 3600) / 60)
-    }
-
-    private fun civilFromDays(days: Long): Triple<Int, Int, Int> {
-        var z = days + 719_468L
-        val era = (if (z >= 0) z else z - 146_096) / 146_097
-        val doe = z - era * 146_097
-        val yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365
-        val y = yoe + era * 400
-        val doy = doe - (365 * yoe + yoe / 4 - yoe / 100)
-        val mp = (5 * doy + 2) / 153
-        val day = (doy - (153 * mp + 2) / 5 + 1).toInt()
-        val month = (if (mp < 10) mp + 3 else mp - 9).toInt()
-        return Triple((if (month <= 2) y + 1 else y).toInt(), month, day)
-    }
 
     data class RowView(
         val number: String,

@@ -39,6 +39,25 @@ class ErailTrainParserTest {
         assertEquals(expected, payload.feedStampMillis)
     }
 
+    /** Round trip: stamp text -> millis -> IST wall text must reproduce the stamp (no sign bugs). */
+    @Test
+    fun stampRoundTripsThroughMillis() {
+        val millis = ErailTrainParser.feedStampToMillis("2026-10-12-10-33-33")!!
+        assertEquals("2026-10-12 10:33", ErailTrainParser.formatIstOfDay(millis))
+        val early = ErailTrainParser.feedStampToMillis("2026-10-12-2-5-6")!!
+        assertEquals("2026-10-12 02:05", ErailTrainParser.formatIstOfDay(early))
+        val lateNight = ErailTrainParser.feedStampToMillis("2026-10-12-23-0-0")!!
+        assertEquals("2026-10-12 23:00", ErailTrainParser.formatIstOfDay(lateNight))
+    }
+
+    @Test
+    fun civilFromDaysInvertsDaysFromCivil() {
+        for (day in listOf(0L, 20732L, 20737L, 20738L, 19000L, 20000L)) {
+            val ymd = ErailTrainParser.civilFromDays(day)
+            assertEquals(day, ErailTrainParser.daysFromCivil(ymd[0], ymd[1], ymd[2]))
+        }
+    }
+
     @Test
     fun throttleBodyIsShapeUnknownNotAParse() {
         val throttled = "~~~~~Please try again after some time."
