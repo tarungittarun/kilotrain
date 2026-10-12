@@ -5,13 +5,12 @@ import androidx.lifecycle.viewModelScope
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailRouteSource
-import io.opentrack.core.diag.Diagnostics
-import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.HttpErailTransport
 import io.opentrack.app.source.SourceLocator
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
+import io.opentrack.core.diag.Diagnostics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
