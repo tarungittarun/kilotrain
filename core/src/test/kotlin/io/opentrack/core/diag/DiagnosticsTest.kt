@@ -70,7 +70,7 @@ class DiagnosticsShapeTest {
         val shape = DiagnosticsCodec.jsonShape(body)
         assertEquals("object", shape["obj.delay"])
         assertEquals("1", shape["array.timeTable.len"])
-        assertEquals("leaf", shape["leaf.timeTable[].stnCode"]?.substringBefore('.'))
+        assertEquals("JsonString", shape["leaf.timeTable[].stnCode"])
         // keys are structural facts; VALUES never enter the log
         assertTrue(shape.keys.any { it.endsWith(".trainNo") })
         assertFalse(shape.values.any { it == "16228" })
