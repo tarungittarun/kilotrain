@@ -1,6 +1,17 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.11.0 (rolling `latest-apk`) — PER-STOP ACTUALS FROM NTES (documented mobile contract)
+- **On screen:** when NTES answers, the live-status block now shows per-stop rows in the form
+  "SMET Shivamogga Town · sched 22:55/23:00 · actual 23:05/23:10 · late 10 min" - ACTUAL times
+  and delay minutes beside the schedule, plus platform, current station and next station from the
+  same response. Unstated actuals stay em dashes.
+- **The contract, investigated from public clients of the official app's mobile API:** the session
+  is WARMED (GET /mntes/, cookies carried into the POST with the Referer) - NTES answers an empty
+  body without it, which is the masked-empty you saw; the request is the encrypted ShowFullRunJson
+  envelope; the response's per-stop array is STNS with SC/SN/STA/STD/ETA/ETD/PF/DARR/DDEP. All
+  three were wrong or missing before; all three are now implemented to that documented shape.
+
 ## 2.10.0 (rolling `latest-apk`) — FIVE SOURCES, FIRST ANSWER WINS
 - **On screen:** "live status" now races FIVE keyless sources in parallel and displays the FIRST
   answer the phone receives, naming the winner: 1) NTES mobile JSON (queryType 6 - per-stop
