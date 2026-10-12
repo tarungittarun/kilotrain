@@ -48,13 +48,22 @@ object NtesRunningStatusParser {
         if (rows.size == 0) return null
         val stops = rows.items.mapNotNull { raw ->
             val s = raw as? JsonValue.JsonObject ?: return@mapNotNull null
+            val schArr = time(s.optString("STA"))
+            val schDep = time(s.optString("STD"))
+            var actArr = time(s.optString("ETA"))
+            var actDep = time(s.optString("ETD"))
+            // NTES echoes the schedule into ETA/ETD when no actual has been reported, and stamps
+            // the ORIGIN as "Source". Claiming those as actuals would be fabrication (3.4), so an
+            // echo is treated as "not reported" and renders as an em dash (3.3).
+            if (actArr != null && actArr == schArr) actArr = null
+            if (actDep != null && actDep == schDep) actDep = null
             NtesStopStatus(
                 stationCode = s.optString("SC").trim().takeIf { it.isNotBlank() },
                 stationName = s.optString("SN").trim().takeIf { it.isNotBlank() },
-                scheduledArrival = time(s.optString("STA")),
-                scheduledDeparture = time(s.optString("STD")),
-                actualArrival = time(s.optString("ETA")),
-                actualDeparture = time(s.optString("ETD")),
+                scheduledArrival = schArr,
+                scheduledDeparture = schDep,
+                actualArrival = actArr,
+                actualDeparture = actDep,
                 arrivalDelayMinutes = s.optString("DARR").trim().toIntOrNull(),
                 departureDelayMinutes = s.optString("DDEP").trim().toIntOrNull(),
                 platform = s.optString("PF").trim().takeIf { it.isNotBlank() },
@@ -77,5 +86,21 @@ object NtesRunningStatusParser {
         )
     }
 
-    private fun time(raw: String): String? = raw.trim().takeIf { it.isNotBlank() && it != "null" && it != "0" }
+    /**
+     * NTES time values are compound: `Source/20:55 13-Oct`, `Destination/08:20 13-Oct`, or a bare
+     * `20:55`. The marker and the echoed QUERY date are not the stop's schedule, so only HH:mm is
+     * kept (3.4); the embedded date is the query date, which is why every stop once showed 13-Oct.
+     */
+    private val COMPOUND = Regex("""^(Source|Destination)?\s*/?\s*(\d{1,2}:\d{2})(?:\s+\d{1,2}-[A-Za-z]{3})?$""")
+
+    private fun time(raw: String): String? {
+        val value = raw.trim()
+        if (value.isBlank() || value == "null" || value == "0") return null
+        val match = COMPOUND.find(value)
+        if (match != null) {
+            val hhmm = match.groupValues[2]
+            return if (hhmm.count { it == ':' } == 1) hhmm else value
+        }
+        return value
+    }
 }

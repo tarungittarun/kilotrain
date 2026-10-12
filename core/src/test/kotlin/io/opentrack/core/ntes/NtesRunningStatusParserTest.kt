@@ -17,8 +17,8 @@ class NtesRunningStatusParserTest {
          "CurrentStationName":"SMET","LUPDT":"Train departed SMET at 22:58",
          "DelayDep":"10 min","DelayArr":"15 min","Platform":"1","NextStationName":"SME",
          "STNS":[
-           {"SC":"TLGP","SN":"Talguppa","STA":"20:55","STD":"21:00","ETA":"21:05","ETD":"21:10",
-            "DARR":"10","DDEP":"10","PF":"1","DIST":"0","Sr":"1","Halt":"5"},
+           {"SC":"TLGP","SN":"Talguppa","STA":"Source/20:55 12-Oct","STD":"21:00","ETA":"21:05",
+            "ETD":"21:10","DARR":"10","DDEP":"10","PF":"1","DIST":"0","Sr":"1","Halt":"5"},
            {"SC":"SMET","SN":"Shivamogga Town","STA":"22:55","STD":"23:00","ETA":"23:05","ETD":"23:10",
             "DARR":"10","DDEP":"10","PF":"2","DIST":"29","Sr":"2","Halt":"5","CURR":"Y"},
            {"SC":"SME","SN":"Shivamogga H","STA":"23:05","STD":"23:10","ETA":"23:15","ETD":"23:20",
@@ -35,6 +35,7 @@ class NtesRunningStatusParserTest {
         val current = stops[1]
         assertEquals("SMET", current.stationCode)
         assertEquals("Shivamogga Town", current.stationName)
+        assertEquals("20:55", stops[0].scheduledArrival) // the Source marker and date are stripped
         assertEquals("22:55", current.scheduledArrival)
         assertEquals("23:00", current.scheduledDeparture)
         assertEquals("23:05", current.actualArrival)
@@ -52,12 +53,13 @@ class NtesRunningStatusParserTest {
     @Test
     fun anUnreportedStopKeepsNullNotZero() {
         val body = """
-            {"TrainNo":"1","STNS":[{"SC":"AAA","SN":"A","ETA":"","ETD":"","DARR":"","DDEP":""}]}
+            {"TrainNo":"1","STNS":[{"SC":"AAA","SN":"A","STA":"10:00","STD":"10:05","ETA":"10:00","ETD":"10:05","DARR":"","DDEP":""}]}
         """.trimIndent()
         val parsed = NtesRunningStatusParser.parse(body, 1L, false)
         val stop = parsed!!.stops.single()
-        assertNull(stop.actualArrival) // 3.3/3.4: unstated is an em dash, never a zero delay
+        assertNull(stop.actualArrival) // 3.3/3.4: an echo is not an actual; never a zero delay
         assertNull(stop.arrivalDelayMinutes)
+        assertEquals("10:00", stop.scheduledArrival)
     }
 
     @Test
