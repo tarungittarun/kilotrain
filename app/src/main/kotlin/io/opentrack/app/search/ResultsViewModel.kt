@@ -97,11 +97,16 @@ class ResultsViewModel(
                         openConnection = { it.openConnection() as java.net.HttpURLConnection },
                         diagnostics = diagnostics,
                     )
+                val trainSource = erailSource ?: SourceLocator.erailSource
+                    ?: ErailTrainSource(HttpErailTransport())
+                val routeSource = erailRouteSource ?: SourceLocator.erailRouteSource
+                    ?: ErailRouteSource(HttpErailTransport(), trainSource)
                 ResultsEngine(
                     asset = asset,
                     store = store,
                     clock = clock,
                     ntesStatusSource = source,
+                    erailRouteSource = routeSource,
                     diagnostics = diagnostics,
                 ).liveStatus(number)
             } ?: return@launch
