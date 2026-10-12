@@ -13,16 +13,12 @@ class NtesRunningStatusSourceTest {
 
     @Test
     fun ntesDateIsIstFormatted() {
-        // 2026-10-13T06:40:00Z == 2026-10-13 12:10 IST (the stamp, not the device clock)
-        assertEquals(
-            "13-Oct-2026",
-            NtesRunningStatusSource.defaultDate(1_791_873_600_000L),
-        )
-        // 2026-10-12T18:30:00Z == 2026-10-13 00:00 IST: the IST day rolls over at 18:30 UTC
-        assertEquals(
-            "13-Oct-2026",
-            NtesRunningStatusSource.defaultDate(1_791_783_000_000L + 30 * 60_000L * 6),
-        )
+        // 2026-10-13T06:40:00Z == 2026-10-13 12:10 IST
+        assertEquals("13-Oct-2026", NtesRunningStatusSource.defaultDate(1_791_873_600_000L))
+        // 2026-10-12T18:29:00Z == 2026-10-12 23:59 IST: still the previous day, one minute earlier
+        assertEquals("12-Oct-2026", NtesRunningStatusSource.defaultDate(1_791_829_740_000L))
+        // 2026-10-12T18:45:00Z == 2026-10-13 00:15 IST: the IST day rolls over at 18:30 UTC
+        assertEquals("13-Oct-2026", NtesRunningStatusSource.defaultDate(1_791_830_700_000L))
     }
 
     @Test

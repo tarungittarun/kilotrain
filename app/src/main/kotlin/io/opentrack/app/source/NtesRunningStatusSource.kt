@@ -109,18 +109,5 @@ class NtesRunningStatusSource(
                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
                 return "%02d-%s-%04d".format(ymd[2], months[ymd[1] - 1], ymd[0])
             }
-
-        internal fun civilFromDays(days: Long): IntArray {
-            var z = days + 719_468L
-            val era = (if (z >= 0) z else z - 146_096) / 146_097
-            val doe = z - era * 146_097
-            val yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365
-            val y = yoe + era * 400
-            val doy = doe - (365 * yoe + yoe / 4 - yoe / 100)
-            val mp = (5 * doy + 2) / 153
-            val day = (doy - (153 * mp + 2) / 5 + 1).toInt()
-            val month = (if (mp < 10) mp + 3 else mp - 9).toInt()
-            return intArrayOf((if (month <= 2) y + 1 else y).toInt(), month, day)
-        }
     }
 }
