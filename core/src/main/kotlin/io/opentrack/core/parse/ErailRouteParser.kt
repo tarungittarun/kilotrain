@@ -22,7 +22,11 @@ data class RouteStopSchedule(
 )
 
 object ErailRouteParser {
-    private val ROW = Regex("""\^(\d+)~([A-Z0-9]+)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~""")
+    // ten positional tokens per row: n, code, name, then seven more (enough for the shifted
+    // first/last-stop layout: role, arr, dep, sentinel, day, distance, halt)
+    private val ROW = Regex(
+        """\^(\d+)~([A-Z0-9]+)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~"""
+    )
 
     /**
      * Captured layout is positionally identical for middle stops
