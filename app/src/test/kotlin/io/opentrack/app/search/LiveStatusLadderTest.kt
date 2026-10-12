@@ -94,7 +94,7 @@ class LiveStatusLadderTest {
         assertEquals(2, live.stops.size)
         assertEquals("23:05", live.stops.first().actualArrival)
         assertEquals(10, live.stops.first().arrivalDelayMinutes)
-        assertTrue(logged.any { it.contains("ntes_status") })
+        assertTrue("LOG: $logged", logged.any { it.contains("live_status_winner") })
     }
 
     @Test
@@ -109,7 +109,7 @@ class LiveStatusLadderTest {
         assertTrue(live.stops.isNotEmpty())
         assertTrue(live.stops.all { it.actualArrival == null && it.actualDeparture == null })
         assertTrue(live.attempts.any { it.contains("NTES") } || live.attempts.isEmpty())
-        assertTrue(logged.any { it.contains("ntes_status") || it.contains("SOURCE_FAILURE") })
+        assertTrue("LOG: $logged", logged.any { it.contains("live_status_winner") })
     }
 
     @Test
@@ -128,6 +128,6 @@ class LiveStatusLadderTest {
         val message = (outcome as ResultsEngine.StatusOutcome.Unavailable).reason
         assertTrue(message.contains("NTES"))
         assertTrue(message.contains("erail.in"))
-        assertTrue(logged.any { it.contains("ALL_SOURCES_FAILED") })
+        assertTrue("LOG: $logged", logged.any { it.contains("ALL_SOURCES_FAILED") })
     }
 }
