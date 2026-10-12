@@ -40,14 +40,21 @@ class NtesRunningStatusSource(
         data class Failed(val failure: SourceFailure, val detail: String) : NtesStatusResult
     }
 
-    fun fetch(trainNumber: String): NtesStatusResult {
+    /** The request form a rung uses (ADR 0013): the plain mobile JSON, or the official envelope. */
+    enum class Form { PLAIN_JSON, ENCRYPTED }
+
+    fun fetch(trainNumber: String, form: Form = Form.PLAIN_JSON): NtesStatusResult {
         if (!enabled) return NtesStatusResult.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
         val train = trainNumber.trim()
         // protection 3: a cached answer must SAY it is cached (3.2), not claim to be live
         cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it.value.copy(viaCache = true)) }
         val started = clock()
         val date = defaultDate(started) // protection 1
-        val reply = post(plainBody(train, date), DALVIK_UA)
+        val reply = post(
+            if (form == Form.PLAIN_JSON) plainBody(train, date) else encryptedBody(train, date),
+            DALVIK_UA,
+        )
+        // the reference's masked answer (2xx, empty body) is a stated failure, never a fake row
         val body = when (reply) {
             is Wire.Ok -> reply.body
             is Wire.Failure -> return NtesStatusResult.Failed(reply.failure, reply.detail)
@@ -68,6 +75,14 @@ class NtesRunningStatusSource(
         }
         cache.put(train, parsed)
         return NtesStatusResult.Live(parsed)
+    }
+
+    /** The official app's encrypted envelope on the same endpoint (documented second form). */
+    private fun encryptedBody(train: String, date: String): String {
+        val payload = "service=TrainRunningMob&subService=ShowFullRunJson" +
+            "&trainNo=" + train + "&startDate=" + date
+        val wire = NtesCrypto.buildRequest(payload)
+        return "{\"jsonIn\":\"" + wire + "\"}"
     }
 
     private fun decodeEncryptedFallback(body: String): String? {

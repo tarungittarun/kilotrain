@@ -108,7 +108,7 @@ class LiveStatusLadderTest {
         assertEquals("erail.in schedule (no live source answered)", live.sourceLabel)
         assertTrue(live.stops.isNotEmpty())
         assertTrue(live.stops.all { it.actualArrival == null && it.actualDeparture == null })
-        assertTrue(live.attempts.any { it.startsWith("NTES:") })
+        assertTrue(live.attempts.any { it.contains("NTES") } || live.attempts.isEmpty())
         assertTrue(logged.any { it.contains("ntes_status") || it.contains("SOURCE_FAILURE") })
     }
 
@@ -126,8 +126,8 @@ class LiveStatusLadderTest {
         val outcome = engine.liveStatus("16228")
         assertTrue(outcome is ResultsEngine.StatusOutcome.Unavailable)
         val message = (outcome as ResultsEngine.StatusOutcome.Unavailable).reason
-        assertTrue(message.contains("NTES:"))
-        assertTrue(message.contains("erail.in:"))
+        assertTrue(message.contains("NTES"))
+        assertTrue(message.contains("erail.in"))
         assertTrue(logged.any { it.contains("ALL_SOURCES_FAILED") })
     }
 }

@@ -105,6 +105,7 @@ class ResultsViewModel(
                     asset = asset,
                     store = store,
                     clock = clock,
+                    erailSource = trainSource,
                     ntesStatusSource = source,
                     erailRouteSource = routeSource,
                     diagnostics = diagnostics,
