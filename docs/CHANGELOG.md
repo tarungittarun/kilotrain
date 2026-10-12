@@ -1,6 +1,15 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.8.0 (rolling `latest-apk`) — PER-STOP ACTUAL vs SCHEDULED (NTES, reference payload)
+- **On screen:** each train row's "live status" now shows the NTES summary PLUS per-stop rows:
+  station · scheduled arr/dep · ACTUAL arr/dep · delay in minutes · "here now" marker. Unstated
+  actuals are em dashes (never zeros). The block is labelled from the one vocabulary: "live data
+  <age> old" fresh, "cached <age> old" for the protected 90-second cache.
+- **The three protections are in:** the date is DD-MMM-YYYY with three-letter months; TLS suites
+  are widened while certificate verification stays ON (rotated certs fail loudly, never silently);
+  the status block is cached per train for 90 seconds so a refresh cannot hammer the endpoint.
+
 ## 2.7.0 (rolling `latest-apk`) — LIVE RUNNING STATUS (NTES)
 - **On screen:** each train row has a "live status" button: current station, last update, delay
   (dep/arr), platform and next station, from the official NTES enquiry service - keyless. The line

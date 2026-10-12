@@ -1,7 +1,7 @@
 # TEST_CARD.md — owner-facing, 5 lines max. What to check on the phone this round.
 
-Round 9 (live running status): install the new `latest-apk`, search **SMET → SBC**, tap any train's
-**live status** button (expect: current station, last update, delay, platform, next station). For
-the LAST missing piece - per-stop actual times - do this once: turn ON **diagnostics** AND
-"include raw responses", tap **live status** on **16228**, then **share as file** and send it to me.
-Current searches stay live throughout.
+Round 10 (actual vs scheduled): install the new `latest-apk`, search **SMET → SBC**, tap any
+train's **live status**. Expect: the train's status line plus one row per stop showing
+**scheduled** and **ACTUAL** arrival/departure with the delay in minutes and "here now" on the
+current stop. If NTES answers on your network, priority 3 is complete end to end; if it does not,
+the screen will name the exact reason (and diagnostics collects the raw shape for the next fix).
