@@ -1,6 +1,14 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.4.0 (rolling `latest-apk`) — PAIR SEARCH QUERIED FROM YOUR OWN PHONE
+- **On screen:** station-pair search now makes a REAL request from your phone (its network reaches
+  these sources; my CI runners are throttled, yours is not). Results are labelled `via erail.in`
+  with the feed's own stamp. If the source does not answer or its shape changed, the screen says
+  exactly that - never old rows.
+- **Not yet:** per-stop ACTUAL arrival/departure (needs the NTES running-status source, whose
+  envelope still has no capture).
+
 ## 2.3.0 (rolling `latest-apk`) — NO YEARS-OLD ANSWERS (owner's correction)
 - **On screen:** a station-pair search (e.g. TLGP → MYS) now says "could not look this up. no old
   data is shown in its place." with the reason. The 2016-vintage fallback is no longer served as a

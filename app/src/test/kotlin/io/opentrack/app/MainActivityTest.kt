@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.SourceLocator
 import io.opentrack.app.source.TransportReply
@@ -32,6 +33,7 @@ class MainActivityTest {
     @After
     fun tearDown() {
         SourceLocator.erailSource = null
+        SourceLocator.erailPairSource = null
     }
 
     @Test
@@ -40,9 +42,12 @@ class MainActivityTest {
             .assertIsDisplayed()
     }
 
-    /** ADR 0009 (owner 2026-10-12): a pair query NEVER shows years-old rows as an answer. */
+    /** The pair query runs on the device; here its transport is faked to the throttle body. */
     @Test
     fun aPairSearchSaysItCouldNotLookInsteadOfShowingOldRows() {
+        SourceLocator.erailPairSource = ErailPairSource(
+            { TransportReply(200, "~~~~~Please try again after some time.") }, enabled = true
+        )
         compose.onNodeWithText("from station code").performTextInput("tlgt")
         compose.onNodeWithText("to station code").performTextInput("mys")
         compose.onNodeWithText("search").performClick()

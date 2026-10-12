@@ -1,7 +1,9 @@
 package io.opentrack.app.search
 
 import io.opentrack.app.asset.OfflineAsset
+import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.FeatureFlags
 import io.opentrack.app.source.TrainLookup
 import io.opentrack.app.store.OpenTrackStore
@@ -26,6 +28,7 @@ import org.json.JSONObject
  */
 class ResultsEngine(
     private val asset: OfflineAsset,
+    private val erailPairSource: ErailPairSource? = null,
     /** Reserved for the live pair cache (TTL) - unused until a pair source is captured (ADR 0009);
      *  deliberately NOT consulted for pairs today, so years-old rows can never surface as answers. */
     private val store: OpenTrackStore,
@@ -49,15 +52,36 @@ class ResultsEngine(
         if (!asset.schemaCompatible) {
             return Outcome(UiStateName.PROTOCOL_CHANGED, emptyList(), "offline asset", asset.degradeMessage)
         }
-        // No stale pair answers: the cache is NOT consulted for pairs (it may hold 2016 rows from
-        // an earlier build), and the flag-gated live pair source has no capture yet (ADR 0002/0008).
+        // The pair query runs on the PASSENGER's device (ADR 0010), so it uses the passenger's
+        // network. The cache is NOT consulted: it may hold pre-rule rows (ADR 0009).
+        val live = erailPairSource?.takeIf { FeatureFlags.ERAIL_PAIR }?.fetch(from, to)
+        if (live is PairLookupResult.Live) {
+            val response = live.response
+            val rows = response.trains.map { p ->
+                RowView(
+                    number = p.number,
+                    name = p.name,
+                    timeDue = p.departureMinutesOfDay?.let { formatMinutes(it) },
+                    provenanceLabel = Provenance(ProvenanceKind.VIA_SOURCE, p.source, p.feedStampMillis)
+                        .label(clock.nowMillis()),
+                )
+            }
+            return Outcome(
+                state = UiStateName.LIVE,
+                rows = rows,
+                bannerSource = response.trains.firstOrNull()?.source ?: "erail.in",
+                note = "as of ${formatStamp(response.feedStampMillis)} "
+                    + "(${response.trains.size} trains between $from and $to, the feed's own stamp)",
+            )
+        }
+        val failure = live as? PairLookupResult.Failed
         return Outcome(
             state = UiStateName.COULD_NOT_LOOK,
             rows = emptyList(),
             bannerSource = null,
-            note = ("could not look up trains between $from and $to. No current source answered - "
-                + "this app will not show years-old timetable data as an answer. Live pair search "
-                + "arrives with a captured source (ADR 0002/0008); a train NUMBER answers live today."),
+            note = ("could not look up trains between $from and $to"
+                + (failure?.let { " (${it.failure}: ${it.detail})" } ?: " (source disabled)")
+                + ". No old data is shown in its place."),
         )
     }
 

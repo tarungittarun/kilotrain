@@ -7,4 +7,7 @@ package io.opentrack.app.source
 object SourceLocator {
     @Volatile
     var erailSource: ErailTrainSource? = null
+
+    @Volatile
+    var erailPairSource: ErailPairSource? = null
 }

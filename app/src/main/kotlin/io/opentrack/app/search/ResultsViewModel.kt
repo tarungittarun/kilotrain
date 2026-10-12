@@ -3,6 +3,7 @@ package io.opentrack.app.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.opentrack.app.asset.OfflineAsset
+import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.HttpErailTransport
 import io.opentrack.app.source.SourceLocator
@@ -19,6 +20,7 @@ class ResultsViewModel(
     private val store: OpenTrackStore,
     private val clock: Clock,
     private val erailSource: ErailTrainSource? = null,
+    private val erailPairSource: ErailPairSource? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -54,7 +56,9 @@ class ResultsViewModel(
                 // click; production resolves to the real transport here.
                 val source = erailSource ?: SourceLocator.erailSource
                     ?: ErailTrainSource(HttpErailTransport())
-                block(ResultsEngine(asset, store, clock, source), a, b)
+                val pairSource = erailPairSource ?: SourceLocator.erailPairSource
+                    ?: ErailPairSource(HttpErailTransport())
+                block(ResultsEngine(asset, store, clock, source, pairSource), a, b)
             }
             _state.value = UiState(outcome.state, outcome.rows, outcome.bannerSource, outcome.note)
         }
