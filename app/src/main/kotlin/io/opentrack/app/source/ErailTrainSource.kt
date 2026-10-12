@@ -1,6 +1,7 @@
 package io.opentrack.app.source
 
 import io.opentrack.core.contract.SourceFailure
+import io.opentrack.core.diag.DiagnosticsCodec
 import io.opentrack.core.parse.ErailTrainParser
 import io.opentrack.core.parse.ErailTrainPayload
 import java.io.IOException
@@ -47,8 +48,15 @@ class HttpErailTransport(
 }
 
 sealed interface TrainLookup {
-    data class Live(val payload: ErailTrainPayload) : TrainLookup
-    data class Failed(val failure: SourceFailure, val detail: String) : TrainLookup
+    data class Live(
+        val payload: ErailTrainPayload,
+        val wire: Map<String, String> = emptyMap(),
+    ) : TrainLookup
+    data class Failed(
+        val failure: SourceFailure,
+        val detail: String,
+        val wire: Map<String, String> = emptyMap(),
+    ) : TrainLookup
 }
 
 /**
@@ -70,16 +78,22 @@ class ErailTrainSource(
             )
         }
         if (reply.status !in 200..299) {
-            return TrainLookup.Failed(SourceFailure.HTTP, "HTTP ${reply.status}")
+            return TrainLookup.Failed(
+                SourceFailure.HTTP, "HTTP ${reply.status}",
+                wire = DiagnosticsCodec.signature(reply.body.orEmpty()) + mapOf("http_status" to reply.status.toString()),
+            )
         }
         val body = reply.body
         if (body.isNullOrBlank()) {
             return TrainLookup.Failed(SourceFailure.EMPTY, "2xx with an empty body")
         }
         val payload = ErailTrainParser.parse(body)
-            ?: return TrainLookup.Failed(SourceFailure.SHAPE_UNKNOWN,
-                "the feed did not match its captured shape; it may have changed (12.3)")
-        return TrainLookup.Live(payload)
+            ?: return TrainLookup.Failed(
+                SourceFailure.SHAPE_UNKNOWN,
+                "the feed did not match its captured shape; it may have changed (12.3)",
+                wire = DiagnosticsCodec.signature(body),
+            )
+        return TrainLookup.Live(payload, DiagnosticsCodec.signature(body))
     }
 
     private fun isTimeout(e: IOException): Boolean =

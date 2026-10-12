@@ -1,14 +1,22 @@
 package io.opentrack.app.source
 
 import io.opentrack.core.contract.SourceFailure
+import io.opentrack.core.diag.DiagnosticsCodec
 import io.opentrack.core.parse.ErailPairParser
 import io.opentrack.core.parse.ErailPairResponse
 import java.io.IOException
 
 /** Pair lookup result: real trains from a captured-family payload, or a typed failure. */
 sealed interface PairLookupResult {
-    data class Live(val response: ErailPairResponse) : PairLookupResult
-    data class Failed(val failure: SourceFailure, val detail: String) : PairLookupResult
+    data class Live(
+        val response: ErailPairResponse,
+        val wire: Map<String, String> = emptyMap(),
+    ) : PairLookupResult
+    data class Failed(
+        val failure: SourceFailure,
+        val detail: String,
+        val wire: Map<String, String> = emptyMap(),
+    ) : PairLookupResult
 }
 
 /**
@@ -39,10 +47,14 @@ class ErailPairSource(
             return PairLookupResult.Failed(
                 if (e is java.net.SocketTimeoutException) SourceFailure.TIMEOUT else SourceFailure.OFFLINE,
                 e.message ?: e.javaClass.simpleName,
+                wire = mapOf("elapsed_ms" to "n/a (no reply)"),
             )
         }
         if (reply.status !in 200..299) {
-            return PairLookupResult.Failed(SourceFailure.HTTP, "HTTP ${reply.status}")
+            return PairLookupResult.Failed(
+                SourceFailure.HTTP, "HTTP ${reply.status}",
+                wire = DiagnosticsCodec.signature(reply.body.orEmpty()) + mapOf("http_status" to reply.status.toString()),
+            )
         }
         val body = reply.body
         if (body.isNullOrBlank()) {
@@ -53,7 +65,8 @@ class ErailPairSource(
                 SourceFailure.SHAPE_UNKNOWN,
                 "the feed did not match its captured shape; it may have changed (12.3). "
                     + "signature=${ErailPairParser.signatureOf(body)}",
+                wire = DiagnosticsCodec.signature(body),
             )
-        return PairLookupResult.Live(response)
+        return PairLookupResult.Live(response, DiagnosticsCodec.signature(body))
     }
 }

@@ -6,6 +6,7 @@ import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RouteLookupResult
+import io.opentrack.core.diag.Diagnostics
 import io.opentrack.app.source.FeatureFlags
 import io.opentrack.app.source.TrainLookup
 import io.opentrack.app.store.OpenTrackStore
@@ -38,6 +39,7 @@ class ResultsEngine(
     private val erailSource: ErailTrainSource? = null,
     private val erailPairSource: ErailPairSource? = null,
     private val erailRouteSource: ErailRouteSource? = null,
+    private val diagnostics: Diagnostics? = null,
 ) {
     data class Outcome(
         val state: UiStateName,
@@ -58,6 +60,7 @@ class ResultsEngine(
         }
         // The pair query runs on the PASSENGER's device (ADR 0010), so it uses the passenger's
         // network. The cache is NOT consulted: it may hold pre-rule rows (ADR 0009).
+        diagnostics?.pairSearch(mapOf("from" to from, "to" to to, "source" to "erail_pair"))
         val live = erailPairSource?.takeIf { FeatureFlags.ERAIL_PAIR }?.fetch(from, to)
         if (live is PairLookupResult.Live) {
             val response = live.response
@@ -79,6 +82,8 @@ class ResultsEngine(
             )
         }
         val failure = live as? PairLookupResult.Failed
+        recordOutcome(diagnostics, "pair", from, to, failure?.wire, UiStateName.COULD_NOT_LOOK,
+            emptyList(), 0, failure?.detail)
         return Outcome(
             state = UiStateName.COULD_NOT_LOOK,
             rows = emptyList(),
@@ -86,6 +91,30 @@ class ResultsEngine(
             note = ("could not look up trains between $from and $to"
                 + (failure?.let { " (${it.failure}: ${it.detail})" } ?: " (source disabled)")
                 + ". No old data is shown in its place."),
+        )
+    }
+
+    /** One line per completed operation: wire structure + the exact rows the screen will show. */
+    private fun recordOutcome(
+        diagnostics: Diagnostics?,
+        kind: String,
+        a: String,
+        b: String,
+        wire: Map<String, String>?,
+        state: UiStateName,
+        rows: List<RowView>,
+        count: Int,
+        failureDetail: String? = null,
+    ) {
+        diagnostics ?: return
+        diagnostics.screenState(
+            mapOf(
+                "op" to kind,
+                "query" to "$a|$b",
+                "ui_state" to state.name,
+                "rows" to rows.joinToString(", ") { "${it.number}@${it.timeDue ?: "-"}[${it.provenanceLabel}]" },
+                "count" to count.toString(),
+            ) + (wire ?: emptyMap()) + mapOf("failure" to (failureDetail ?: "-"))
         )
     }
 

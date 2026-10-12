@@ -1,6 +1,10 @@
 package io.opentrack.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.weight
+import androidx.compose.ui.Alignment
+import androidx.compose.material3.Switch
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +37,10 @@ import io.opentrack.app.search.ResultsViewModel
  * every row (10.5); the banner is a full sentence for TalkBack.
  */
 @Composable
-fun ResultsScreen(viewModel: ResultsViewModel) {
+fun ResultsScreen(
+    viewModel: ResultsViewModel,
+    diagnosticsStore: io.opentrack.app.diag.DiagnosticsStore? = null,
+) {
     val ui by viewModel.state.collectAsState()
     var from by rememberSaveable { mutableStateOf("") }
     var to by rememberSaveable { mutableStateOf("") }
@@ -59,6 +66,8 @@ fun ResultsScreen(viewModel: ResultsViewModel) {
             ) {
                 Text("search")
             }
+
+            DiagnosticsBar(diagnosticsStore)
 
             OutlinedTextField(
                 value = trainNumber,
@@ -125,6 +134,51 @@ fun ResultsScreen(viewModel: ResultsViewModel) {
     }
 }
 
+/** 3.6: opt-in diagnostics - OFF collects nothing; shares are file or clipboard (owner's ask). */
+@Composable
+internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
+    if (store == null) return
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var enabled by rememberSaveable { mutableStateOf(store.enabled) }
+    var captureRaw by rememberSaveable { mutableStateOf(store.captureRaw) }
+    Column(modifier = Modifier.padding(top = 16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("diagnostics", style = MaterialTheme.typography.bodyMedium)
+            Spacer(modifier = Modifier.weight(1f))
+            Switch(
+                checked = enabled,
+                onCheckedChange = {
+                    enabled = it
+                    store.enabled = it
+                },
+            )
+        }
+        if (enabled) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("include raw responses", style = MaterialTheme.typography.bodySmall)
+                Spacer(modifier = Modifier.weight(1f))
+                Switch(
+                    checked = captureRaw,
+                    onCheckedChange = {
+                        captureRaw = it
+                        store.captureRaw = it
+                    },
+                )
+            }
+            Row(modifier = Modifier.padding(top = 4.dp)) {
+                TextButton(onClick = { context.startActivity(store.shareAsFile(context)) }) {
+                    Text("share as file")
+                }
+                TextButton(onClick = { context.startActivity(store.shareAsText(context)) }) {
+                    Text("share as copy")
+                }
+                TextButton(onClick = { store.clear() }) { Text("clear") }
+            }
+        }
+    }
+}
+
+@Composable
 internal fun screenStateOf(name: ResultsEngine.UiStateName): ScreenState = when (name) {
     ResultsEngine.UiStateName.LIVE -> ScreenState.LIVE
     ResultsEngine.UiStateName.LIVE_STALE -> ScreenState.LIVE_STALE
