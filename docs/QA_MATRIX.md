@@ -17,7 +17,7 @@ phone (reserved for what only a phone can witness).
 | 9 | fetch→parse→store→UI with local mock, no railway egress | L4 | BLOCKED-with-reason | no source has a captured payload (ADR 0002); no parser exists to prove; QA row stays open until M2's capture |
 | 10 | migration failure clears cache and says so | L1 | GREEN | OpenTrackStoreTest.upgradeClearsCacheRatherThanShowingStaleAsFresh |
 | 11 | known-truths gate verdict recorded in artefact; build stays green on data contradiction | L6 | GREEN | gate verdict in CI (checks job) + gate_selftest asserts it never exits non-zero on data |
-| 12 | instrumented L3 verdict (KVM present on runners) | L3 | UNTESTED, WITH A REASON (4 measured runs: 38178953830, 38179369449, 38179767383, 38179889555): /dev/kvm exists but `avdmanager create avd` exits 0 after its hardware prompt and writes NO AVD dir ($HOME/.android/avd absent), so no emulator ever boots; both system-image families tried. Job is continue-on-error with a verdict summary - never a fake pass | create_avd.log in the run artefact |
+| 12 | instrumented L3 on a REAL API-34 emulator | L3 | **GREEN** (run 38207293417, 15m17s): reactivecircus/android-emulator-runner booted a real AVD (emulator-5554, API 34) and `anOpenedTrainCorrectsTheColdStartCopy` ran with 0 failures | TEST-emulator-5554-14-_app-.xml in the run artefact |
 | 13 | owner phone: real TLS/egress, Doze alarm, look and feel | L7 | deferred to M4/M6 | needs-device row when opened |
 
 Waived rows (with reason) will be listed here; none waived yet.
@@ -33,4 +33,5 @@ Waived rows (with reason) will be listed here; none waived yet.
 | 22 | throttle body is SHAPE_UNKNOWN, never a parse (LEARNINGS 1) | L1 | GREEN | throttleBodyIsShapeUnknownNotATrain |
 
 | 23 | a pair query is NEVER answered from years-old data (ADR 0009) | L1/L2 | GREEN | aPairQueryIsNeverAnsweredFromThe2016Fallback + MainActivityTest pair assertion |
-| 24 | COULD_NOT_LOOK copy matches what is actually shown | L2 | GREEN | StateCopyTest.couldNotLookIsNotAnEmptyAnswer |
+| 24 | the APK installs and runs on a REAL emulator (L3) | L3 | GREEN | run 38207293417, test result on emulator-5554 API 34 |
+| 25 | COULD_NOT_LOOK copy matches what is actually shown | L2 | GREEN | StateCopyTest.couldNotLookIsNotAnEmptyAnswer |

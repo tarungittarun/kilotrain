@@ -30,6 +30,11 @@
    the job**: the L3 job waited 18+ minutes because the emulator never appeared. Every wait in
    CI is now bounded with a stated reason on miss (10.8: no diagnostic may outrank the user's
    request - a hung job hides evidence instead of producing it).
+11. **Use the standard emulator action, not hand-rolled avdmanager.** Four rounds died on
+    `avdmanager create avd` exiting 0 while writing nothing; `reactivecircus/android-emulator-runner@v2`
+    booted a real API-34 emulator and ran the instrumented tests green in 15m. And a real device in
+    CI proves the APP (install, navigation, store flows) - it does NOT change network egress, so
+    live railway data still needs a capture from the owner's network. Two different problems.
 10. **When a CI tool fails silently, instrument the exit code and the file it should have
     written.** `avdmanager create avd` exiting 0 while writing nothing cost four rounds; the
     moment the step checked for `$HOME/.android/avd/opentrack_test.ini` it failed WITH THE

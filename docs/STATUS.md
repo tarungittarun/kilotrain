@@ -32,6 +32,19 @@ sources: 2026-10-11 done, next 2026-11-11 (or on gate FAIL) · competitors: due 
 open-data S4: monthly until admitted or abandoned twice (next 2026-11-11) · RISK.md: 2026-11-11 ·
 RUNBOOK.md: on install/rollback change.
 
+## HANDOFF 2026-10-12 (session 4, real emulator in CI)
+- The owner asked twice whether workflows can create a real device environment: YES, and it now
+  does - reactivecircus/android-emulator-runner@v2 boots a real API-34 AVD and runs L3 green
+  (run 38207293417, 15m17s; test anOpenedTrainCorrectsTheColdStartCopy on emulator-5554, 0 failures).
+  Same round: checks 38207293395, unit-screens 38207293385, debug-apk 38207293401 all PASS.
+  All four CI jobs of every round now pass (instrumented included).
+- Standing limit recorded (QA row 12 + LEARNINGS 11): a CI device proves the app, not the data -
+  runners are datacenter IPs where NTES times out and erail's pair endpoint throttles. Live pair
+  search + per-stop actuals still need ONE capture from the owner's network (STATUS row M2-0).
+- Options offered for that capture: (a) one paste from the NTES app / erail.in on the phone;
+  (b) a self-hosted runner on the owner's PC (Android Studio emulator on their home network would
+  answer NTES directly and automate future captures).
+
 ## HANDOFF 2026-10-12 (session 3, owner's stale-data correction)
 - Owner tested TLGP->MYS, saw 2016-vintage rows as the answer, and flagged it. Fixed per ADR 0009:
   pair search answers ONLY from a current source; otherwise "could not look this up. no old data
