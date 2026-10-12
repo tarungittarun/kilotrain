@@ -31,6 +31,9 @@ class NtesRunningStatusSourceTest {
     private var requests = 0
     private var lastBody: String = ""
     private var response: Pair<Int, String> = 200 to documentedAnswer
+    private var warmupMethod: String = ""
+    private var warmupCookies: String = ""
+    private var postCount: Int = 0
 
     private fun connectionFactory() = { url: URL ->
         requests += 1
@@ -60,13 +63,29 @@ class NtesRunningStatusSourceTest {
     @Test
     fun sendsTheDocumentedJsonBody() {
         val src = source { 1_792_000_000_000L }
-        val result = src.fetch("16228")
+        val result = src.fetch("16228", NtesRunningStatusSource.Form.PLAIN_JSON)
         assertTrue(result is NtesRunningStatusSource.NtesStatusResult.Live)
         assertTrue(lastBody.contains("\"queryType\":\"6\""))
         assertTrue(lastBody.contains("\"trainNo\":\"16228\""))
         assertTrue(lastBody.contains("\"startDate\":\"14-Oct-2026\""))
         assertTrue(lastBody.contains("\"stationCode\":\"\""))
         assertTrue(lastBody.contains("\"lang\":\"en\""))
+    }
+
+    @Test
+    fun theEncryptedFormCarriesTheEnvelopeNotPlaintext() {
+        val src = source { 1_792_000_000_000L }
+        src.fetch("16228", NtesRunningStatusSource.Form.ENCRYPTED)
+        assertTrue(lastBody.contains("\"jsonIn\":\""))
+        assertTrue(lastBody.contains("service=TrainRunningMob") == false) // encrypted, not readable
+    }
+
+    @Test
+    fun theSessionIsWarmedBeforeThePost() {
+        val src = source { 1_792_000_000_000L }
+        src.fetch("16228")
+        assertEquals("GET", warmupMethod)
+        assertEquals("JSESSIONID=test-session", warmupCookies)
     }
 
     @Test
@@ -84,27 +103,29 @@ class NtesRunningStatusSourceTest {
         assertEquals(false, live.status.viaCache)
     }
 
-    /** Protection 3: two calls inside 90 s = ONE request, and the second is labelled cached. */
+    /** Protection 3: a warmup happens once; two lookups inside 90 s = ONE POST, the second cached. */
     @Test
     fun theNinetySecondCacheProtectsTheEndpoint() {
         var now = 1_792_000_000_000L
         val src = source { now }
         src.fetch("16228")
-        assertEquals(1, requests)
+        val postsAfterFirst = postCount
+        assertEquals(1, postsAfterFirst)
         now += 60_000
         val second = src.fetch("16228") as NtesRunningStatusSource.NtesStatusResult.Live
-        assertEquals(1, requests) // no second request
+        assertEquals(1, postCount) // no second POST inside the TTL
         assertTrue(second.status.viaCache)
         now += 31_000 // beyond 90 s
         src.fetch("16228")
-        assertEquals(2, requests)
+        assertEquals(2, postCount)
     }
 
     @Test
     fun aThrottleBodyIsAStatedFailure() {
         response = 200 to "~~~~~Please try again after some time."
         val src = source { 1L }
-        val failed = src.fetch("16228") as NtesRunningStatusSource.NtesStatusResult.Failed
+        val failed = src.fetch("16228", NtesRunningStatusSource.Form.PLAIN_JSON)
+            as NtesRunningStatusSource.NtesStatusResult.Failed
         assertEquals(SourceFailure.SHAPE_UNKNOWN, failed.failure)
         assertTrue(failed.detail.contains("protocol may have changed"))
     }
@@ -113,7 +134,8 @@ class NtesRunningStatusSourceTest {
     fun httpErrorIsTyped() {
         response = 503 to "unavailable"
         val src = source { 1L }
-        val failed = src.fetch("16228") as NtesRunningStatusSource.NtesStatusResult.Failed
+        val failed = src.fetch("16228", NtesRunningStatusSource.Form.PLAIN_JSON)
+            as NtesRunningStatusSource.NtesStatusResult.Failed
         assertEquals(SourceFailure.HTTP, failed.failure)
     }
 
