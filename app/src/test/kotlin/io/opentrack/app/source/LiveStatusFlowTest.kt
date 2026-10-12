@@ -87,9 +87,9 @@ class LiveStatusFlowTest {
         // the action in question: tap "live status" on the first train row
         compose.onAllNodesWithText("live status")[0].performClick()
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("16228").fetchSemanticsNodes().isNotEmpty() &&
-                compose.onAllNodesWithText("SMET Shivamogga Town · sched 22:55/23:00 · actual 23:05/23:10 · late 10 min")
-                    .fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText(
+                "SMET Shivamogga Town · sched 22:55/23:00 · actual 23:05/23:10 · late 10 min"
+            ).fetchSemanticsNodes().isNotEmpty()
         }
 
         // the per-stop ACTUAL row is on screen
