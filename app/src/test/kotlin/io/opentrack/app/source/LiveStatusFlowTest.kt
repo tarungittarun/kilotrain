@@ -92,11 +92,14 @@ class LiveStatusFlowTest {
         compose.onAllNodesWithText("live status")[0].performClick()
 
         // the request must be recorded immediately, whatever the screen shows next
-        compose.waitUntil(8_000) {
+        compose.waitUntil(2_000) {
             val log = java.io.File(compose.activity.filesDir, "diagnostics/opentrack-diagnostics.jsonl")
                 .takeIf { it.exists() }?.readText() ?: return@waitUntil false
             log.contains("ntes_status")
         }
+        val logNow = java.io.File(compose.activity.filesDir, "diagnostics/opentrack-diagnostics.jsonl")
+            .takeIf { it.exists() }?.readText() ?: "(no log file)"
+        assertTrue("LOG AFTER TAP:\n$logNow", logNow.contains("ntes_status"))
 
         // scroll so the lazily-composed per-stop rows exist on the small test screen
         compose.onNodeWithTag("results_list").performScrollToIndex(12)
