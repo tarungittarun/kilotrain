@@ -6,9 +6,6 @@ import androidx.activity.compose.setContent
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
 import io.opentrack.app.search.ResultsViewModel
-import io.opentrack.app.source.ErailTrainSource
-import io.opentrack.app.source.HttpErailTransport
-import io.opentrack.app.source.SourceLocator
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.app.ui.ResultsScreen
 import io.opentrack.core.contract.SystemClock
@@ -30,8 +27,8 @@ class MainActivity : ComponentActivity() {
             asset = asset,
             store = store,
             clock = SystemClock,
-            // keyless, no account (3.1); the flag decides whether the source may answer (12.6)
-            erailSource = SourceLocator.erailSource ?: ErailTrainSource(HttpErailTransport()),
+            // no source passed here: the ViewModel resolves it at search time, so tests can
+            // install a fake (SourceLocator) while production gets the real transport (3.1)
         )
 
         setContent {
