@@ -9,6 +9,7 @@ import io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult
 import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.core.diag.Diagnostics
+import io.opentrack.core.ntes.NtesRunningStatus
 import kotlinx.coroutines.runBlocking
 import io.opentrack.app.source.FeatureFlags
 import io.opentrack.app.source.TrainLookup
@@ -232,19 +233,19 @@ class ResultsEngine(
         val rungs = listOfNotNull(
             ntes?.let {
                 io.opentrack.app.source.FirstWinsAggregator.Rung("NTES (mobile JSON)") {
-                    when (val r = it.fetch(train, io.opentrack.app.source.NtesRunningStatusSource.Form.PLAIN_JSON)) {
-                        is io.opentrack.app.source.NtesStatusResult.Live ->
+                    when (val r = it.fetch(train, NtesRunningStatusSource.Form.PLAIN_JSON)) {
+                        is NtesStatusResult.Live ->
                             statusFromNtes(r.status, train, "NTES live running status")
-                        is io.opentrack.app.source.NtesStatusResult.Failed -> null
+                        is NtesStatusResult.Failed -> null
                     }
                 }
             },
             ntes?.let {
                 io.opentrack.app.source.FirstWinsAggregator.Rung("NTES (encrypted)") {
-                    when (val r = it.fetch(train, io.opentrack.app.source.NtesRunningStatusSource.Form.ENCRYPTED)) {
-                        is io.opentrack.app.source.NtesStatusResult.Live ->
+                    when (val r = it.fetch(train, NtesRunningStatusSource.Form.ENCRYPTED)) {
+                        is NtesStatusResult.Live ->
                             statusFromNtes(r.status, train, "NTES live running status")
-                        is io.opentrack.app.source.NtesStatusResult.Failed -> null
+                        is NtesStatusResult.Failed -> null
                     }
                 }
             },
@@ -363,7 +364,7 @@ class ResultsEngine(
     }
 
     private fun statusFromNtes(
-        status: io.opentrack.core.ntes.NtesRunningStatus,
+        status: NtesRunningStatus,
         train: String,
         label: String,
     ): StatusOutcome.Live = StatusOutcome.Live(
