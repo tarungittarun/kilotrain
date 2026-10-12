@@ -102,10 +102,11 @@ fun ResultsScreen(viewModel: ResultsViewModel) {
                         }
                     }
                 }
-                if (ui.stops.isEmpty() && ui.stopsNote != null) {
+                val stopsNote = ui.stopsNote
+                if (ui.stops.isEmpty() && stopsNote != null) {
                     item {
                         Text(
-                            text = ui.stopsNote,
+                            text = stopsNote,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 8.dp),
                         )
