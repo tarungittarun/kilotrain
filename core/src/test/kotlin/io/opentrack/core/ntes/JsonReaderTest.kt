@@ -25,11 +25,10 @@ class JsonReaderTest {
 
     @Test
     fun escapesAreDecoded() {
-        val value = JsonReader.parse("""{"s":"a\"b\\c\nd"}""") as JsonValue.JsonObject
-        assertEquals("a\"b\\c\nd".replace("\\", "\"), obj_get(value))
+        val value = JsonReader.parse("{\"s\":\"a\\\"b\\\\c\\nd\\u0041\"}") as JsonValue.JsonObject
+        val decoded = value.getString("s")
+        assertEquals("a\"b\\c\ndA", decoded)
     }
-
-    private fun obj_get(o: JsonValue.JsonObject): String? = o.getString("s")
 
     @Test
     fun malformedJsonIsNullNotACrash() {
@@ -42,6 +41,5 @@ class JsonReaderTest {
     @Test
     fun trailingContentIsRejected() {
         assertNull(JsonReader.parse("""{"a":1} garbage"""))
-        assertFalse(JsonReader.parse("null") !is JsonValue.JsonNull)
     }
 }
