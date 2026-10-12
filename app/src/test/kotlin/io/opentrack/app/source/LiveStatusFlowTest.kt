@@ -86,6 +86,17 @@ class LiveStatusFlowTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
 
+        // sanity: a per-row action DOES work in this setup (stop times), proving row buttons fire
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("stop times").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onAllNodesWithText("stop times")[0].performClick()
+        compose.waitUntil(8_000) {
+            val log = java.io.File(compose.activity.filesDir, "diagnostics/opentrack-diagnostics.jsonl")
+                .takeIf { it.exists() }?.readText() ?: return@waitUntil false
+            log.contains("\"kind\":\"ROUTE\"")
+        }
+
         // the action in question: tap "live status" on the first train row
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText("live status").fetchSemanticsNodes().isNotEmpty()
