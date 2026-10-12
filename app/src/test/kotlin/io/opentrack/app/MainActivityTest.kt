@@ -7,7 +7,10 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.SourceLocator
+import io.opentrack.app.source.TransportReply
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,9 +18,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * L2 screen tests (10.1): inflation + the exact copy of the state the empty honest asset
- * produces. No railway egress, no emulator (ADR 0006 keeps device-dependent proofs in their
- * own layers).
+ * L2 screen tests (10.1): inflation, the exact copy of every state the search path can produce,
+ * and no network in tests (the source is faked through SourceLocator). Device-dependent proofs
+ * live in their own layers (ADR 0006).
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -26,34 +29,42 @@ class MainActivityTest {
     @get:Rule
     val compose = createAndroidComposeRule<MainActivity>()
 
+    @After
+    fun tearDown() {
+        SourceLocator.erailSource = null
+    }
+
     @Test
-    fun firstRenderIsHonestUnverifiedNeverAnEmptyAnswer() {
+    fun firstRenderIsHonestAndNeverClaimsAnAnswer() {
         compose.onNodeWithText("offline - showing unverified timetable data.")
             .assertIsDisplayed()
     }
 
-    /** The owner's route now resolves from the labelled fallback - with its label visible. */
+    /** ADR 0009 (owner 2026-10-12): a pair query NEVER shows years-old rows as an answer. */
     @Test
-    fun searchingTheOwnerRouteShowsOneLabelledRow() {
-        compose.onNodeWithText("from station code").performTextInput("SMET")
-        compose.onNodeWithText("to station code").performTextInput("MYS")
+    fun aPairSearchSaysItCouldNotLookInsteadOfShowingOldRows() {
+        compose.onNodeWithText("from station code").performTextInput("tlgt")
+        compose.onNodeWithText("to station code").performTextInput("mys")
         compose.onNodeWithText("search").performClick()
         // the engine runs on Dispatchers.Default, outside the compose clock: wait for the state
         compose.waitUntil(5_000) {
-            compose.onAllNodesWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
+            compose.onAllNodesWithText("could not look this up. no old data is shown in its place.")
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
-            .assertExists()
-        compose.onNodeWithText("offline - showing unverified timetable data.")
+        compose.onNodeWithText("could not look this up. no old data is shown in its place.")
             .assertIsDisplayed()
+        // and nothing old is on screen to contradict it
+        compose.onAllNodesWithText("16205 · Talaguppa Mysore Intercity Express — 14:45 · timetable")
+            .assertCountEquals(0)
+        compose.onAllNodesWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
+            .assertCountEquals(0)
     }
 
-    /** Priority 1: a train number alone is a complete query (fake source: no network in tests). */
+    /** Priority 1+2: a train number answers live from erail.in with the feed's own stamp. */
     @Test
-    fun aTrainNumberAloneResolves() {
-        SourceLocator.erailSource = io.opentrack.app.source.ErailTrainSource(
-            { io.opentrack.app.source.TransportReply(200, liveCapture) }, enabled = true
+    fun aTrainNumberAnswersLive() {
+        SourceLocator.erailSource = ErailTrainSource(
+            { TransportReply(200, liveCapture) }, enabled = true
         )
         compose.onNodeWithText("or train number").performTextInput("56269")
         compose.onNodeWithText("show train").performClick()
@@ -63,26 +74,23 @@ class MainActivityTest {
         }
         compose.onNodeWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
             .assertExists()
-        SourceLocator.erailSource = null
     }
 
-    private val liveCapture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
-
-    /**
-     * 3.3/3.4: a pair the fallback does not cover is not an empty answer. SMET->NDLS is
-     * measured-absent from the pinned full asset (2026-10-11), so this test holds on the
-     * committed fixture AND on the CI-generated asset.
-     */
+    /** When the live source cannot answer, the failure is named and no old row appears. */
     @Test
-    fun anUnknownPairSaysSoInsteadOfClaimingNoTrains() {
-        compose.onNodeWithText("from station code").performTextInput("SMET")
-        compose.onNodeWithText("to station code").performTextInput("NDLS")
-        compose.onNodeWithText("search").performClick()
+    fun aLiveFailureNamesItselfAndShowsNoOldRow() {
+        SourceLocator.erailSource = ErailTrainSource(
+            { TransportReply(200, "~~~~~Please try again after some time.") }, enabled = true
+        )
+        compose.onNodeWithText("or train number").performTextInput("56269")
+        compose.onNodeWithText("show train").performClick()
         compose.waitUntil(5_000) {
             compose.onAllNodesWithText("could not look this up. no old data is shown in its place.")
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onAllNodesWithText("no trains found for this route today")
+        compose.onAllNodesWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
             .assertCountEquals(0)
     }
+
+    private val liveCapture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
 }
