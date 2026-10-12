@@ -1,7 +1,5 @@
 package io.opentrack.core.ntes
 
-import org.json.JSONArray
-import org.json.JSONObject
 
 /**
  * Per-stop live status: scheduled vs ACTUAL times, exactly the documented shape of NTES's answer
@@ -39,31 +37,25 @@ object NtesRunningStatusParser {
      * anything else is not inventable.
      */
     fun parse(body: String, nowMillis: Long, viaCache: Boolean): NtesRunningStatus? {
-        val json = try {
-            JSONObject(body.trim().removePrefix("﻿"))
-        } catch (e: Exception) {
-            return null
+        val json = when (val root = JsonReader.parse(body.trim().removePrefix("\uFEFF"))) {
+            is JsonValue.JsonObject -> root
+            else -> return null
         }
-        val stopsJson: JSONArray = json.optJSONArray("trainFullStatus") ?: return null
-        if (stopsJson.length() == 0) return null
-        val stops = buildList {
-            for (i in 0 until stopsJson.length()) {
-                val s = stopsJson.optJSONObject(i) ?: continue
-                val code = s.optString("stnCode").trim().takeIf { it.isNotBlank() }
-                add(
-                    NtesStopStatus(
-                        stationCode = code,
-                        stationName = s.optString("stnName").trim().takeIf { it.isNotBlank() },
-                        scheduledArrival = time(s, "schArrTime"),
-                        scheduledDeparture = time(s, "schDepTime"),
-                        actualArrival = time(s, "actArrTime"),
-                        actualDeparture = time(s, "actDepTime"),
-                        arrivalDelayMinutes = s.optString("arrDelay").trim().toIntOrNull(),
-                        departureDelayMinutes = s.optString("depDelay").trim().toIntOrNull(),
-                        isCurrentStation = s.optString("isCurrentStn").trim() == "true",
-                    )
-                )
-            }
+        val stopsJson = json.getArray("trainFullStatus") ?: return null
+        if (stopsJson.size == 0) return null
+        val stops = stopsJson.items.mapNotNull { raw ->
+            val s = raw as? JsonValue.JsonObject ?: return@mapNotNull null
+            NtesStopStatus(
+                stationCode = s.optString("stnCode").trim().takeIf { it.isNotBlank() },
+                stationName = s.optString("stnName").trim().takeIf { it.isNotBlank() },
+                scheduledArrival = time(s, "schArrTime"),
+                scheduledDeparture = time(s, "schDepTime"),
+                actualArrival = time(s, "actArrTime"),
+                actualDeparture = time(s, "actDepTime"),
+                arrivalDelayMinutes = s.optString("arrDelay").trim().toIntOrNull(),
+                departureDelayMinutes = s.optString("depDelay").trim().toIntOrNull(),
+                isCurrentStation = s.optBoolean("isCurrentStn"),
+            )
         }
         if (stops.none { it.stationCode != null }) return null
         return NtesRunningStatus(
@@ -75,6 +67,6 @@ object NtesRunningStatusParser {
         )
     }
 
-    private fun time(station: JSONObject, key: String): String? =
+    private fun time(station: JsonValue.JsonObject, key: String): String? =
         station.optString(key).trim().takeIf { it.isNotBlank() && it != "null" }
 }

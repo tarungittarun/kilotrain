@@ -23,7 +23,7 @@ class NtesRunningStatusParserTest {
         depDelay: String = "10", current: Boolean = false,
     ) = """{"stnCode":"$code","stnName":"$name","schArrTime":"$schArr","schDepTime":"$schDep",
          "actArrTime":"$actArr","actDepTime":"$actDep","arrDelay":"$arrDelay",
-         "depDelay":"$depDelay","isCurrentStn":"$current"}"""
+         "depDelay":"$depDelay","isCurrentStn":$current}"""
 
     @Test
     fun parsesScheduledAgainstActualPerStop() {
