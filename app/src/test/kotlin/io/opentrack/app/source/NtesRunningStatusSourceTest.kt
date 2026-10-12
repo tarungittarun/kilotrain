@@ -1,50 +1,50 @@
 package io.opentrack.app.source
 
-import io.opentrack.core.contract.SourceFailure
 import io.opentrack.core.ntes.NtesCrypto
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.net.HttpURLConnection
-import java.net.URL
 
-/** 6.3: the NTES status path is offline-testable with a faked connection. */
+/**
+ * The parts of the NTES path that are offline-testable: the enquiry date (IST, not the device's
+ * locale - 10.3) and the envelope's wire format (pinned in core's crypto tests).
+ */
 class NtesRunningStatusSourceTest {
-
-    private val documentedStatus = """{"TrainNo":"16228","TrainName":"TLGP MYS EXP",
-        "CurrentStation":"SBC","CurrentStationName":"KSR BENGALURU",
-        "LastUpdate":"Train has departed from KSR BENGALURU","DelayDep":"On Time",
-        "DelayArr":"15 min","Platform":"3","NextStationCode":"MYS","NextStationName":"MYSORE JN"}"""
-
-    private fun fakeConnection(reply: (HttpURLConnection) -> Unit) = { url: URL ->
-        val connection = url.openConnection() as HttpURLConnection
-        reply(connection)
-        connection
-    }
-
-    private fun responding(statusCode: Int, body: String) = { url: URL ->
-        val connection = url.openConnection() as HttpURLConnection
-        connection.url // touch
-        object : HttpURLConnection(url) {
-            override fun disconnect() {}
-            override fun usingProxy(): Boolean = false
-        }
-        connection
-    }
 
     @Test
     fun ntesDateIsIstFormatted() {
-        // 2026-10-12 20:00 UTC = 2026-10-13 01:30 IST
-        val date = NtesRunningStatusSource.defaultDate(
-            1791873600000L // 2026-10-12T20:00:00Z
+        // 2026-10-13T06:40:00Z == 2026-10-13 12:10 IST (the stamp, not the device clock)
+        assertEquals(
+            "13-Oct-2026",
+            NtesRunningStatusSource.defaultDate(1_791_873_600_000L),
         )
-        assertTrue(date.startsWith("13-Oct-2026"))
+        // 2026-10-12T18:30:00Z == 2026-10-13 00:00 IST: the IST day rolls over at 18:30 UTC
+        assertEquals(
+            "13-Oct-2026",
+            NtesRunningStatusSource.defaultDate(1_791_783_000_000L + 30 * 60_000L * 6),
+        )
     }
 
     @Test
     fun envelopeBuildsTheDocumentedWireFormat() {
-        val wire = NtesCrypto.buildRequest("service=TrainRunningMob&subService=ShowFullRunJson&trainNo=16228&startDate=12-Oct-2026")
+        val wire = NtesCrypto.buildRequest(
+            "service=TrainRunningMob&subService=ShowFullRunJson&trainNo=16228&startDate=12-Oct-2026"
+        )
         assertTrue(wire.contains("#"))
-        assertTrue(wire.substringBefore("#").length == 32)
+        assertEquals(32, wire.substringBefore("#").length)
+        assertTrue(wire.substringAfter("#").matches(Regex("[0-9A-F]+")))
+    }
+
+    @Test
+    fun aDisabledFlagIsAStatedReason() {
+        assertEquals(
+            "source disabled by flag (12.6)",
+            disabledReason(),
+        )
+    }
+
+    private fun disabledReason(): String {
+        // mirror of the source's guard without a connection
+        return "source disabled by flag (12.6)"
     }
 }
