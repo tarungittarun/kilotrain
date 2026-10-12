@@ -141,9 +141,8 @@ class NtesRunningStatusSourceTest {
 
     @Test
     fun theDateUsesThreeLetterMonthsNeverNumericMonths() {
-        val src = source { 1_792_000_000_000L } // 2026-10-14T17:46:40Z -> 23:16 IST 14-Oct-2026
-        src.fetch("16228")
-        val date = Regex("\"startDate\":\"([^\"]+)\"").find(lastBody)!!.groupValues[1]
+        // the date travels inside the encrypted envelope, so it is pinned through the formatter
+        val date = NtesRunningStatusSource.defaultDate(1_792_000_000_000L) // 14-Oct-2026 23:16 IST
         assertEquals("14-Oct-2026", date)
         assertTrue(date.matches(Regex("\\d{2}-[A-Z][a-z]{2}-\\d{4}")))
     }
