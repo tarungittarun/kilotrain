@@ -67,7 +67,7 @@ class DiagnosticsFlowTest {
             compose.activity.filesDir,
             "diagnostics/${DiagnosticsStore.LOG_NAME}",
         ).readText()
-        assertTrue(log.contains("PAIR_SEARCH"))
+        assertTrue("LOG WAS: $log", log.contains("PAIR_SEARCH"))
         assertTrue(log.contains("SCREEN_STATE"))
         assertTrue(log.contains("16228@23:00[via erail.in]"))
         assertTrue(log.contains("ui_state\":\"LIVE"))
