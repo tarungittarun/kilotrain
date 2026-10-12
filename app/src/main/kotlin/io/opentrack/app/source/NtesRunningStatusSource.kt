@@ -107,14 +107,15 @@ class NtesRunningStatusSource(
         data class Failure(val failure: SourceFailure, val detail: String) : Wire
     }
 
+    /**
+     * The documented request body, written by hand: org.json is not available on the JVM test
+     * classpath (core cannot see it either), and this shape is fixed by the reference.
+     */
     private fun plainBody(train: String, date: String): String =
-        org.json.JSONObject()
-            .put("queryType", "6")
-            .put("trainNo", train)
-            .put("startDate", date)
-            .put("stationCode", "")
-            .put("lang", "en")
-            .toString()
+        """{"queryType":"6","trainNo":${jsonString(train)},"startDate":${jsonString(date)},"stationCode":"","lang":"en"}"""
+
+    private fun jsonString(value: String): String =
+        "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
     private fun legacyTlsFactory(): javax.net.ssl.SSLSocketFactory {
         val context = SSLContext.getInstance("TLSv1.2")
