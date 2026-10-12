@@ -1,7 +1,6 @@
 # TEST_CARD.md — owner-facing, 5 lines max. What to check on the phone this round.
 
-Round 13 (per-stop ACTUAL times): install the new `latest-apk`, search a pair, tap **live status**.
-If NTES answers on your network you now see, per stop: "SMET Shivamogga Town · sched 22:55/23:00 ·
-actual 23:05/23:10 · late 10 min" - actual times beside the schedule. If NTES still does not answer,
-the erail schedule rung answers instead and the block says so. Send the log either way; it now
-records which rung won.
+Round 14 (no echoed actuals): install the new `latest-apk`, search a pair, tap **live status**.
+Stops NTES has actually reported now show "actual HH:MM · late N min"; stops it has NOT reported
+show an em dash instead of a copied schedule time; the origin no longer says "Source/" and no stop
+carries a 13-Oct-style date. Send the log and I'll confirm the reported actuals match your train.

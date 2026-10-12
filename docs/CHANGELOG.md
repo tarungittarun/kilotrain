@@ -1,6 +1,14 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.12.0 (rolling `latest-apk`) — NO ECHOED ACTUALS, NO PHONEY DATES
+- **On screen:** the NTES rung now shows ACTUAL times only where NTES actually reported them.
+  Stops whose ETA/ETD merely repeat the schedule render as an em dash (never the schedule dressed
+  as an actual), the "Source"/"Destination" markers are gone, and the query date that made every
+  stop read 13-Oct is stripped so times read as plain HH:mm.
+- **Why:** NTES echoes the schedule into ETA/ETD when no actual is reported and stamps the origin
+  "Source" with the query date - both were shown as if they were fact.
+
 ## 2.11.0 (rolling `latest-apk`) — PER-STOP ACTUALS FROM NTES (documented mobile contract)
 - **On screen:** when NTES answers, the live-status block now shows per-stop rows in the form
   "SMET Shivamogga Town · sched 22:55/23:00 · actual 23:05/23:10 · late 10 min" - ACTUAL times
