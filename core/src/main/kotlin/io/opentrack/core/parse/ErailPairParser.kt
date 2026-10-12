@@ -75,6 +75,8 @@ object ErailPairParser {
             durationMinutes = ErailTrainParser.parseTime(fields[12]),
             runDaysRaw = fields[13].trim(),
             feedStampMillis = stampMillis,
+            trainId = fields.getOrNull(33)?.trim()?.takeIf { it.isNotBlank() },
+            stopCount = fields.getOrNull(28)?.trim()?.toIntOrNull(),
         )
     }
 
