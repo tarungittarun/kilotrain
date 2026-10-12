@@ -105,7 +105,7 @@ class LiveStatusLadderTest {
         val outcome = engine.liveStatus("16228")
         assertTrue(outcome is ResultsEngine.StatusOutcome.Live)
         val live = outcome as ResultsEngine.StatusOutcome.Live
-        assertEquals("erail.in schedule", live.sourceLabel) // GOT: ${live.sourceLabel}
+        assertEquals("GOT: ${live.sourceLabel}", "erail.in schedule", live.sourceLabel)
         assertTrue(live.stops.isNotEmpty())
         assertTrue(live.stops.all { it.actualArrival == null && it.actualDeparture == null })
         assertTrue(live.attempts.isNotEmpty() || live.attempts.isEmpty()) // winner + attempts recorded
