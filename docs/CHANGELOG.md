@@ -1,6 +1,17 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.6.0 (rolling `latest-apk`) — STOP TIMES + CONFIRMED LIVE PATHS
+- **On screen:** every search now uses LIVE, current sources: pair search (SMET->MYS returns the
+  four current trains), train-number search, and a new "stop times" action per row showing the
+  per-stop arrival/departure schedule from the measured route endpoint.
+- **Measured live today:** pair capture stamped 2026-10-12 10:33 IST (4 trains); train payload
+  stamped 2026-10-12 13:34; route capture with stop-by-stop times for 56269.
+- **Honest gap:** per-stop ACTUAL (delay) times are NOT published by any keyless plain endpoint I
+  could measure - erail exposes them only through its peer network, and NTES needs the APK's
+  envelope constants (mirrors block automated download; this sandbox has no pip/RE tooling). The
+  app says so instead of inventing delays.
+
 ## 2.5.0 (rolling `latest-apk`) — LIVE PAIR SEARCH WORKS (current trains, measured endpoint)
 - **On screen:** SMET -> MYS returns the four current trains (16228 TLGP MYS EXP, 16205 MYSURU EXP,
   16226 SMET-MYS UR EXP, 16221 TLGP-MYS KUVEMPU EXPRESS) with departure times, each labelled

@@ -46,9 +46,12 @@ RUNBOOK.md: on install/rollback change.
   debug-apk 38213995088 PASS 2m12s; release app-debug.apk 9,677,229 bytes 2026-10-12T06:46:23Z.
   Instrumented 38213995307 cancelled: emulator boot flake again (QA row 12; one green L3 run
   38207293417 stands as the device-level proof).
-- Resume line: priority 3 needs its own captured source; candidates ranked: (a) NTES envelope
-  constants are public in the official APK but we hold no APK here, (b) erail live-status path is
-  SignalR-gated, (c) an owner paste remains the one-step unblock if they change their mind.
+- Resume line: priorities 1 and 2 are DELIVERED (live pair + number + route, all current).
+  Priority 3: the SCHEDULE half is delivered (stop times); the ACTUALS half needs a source. Ranked
+  candidates, all measured dead-ends from here: (a) NTES envelope - APK mirrors block automated
+  download and this sandbox has no pip/RE tooling; (b) erail per-stop delays - served only through
+  their peer network (role=requester), which 3.5 forbids impersonating; (c) an owner paste from the
+  NTES app remains the one-step unblock if they change their mind.
 
 ## HANDOFF 2026-10-12 (session 4, real emulator in CI)
 - The owner asked twice whether workflows can create a real device environment: YES, and it now
