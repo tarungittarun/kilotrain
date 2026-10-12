@@ -217,6 +217,13 @@ class ResultsEngine(
     fun liveStatus(trainNumber: String): StatusOutcome {
         val result = ntesStatusSource?.fetch(trainNumber)
             ?: return StatusOutcome.Unavailable("live status source not installed (12.6)")
+        diagnostics?.numberSearch(
+            mapOf("train_no" to trainNumber.trim(), "source" to "ntes_status") +
+                when (result) {
+                    is NtesStatusResult.Failed -> mapOf("failure" to result.failure.name, "detail" to result.detail)
+                    is NtesStatusResult.Live -> mapOf("wire" to "ok", "stops" to result.status.stops.size.toString())
+                }
+        )
         return when (result) {
             is NtesStatusResult.Live -> {
                 val s = result.status
