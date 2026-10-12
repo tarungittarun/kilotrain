@@ -41,7 +41,8 @@ class NtesRunningStatusSource(
     fun fetch(trainNumber: String): NtesStatusResult {
         if (!enabled) return NtesStatusResult.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
         val train = trainNumber.trim()
-        cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it.value) } // protection 3
+        // protection 3: a cached answer must SAY it is cached (3.2), not claim to be live
+        cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it.value.copy(viaCache = true)) }
         val started = clock()
         val date = defaultDate(started) // protection 1
         val reply = post(plainBody(train, date), DALVIK_UA)

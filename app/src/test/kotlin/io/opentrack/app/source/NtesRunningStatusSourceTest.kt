@@ -57,12 +57,11 @@ class NtesRunningStatusSourceTest {
         val src = source { 1_792_000_000_000L }
         val result = src.fetch("16228")
         assertTrue(result is NtesRunningStatusSource.NtesStatusResult.Live)
-        val body = org.json.JSONObject(lastBody)
-        assertEquals("6", body.getString("queryType"))
-        assertEquals("16228", body.getString("trainNo"))
-        assertEquals("13-Oct-2026", body.getString("startDate"))
-        assertEquals("", body.getString("stationCode"))
-        assertEquals("en", body.getString("lang"))
+        assertTrue(lastBody.contains("\"queryType\":\"6\""))
+        assertTrue(lastBody.contains("\"trainNo\":\"16228\""))
+        assertTrue(lastBody.contains("\"startDate\":\"13-Oct-2026\""))
+        assertTrue(lastBody.contains("\"stationCode\":\"\""))
+        assertTrue(lastBody.contains("\"lang\":\"en\""))
     }
 
     @Test
@@ -117,7 +116,7 @@ class NtesRunningStatusSourceTest {
     fun theDateUsesThreeLetterMonthsNeverNumericMonths() {
         val src = source { 1_792_000_000_000L } // 2026-10-13T05:46:40Z -> IST 11:16 13-Oct-2026
         src.fetch("16228")
-        val date = org.json.JSONObject(lastBody).getString("startDate")
+        val date = Regex("\"startDate\":\"([^\"]+)\"").find(lastBody)!!.groupValues[1]
         assertEquals("13-Oct-2026", date)
         assertTrue(date.matches(Regex("\\d{2}-[A-Z][a-z]{2}-\\d{4}")))
     }
