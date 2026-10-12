@@ -65,10 +65,10 @@ class DiagnosticsStoreTest {
     fun rawCaptureIsAttachedOnlyWhenOptedIn() {
         store.enabled = true
         store.captureRaw = false
-        store.diagnostics.pairSearch(mapOf("x" to "1"), rawBody = store.attachRaw("SECRET-BODY"))
+        store.diagnostics.record(io.opentrack.core.diag.DiagKind.PAIR_SEARCH, mapOf("x" to "1"), store.attachRaw("SECRET-BODY"))
         assertFalse(store.logText().contains("SECRET-BODY"))
         store.captureRaw = true
-        store.diagnostics.pairSearch(mapOf("x" to "2"), rawBody = store.attachRaw("SECRET-BODY2"))
+        store.diagnostics.record(io.opentrack.core.diag.DiagKind.PAIR_SEARCH, mapOf("x" to "2"), store.attachRaw("SECRET-BODY2"))
         assertTrue(store.logText().contains("SECRET-BODY2"))
     }
 
