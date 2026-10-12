@@ -127,6 +127,7 @@ class ResultsEngine(
             return Outcome(UiStateName.PROTOCOL_CHANGED, emptyList(), "offline asset", asset.degradeMessage)
         }
         val normalised = number.trim()
+        diagnostics?.numberSearch(mapOf("train_no" to normalised, "source" to "erail_train"))
         val live = erailSource?.takeIf { FeatureFlags.ERAIL_TRAIN_NUMBER }?.fetch(normalised)
         if (live is TrainLookup.Live) {
             val p = live.payload
@@ -146,6 +147,8 @@ class ResultsEngine(
             )
         }
         val failure = (live as? TrainLookup.Failed)
+        recordOutcome(diagnostics, "number", normalised, "-", failure?.wire,
+            UiStateName.COULD_NOT_LOOK, emptyList(), 0, failure?.detail)
         return Outcome(
             state = UiStateName.COULD_NOT_LOOK,
             rows = emptyList(),
@@ -171,9 +174,10 @@ class ResultsEngine(
     fun lookupRoute(number: String): RouteOutcome {
         val result = erailRouteSource?.fetch(number.trim())
             ?: return RouteOutcome.Unavailable("route source not installed (12.6)")
+        diagnostics?.route(mapOf("train_no" to number.trim()))
         return when (result) {
-            is RouteLookupResult.Live -> RouteOutcome.Stops(
-                result.stops.map { stop ->
+            is RouteLookupResult.Live -> {
+                val stops = result.stops.map { stop ->
                     StopView(
                         code = stop.stationCode,
                         name = stop.stationName,
@@ -181,10 +185,24 @@ class ResultsEngine(
                         departure = stop.departure,
                     )
                 }
-            )
-            is RouteLookupResult.Failed -> RouteOutcome.Unavailable(
-                "could not get the stop times (${result.failure}: ${result.detail})"
-            )
+                diagnostics?.route(
+                    mapOf(
+                        "train_no" to number.trim(),
+                        "stops" to stops.joinToString(", ") { "${it.code}@${it.arrival ?: "-"}" },
+                        "count" to stops.size.toString(),
+                    ) + result.wire
+                )
+                RouteOutcome.Stops(stops)
+            }
+            is RouteLookupResult.Failed -> {
+                diagnostics?.sourceFailure(
+                    mapOf("op" to "route", "failure" to result.failure.name, "detail" to result.detail)
+                        + result.wire
+                )
+                RouteOutcome.Unavailable(
+                    "could not get the stop times (${result.failure}: ${result.detail})"
+                )
+            }
         }
     }
 

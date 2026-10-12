@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
             clock = SystemClock,
             // no source passed here: the ViewModel resolves it at search time, so tests can
             // install a fake (SourceLocator) while production gets the real transport (3.1)
+            diagnostics = diagnosticsStore.diagnostics,
         )
 
         // opt-in diagnostics (3.6): off by default, stays on the device until the user exports

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailRouteSource
+import io.opentrack.core.diag.Diagnostics
+import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.HttpErailTransport
 import io.opentrack.app.source.SourceLocator
@@ -23,6 +25,7 @@ class ResultsViewModel(
     private val erailSource: ErailTrainSource? = null,
     private val erailPairSource: ErailPairSource? = null,
     private val erailRouteSource: ErailRouteSource? = null,
+    private val diagnostics: Diagnostics? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -62,7 +65,12 @@ class ResultsViewModel(
                     ?: ErailTrainSource(HttpErailTransport())
                 val pairSource = erailPairSource ?: SourceLocator.erailPairSource
                     ?: ErailPairSource(HttpErailTransport())
-                block(ResultsEngine(asset, store, clock, source, pairSource), a, b)
+                val routeSource = erailRouteSource ?: SourceLocator.erailRouteSource
+                    ?: ErailRouteSource(HttpErailTransport(), source)
+                block(
+                    ResultsEngine(asset, store, clock, source, pairSource, routeSource, diagnostics),
+                    a, b,
+                )
             }
             _state.value = UiState(outcome.state, outcome.rows, outcome.bannerSource, outcome.note)
         }
@@ -72,12 +80,17 @@ class ResultsViewModel(
     fun showStops(number: String) {
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {
-                val routeSource = erailRouteSource ?: SourceLocator.erailRouteSource ?: return@withContext null
+                val routeSource = erailRouteSource ?: SourceLocator.erailRouteSource
+                    ?: ErailRouteSource(
+                        HttpErailTransport(),
+                        ErailTrainSource(HttpErailTransport()),
+                    )
                 ResultsEngine(
                     asset = asset,
                     store = store,
                     clock = clock,
                     erailRouteSource = routeSource,
+                    diagnostics = diagnostics,
                 ).lookupRoute(number)
             } ?: return@launch
             val current = _state.value
