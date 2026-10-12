@@ -2,112 +2,140 @@ package io.opentrack.app.source
 
 import io.opentrack.core.contract.SourceFailure
 import io.opentrack.core.ntes.NtesCrypto
-import io.opentrack.core.ntes.NtesLiveStatus
-import io.opentrack.core.ntes.NtesLiveStatusParser
-import io.opentrack.core.parse.ErailTrainParser
+import io.opentrack.core.ntes.NtesRunningStatus
+import io.opentrack.core.ntes.NtesRunningStatusParser
+import io.opentrack.core.ntes.TtlCache
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-
-sealed interface LiveStatusLookup {
-    data class Live(val status: NtesLiveStatus, val rawJson: String) : LiveStatusLookup
-    data class Failed(val failure: SourceFailure, val detail: String) : LiveStatusLookup
-}
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
 
 /**
- * S1 NTES live running status (per-stop ACTUALS' source). Keyless: no key is issued to the user,
- * no account, no relay - the request carries only the official app's public envelope constants
- * (3.1). Transport is injected so this is testable offline (6.3); the response's per-stop array is
- * deliberately NOT parsed (no capture yet, 7.4) - the raw decoded body is returned for the
- * diagnostics collector instead, and the screen states what is and is not shown.
+ * NTES live running status, requested exactly as the mobile gateway documents (the owner's
+ * reference): POST a plain JSON body with `queryType: "6"`, the Dalvik user agent, and the date as
+ * `DD-MMM-YYYY`. Keyless: no key is issued to the user, no account, no relay (3.1).
+ *
+ * Protections the reference calls for:
+ *  1. the date is formatted from the clock with three-letter months (never `12-10-2026`);
+ *  2. TLS: the client WIDENS the offered cipher list (CRIS serves legacy static-RSA TLS 1.2) but
+ *     never disables certificate verification - a rotated certificate fails as a stated error, not
+ *     as silent plaintext (3.6);
+ *  3. the status block is cached per train number for 90 s (TtlCache) so a refresh never
+ *     re-hammers the endpoint (3.5/3.8).
+ *
+ * The transport is injected, so the whole path is testable offline (6.3).
  */
 class NtesRunningStatusSource(
     private val openConnection: (URL) -> HttpURLConnection,
     private val clock: () -> Long = { System.currentTimeMillis() },
     private val enabled: Boolean = true,
-    private val dateProvider: () -> String = { defaultDate(clock()) },
 ) {
-    fun fetch(trainNumber: String): LiveStatusLookup {
-        if (!enabled) {
-            return LiveStatusLookup.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
+    private val cache = TtlCache<String, NtesRunningStatus>(clock)
+
+    sealed interface NtesStatusResult {
+        data class Live(val status: NtesRunningStatus) : NtesStatusResult
+        data class Failed(val failure: SourceFailure, val detail: String) : NtesStatusResult
+    }
+
+    fun fetch(trainNumber: String): NtesStatusResult {
+        if (!enabled) return Result.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
+        val train = trainNumber.trim()
+        cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it) } // protection 3
+        val started = clock()
+        val date = defaultDate(started) // protection 1
+        val primary = post { body = plainBody(train, date); ua = DALVIK_UA }
+        val body = when (primary) {
+            is Wire.Ok -> primary.body
+            is Wire.Failure -> return NtesStatusResult.Failed(primary.failure, primary.detail)
         }
-        val payload = "service=TrainRunningMob&subService=ShowFullRunJson" +
-            "&trainNo=${trainNumber.trim()}&startDate=${dateProvider()}"
-        val reply = try {
-            post(payload)
+        // The documented plain-JSON answer; if the gateway answers with the older encrypted form
+        // (public client documents it too), decode that instead of failing.
+        val parsed = NtesRunningStatusParser.parse(body, clock(), viaCache = false)
+            ?: decodeEncryptedFallback(body)?.let { NtesRunningStatusParser.parse(it, clock(), viaCache = false) }
+        if (parsed == null) {
+            return NtesStatusResult.Failed(
+                SourceFailure.SHAPE_UNKNOWN,
+                "the response did not match the documented shape; the protocol may have changed (12.3)",
+            )
+        }
+        cache.put(train, parsed)
+        return NtesStatusResult.Live(parsed)
+    }
+
+    private fun decodeEncryptedFallback(body: String): String? {
+        val jsonIn = Regex("\"jsonIn\"\\s*:\\s*\"([^\"]*)\"").find(body)?.groupValues?.get(1) ?: return null
+        return NtesCrypto.decodeResponse(jsonIn)
+    }
+
+    private data class Body(val body: String, val ua: String)
+
+    private fun post(builder: () -> Body): Wire {
+        val spec = builder()
+        return try {
+            val connection = openConnection(URL(NtesCrypto.BASE_URL))
+            connection.requestMethod = "POST"
+            connection.connectTimeout = 10_000
+            connection.readTimeout = 20_000
+            connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
+            connection.setRequestProperty("User-Agent", spec.ua)
+            if (connection is HttpsURLConnection) {
+                // protection 2: widen the offered suites, KEEP verification on
+                connection.sslSocketFactory = legacyTlsFactory()
+            }
+            connection.doOutput = true
+            connection.outputStream.use { it.write(spec.body.toByteArray(Charsets.UTF_8)) }
+            val status = connection.responseCode
+            val text = try {
+                connection.inputStream.bufferedReader().use { it.readText() }
+            } catch (e: IOException) {
+                connection.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+            }
+            connection.disconnect()
+            when {
+                status !in 200..299 -> Wire.Failure(SourceFailure.HTTP, "HTTP $status")
+                text.isBlank() -> Wire.Failure(SourceFailure.EMPTY, "2xx with an empty body")
+                else -> Wire.Ok(text)
+            }
         } catch (e: IOException) {
-            return LiveStatusLookup.Failed(
+            Wire.Failure(
                 if (e is java.net.SocketTimeoutException) SourceFailure.TIMEOUT else SourceFailure.OFFLINE,
                 e.message ?: e.javaClass.simpleName,
             )
         }
-        val status = reply.status
-        if (status !in 200..299) {
-            return LiveStatusLookup.Failed(SourceFailure.HTTP, "HTTP $status")
-        }
-        val body = reply.body
-        if (body.isBlank()) {
-            return LiveStatusLookup.Failed(SourceFailure.EMPTY, "2xx with an empty body")
-        }
-        val jsonIn = try {
-            Regex("\"jsonIn\"\\s*:\\s*\"([^\"]*)\"").find(body)?.groupValues?.get(1)
-                ?: return LiveStatusLookup.Failed(SourceFailure.SHAPE_UNKNOWN, "no jsonIn field")
-        } catch (e: Exception) {
-            return LiveStatusLookup.Failed(SourceFailure.SHAPE_UNKNOWN, "unreadable envelope")
-        }
-        val decoded = NtesCrypto.decodeResponse(jsonIn)
-            ?: return LiveStatusLookup.Failed(SourceFailure.SHAPE_UNKNOWN, "envelope did not decode")
-        val status2 = NtesLiveStatusParser.parse(decoded)
-            ?: return LiveStatusLookup.Failed(SourceFailure.SHAPE_UNKNOWN,
-                "the response is not the documented status shape (protocol may have changed, 12.3)")
-        return LiveStatusLookup.Live(status2, decoded)
     }
 
-    private data class Reply(val status: Int, val body: String)
-
-    private fun post(payload: String): Reply {
-        val connection = openConnection(URL(NtesCrypto.BASE_URL))
-        connection.requestMethod = "POST"
-        connection.connectTimeout = 10_000
-        connection.readTimeout = 20_000
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.setRequestProperty("charset", "utf-8")
-        connection.setRequestProperty("User-Agent", NtesCrypto.USER_AGENT)
-        // the server only accepts legacy static-RSA TLS 1.2 suites (documented public client
-        // notes the same handshake failure); widening the client's offer is harmless.
-        if (connection is javax.net.ssl.HttpsURLConnection) {
-            connection.sslSocketFactory = legacyTlsFactory()
-        }
-        connection.doOutput = true
-        connection.outputStream.use { it.write(bodyFor(payload).toByteArray(Charsets.UTF_8)) }
-        val status = connection.responseCode
-        val body = try {
-            connection.inputStream.bufferedReader().use { it.readText() }
-        } catch (e: IOException) {
-            connection.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
-        }
-        connection.disconnect()
-        return Reply(status, body)
+    private sealed interface Wire {
+        data class Ok(val body: String) : Wire
+        data class Failure(val failure: SourceFailure, val detail: String) : Wire
     }
 
-    private fun bodyFor(payload: String): String =
-        org.json.JSONObject().put("jsonIn", NtesCrypto.buildRequest(payload)).toString()
+    private fun plainBody(train: String, date: String): String =
+        org.json.JSONObject()
+            .put("queryType", "6")
+            .put("trainNo", train)
+            .put("startDate", date)
+            .put("stationCode", "")
+            .put("lang", "en")
+            .toString()
 
     private fun legacyTlsFactory(): javax.net.ssl.SSLSocketFactory {
-        val context = javax.net.ssl.SSLContext.getInstance("TLSv1.2")
+        val context = SSLContext.getInstance("TLSv1.2")
         context.init(null, null, null)
         return context.socketFactory
     }
 
-        companion object {
-            /** NTES dates are DD-MMM-YYYY in IST (10.3: the enquiry day, not the device's). */
-            fun defaultDate(millis: Long): String {
-                val ist = millis + 5 * 60 * 60 * 1000L + 30 * 60 * 1000L
-                val days = Math.floorDiv(ist, 86_400_000L)
-                val ymd = ErailTrainParser.civilFromDays(days) // the core's tested inverse (7.3)
-                val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
-                return "%02d-%s-%04d".format(ymd[2], months[ymd[1] - 1], ymd[0])
-            }
+    companion object {
+        const val TTL_MS = 90_000L // the reference's protected 90-second cache
+        const val DALVIK_UA = "dalvik/2.1.0 (linux; u; android 13; build/tq3a.230805.001)"
+
+        /** `DD-MMM-YYYY` in IST (10.3: the enquiry day from the stamp, not the device's clock). */
+        fun defaultDate(millis: Long): String {
+            val ist = millis + 5 * 60 * 60 * 1000L + 30 * 60 * 1000L
+            val days = Math.floorDiv(ist, 86_400_000L)
+            val ymd = io.opentrack.core.parse.ErailTrainParser.civilFromDays(days)
+            val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+            return "%02d-%s-%04d".format(ymd[2], months[ymd[1] - 1], ymd[0])
+        }
     }
 }

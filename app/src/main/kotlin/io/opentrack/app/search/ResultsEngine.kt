@@ -6,6 +6,7 @@ import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.LiveStatusLookup
 import io.opentrack.app.source.NtesRunningStatusSource
+import io.opentrack.app.source.NtesStatusResult
 import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.core.diag.Diagnostics
@@ -213,35 +214,58 @@ class ResultsEngine(
         }
     }
 
-    /** Priority 3: the live status fields the NTES API documents (no per-stop array yet). */
+    /** Priority 3: per-stop ACTUAL vs SCHEDULED times from NTES (ADR 0012). */
     fun liveStatus(trainNumber: String): StatusOutcome {
         val result = ntesStatusSource?.fetch(trainNumber)
             ?: return StatusOutcome.Unavailable("live status source not installed (12.6)")
         return when (result) {
-            is LiveStatusLookup.Live -> StatusOutcome.Live(
-                trainName = result.status.trainName ?: "train ${result.status.trainNo ?: trainNumber}",
-                lastUpdate = result.status.lastUpdate ?: "no position published right now",
-                delayDeparture = result.status.delayDeparture,
-                delayArrival = result.status.delayArrival,
-                currentStationName = result.status.currentStationName,
-                platform = result.status.platform,
-                nextStationName = result.status.nextStationName,
-            )
-            is LiveStatusLookup.Failed -> StatusOutcome.Unavailable(
+            is NtesStatusResult.Live -> {
+                val s = result.status
+                StatusOutcome.Live(
+                    trainNo = s.trainNo ?: trainNumber,
+                    currentStatus = s.currentStatus ?: "no status published right now",
+                    stops = s.stops.map { stop ->
+                        StopStatus(
+                            code = stop.stationCode ?: "—",
+                            name = stop.stationName ?: "",
+                            scheduledArrival = stop.scheduledArrival,
+                            scheduledDeparture = stop.scheduledDeparture,
+                            actualArrival = stop.actualArrival,
+                            actualDeparture = stop.actualDeparture,
+                            arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                            departureDelayMinutes = stop.departureDelayMinutes,
+                            isCurrentStation = stop.isCurrentStation,
+                        )
+                    },
+                    viaCache = s.viaCache,
+                    fetchedAtMillis = s.fetchedAtMillis,
+                )
+            }
+            is NtesStatusResult.Failed -> StatusOutcome.Unavailable(
                 "could not get the live status (${result.failure}: ${result.detail})"
             )
         }
     }
 
+    data class StopStatus(
+        val code: String,
+        val name: String,
+        val scheduledArrival: String?,
+        val scheduledDeparture: String?,
+        val actualArrival: String?,
+        val actualDeparture: String?,
+        val arrivalDelayMinutes: Int?,
+        val departureDelayMinutes: Int?,
+        val isCurrentStation: Boolean,
+    )
+
     sealed interface StatusOutcome {
         data class Live(
-            val trainName: String,
-            val lastUpdate: String,
-            val delayDeparture: String?,
-            val delayArrival: String?,
-            val currentStationName: String?,
-            val platform: String?,
-            val nextStationName: String?,
+            val trainNo: String,
+            val currentStatus: String,
+            val stops: List<StopStatus>,
+            val viaCache: Boolean,
+            val fetchedAtMillis: Long,
         ) : StatusOutcome
         data class Unavailable(val reason: String) : StatusOutcome
     }

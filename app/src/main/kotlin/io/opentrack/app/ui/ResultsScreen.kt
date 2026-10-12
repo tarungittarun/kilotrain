@@ -29,6 +29,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import io.opentrack.core.contract.Provenance
+import io.opentrack.core.contract.ProvenanceKind
+import io.opentrack.core.contract.label
 import io.opentrack.app.search.ResultsEngine
 import io.opentrack.app.search.ResultsViewModel
 
@@ -118,10 +121,32 @@ fun ResultsScreen(
                 val status = ui.status
                 if (status is ResultsEngine.StatusOutcome.Live) {
                     item {
+                        val label = if (status.viaCache) {
+                            Provenance(ProvenanceKind.CACHED, "NTES", status.fetchedAtMillis)
+                        } else {
+                            Provenance(ProvenanceKind.LIVE, "NTES", status.fetchedAtMillis)
+                        }
                         Text(
-                            text = StateCopy.liveStatus(status),
-                            style = MaterialTheme.typography.bodyMedium,
+                            text = StateCopy.liveStatusHeader(
+                                trainNo = status.trainNo,
+                                currentStatus = status.currentStatus,
+                                provenanceLabel = label.label(clock = { System.currentTimeMillis() }),
+                            ),
+                            style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                    items(status.stops) { stop ->
+                        Text(
+                            text = StateCopy.stopStatus(
+                                stop.code, stop.name,
+                                stop.scheduledArrival, stop.scheduledDeparture,
+                                stop.actualArrival, stop.actualDeparture,
+                                stop.arrivalDelayMinutes, stop.departureDelayMinutes,
+                                stop.isCurrentStation,
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.fillMaxWidth(),
                         )
                     }
                 } else if (status is ResultsEngine.StatusOutcome.Unavailable) {

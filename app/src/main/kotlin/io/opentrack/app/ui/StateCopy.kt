@@ -34,22 +34,34 @@ object StateCopy {
     }
 
     /**
-     * Live status line (priority 3). Every field is what NTES published; an unstated one is an em
-     * dash. The per-stop ACTUAL array is NOT shown because it is not captured yet - the line says
-     * so instead of inventing times (3.4).
+     * Live status block (priority 3): the NTES summary plus per-stop SCHEDULED vs ACTUAL times.
+     * Unstated values render as em dashes (3.3); nothing is interpolated (3.4). The provenance line
+     * comes from the single label() vocabulary - "live data <age> old" for a fresh answer,
+     * "cached <age> old" for the protected 90-second cache (3.2).
      */
-    fun liveStatus(status: io.opentrack.app.search.ResultsEngine.StatusOutcome.Live): String = buildString {
-        append("live status · ${status.trainName}\n")
-        append(status.lastUpdate)
-        append("\ndelay: dep ")
-        append(status.delayDeparture ?: "—")
-        append(" · arr ")
-        append(status.delayArrival ?: "—")
-        append("\nplatform: ")
-        append(status.platform ?: "—")
-        append("\nnext station: ")
-        append(status.nextStationName ?: "—")
-        append("\nvia NTES · per-stop actual times are not published by this source yet")
+    fun liveStatusHeader(
+        trainNo: String,
+        currentStatus: String,
+        provenanceLabel: String,
+    ): String = "train $trainNo · $currentStatus · $provenanceLabel"
+
+    fun stopStatus(
+        code: String,
+        name: String,
+        scheduledArrival: String?,
+        scheduledDeparture: String?,
+        actualArrival: String?,
+        actualDeparture: String?,
+        arrivalDelayMinutes: Int?,
+        departureDelayMinutes: Int?,
+        isCurrentStation: Boolean,
+    ): String {
+        val here = if (isCurrentStation) " ⬅ here now" else ""
+        return "$code $name · sched ${scheduledArrival ?: "—"}/${scheduledDeparture ?: "—"}" +
+            " · actual ${actualArrival ?: "—"}/${actualDeparture ?: "—"}" +
+            (arrivalDelayMinutes?.let { " · late ${it} min" } ?: "") +
+            (if (arrivalDelayMinutes == null && departureDelayMinutes != null) " · dep late ${departureDelayMinutes} min" else "") +
+            here
     }
 
     /** Provenance-readable row line (10.5). */
