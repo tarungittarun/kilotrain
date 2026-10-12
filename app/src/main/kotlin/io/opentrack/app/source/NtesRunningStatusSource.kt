@@ -34,6 +34,7 @@ class NtesRunningStatusSource(
     private val diagnostics: Diagnostics? = null,
 ) {
     private val cache = TtlCache<String, NtesRunningStatus>(clock)
+    private var sessionCookies: String? = null
 
     sealed interface NtesStatusResult {
         data class Live(val status: NtesRunningStatus) : NtesStatusResult
@@ -43,18 +44,21 @@ class NtesRunningStatusSource(
     /** The request form a rung uses (ADR 0013): the plain mobile JSON, or the official envelope. */
     enum class Form { PLAIN_JSON, ENCRYPTED }
 
-    fun fetch(trainNumber: String, form: Form = Form.PLAIN_JSON): NtesStatusResult {
+    fun fetch(trainNumber: String, form: Form = Form.ENCRYPTED): NtesStatusResult {
         if (!enabled) return NtesStatusResult.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
         val train = trainNumber.trim()
         // protection 3: a cached answer must SAY it is cached (3.2), not claim to be live
         cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it.value.copy(viaCache = true)) }
         val started = clock()
         val date = defaultDate(started) // protection 1
+        // the documented client warms the session first: NTES answers EMPTY without it (this was
+        // the masked-empty the owner saw). The warmup also supplies the Referer and Cookie.
+        val session = warmUp()
         val reply = post(
             if (form == Form.PLAIN_JSON) plainBody(train, date) else encryptedBody(train, date),
             DALVIK_UA,
+            session,
         )
-        // the reference's masked answer (2xx, empty body) is a stated failure, never a fake row
         val body = when (reply) {
             is Wire.Ok -> reply.body
             is Wire.Failure -> return NtesStatusResult.Failed(reply.failure, reply.detail)
@@ -90,7 +94,30 @@ class NtesRunningStatusSource(
         return NtesCrypto.decodeResponse(jsonIn)
     }
 
-    private fun post(requestBody: String, userAgent: String): Wire {
+    /** GET the mobile site once per source instance and keep its cookies (documented warmup). */
+    private fun warmUp(): String {
+        if (sessionCookies != null) return sessionCookies!!
+        return try {
+            val connection = openConnection(URL(WARMUP_URL))
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 10_000
+            connection.readTimeout = 15_000
+            connection.setRequestProperty("User-Agent", DALVIK_UA)
+            connection.responseCode
+            val cookies = connection.headerFields["Set-Cookie"]
+                ?.flatMap { it.split(";") }
+                ?.map { it.trim() }
+                ?.filter { it.contains("=") }
+                ?.joinToString("; ")
+                .orEmpty()
+            sessionCookies = cookies
+            cookies
+        } catch (e: Exception) {
+            "" // a failed warmup is not fatal; the POST still goes out (documented clients retry)
+        }
+    }
+
+    private fun post(requestBody: String, userAgent: String, cookies: String = ""): Wire {
         return try {
             val connection = openConnection(URL(NtesCrypto.BASE_URL))
             connection.requestMethod = "POST"
@@ -98,6 +125,8 @@ class NtesRunningStatusSource(
             connection.readTimeout = 20_000
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
             connection.setRequestProperty("User-Agent", userAgent)
+            if (cookies.isNotBlank()) connection.setRequestProperty("Cookie", cookies)
+            connection.setRequestProperty("Referer", WARMUP_URL)
             if (connection is HttpsURLConnection) {
                 // protection 2: widen the offered suites, KEEP verification on
                 connection.sslSocketFactory = legacyTlsFactory()
@@ -148,6 +177,7 @@ class NtesRunningStatusSource(
     companion object {
         const val TTL_MS = 90_000L // the reference's protected 90-second cache
         const val DALVIK_UA = "dalvik/2.1.0 (linux; u; android 13; build/tq3a.230805.001)"
+        const val WARMUP_URL = "https://enquiry.indianrail.gov.in/mntes/"
 
         /** `DD-MMM-YYYY` in IST (10.3: the enquiry day from the stamp, not the device's clock). */
         fun defaultDate(millis: Long): String {

@@ -15,13 +15,16 @@ import java.net.URL
  */
 class NtesRunningStatusSourceTest {
 
+    /** the documented NTES shape: STNS rows with SC/SN/STA/STD/ETA/ETD/PF/DARR/DDEP */
     private val documentedAnswer = """
-        {"trainNo":"16228","currentStatusStr":"Train is running 9 min late",
-         "trainFullStatus":[
-           {"stnCode":"SMET","stnName":"Shivamogga Town","schArrTime":"22:55","schDepTime":"23:00",
-            "actArrTime":"23:05","actDepTime":"23:10","arrDelay":"10","depDelay":"10","isCurrentStn":false},
-           {"stnCode":"SME","stnName":"Shivamogga H","schArrTime":"23:05","schDepTime":"23:10",
-            "actArrTime":"23:15","actDepTime":"23:20","arrDelay":"10","depDelay":"10","isCurrentStn":true}
+        {"TrainNo":"16228","TrainName":"TLGP MYS EXP","CurrentStationName":"SMET",
+         "LUPDT":"Train departed SMET at 22:58","DelayDep":"10 min","Platform":"1",
+         "NextStationName":"SME",
+         "STNS":[
+           {"SC":"SMET","SN":"Shivamogga Town","STA":"22:55","STD":"23:00","ETA":"23:05",
+            "ETD":"23:10","DARR":"10","DDEP":"10","PF":"2","Sr":"1","Halt":"5"},
+           {"SC":"SME","SN":"Shivamogga H","STA":"23:05","STD":"23:10","ETA":"23:15",
+            "ETD":"23:20","DARR":"10","DDEP":"10","Sr":"2","Halt":"2","CURR":"Y"}
          ]}
     """.trimIndent()
 
@@ -70,7 +73,7 @@ class NtesRunningStatusSourceTest {
     fun parsesPerStopScheduledAgainstActual() {
         val src = source { 1_792_000_000_000L }
         val live = src.fetch("16228") as NtesRunningStatusSource.NtesStatusResult.Live
-        assertEquals("Train is running 9 min late", live.status.currentStatus)
+        assertEquals("Train departed SMET at 22:58", live.status.currentStatus)
         val stops = live.status.stops
         assertEquals(2, stops.size)
         assertEquals("SMET", stops[0].stationCode)
