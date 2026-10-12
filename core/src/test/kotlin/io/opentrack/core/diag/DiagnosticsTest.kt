@@ -66,11 +66,9 @@ class DiagnosticsShapeTest {
 
     @Test
     fun jsonShapeReportsKeysNestingAndArrayLengthsWithoutValues() {
-        val body = """
-            {"trainNo":"16228","timeTable":[{"stnCode":"SMET","actArrTime":"23:05"}],
-             "delay":{"arrDelay":"10"}}
-        """.trimIndent()
+        val body = """{"trainNo":"16228","timeTable":[{"stnCode":"SMET","actArrTime":"23:05"}],"delay":{"arrDelay":"10"}}"""
         val shape = DiagnosticsCodec.jsonShape(body)
+        println("SHAPE WAS: $shape")
         assertEquals("object", shape["obj.delay"])
         assertEquals("object", shape["obj.timeTable[]."])
         assertEquals("1", shape["array.timeTable.len"])

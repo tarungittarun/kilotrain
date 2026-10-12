@@ -43,7 +43,7 @@ class NtesRunningStatusParserTest {
         assertEquals(10, current.departureDelayMinutes)
         assertEquals("2", current.platform)
         assertTrue(current.isCurrentStation)
-        assertEquals("TLGP MYS EXP", parsed.trainNo)
+        assertEquals("16228", parsed.trainNo)
         assertEquals("Train departed SMET at 22:58", parsed.currentStatus)
         assertEquals("10 min", parsed.delayDeparture)
         assertEquals("1", parsed.platform)
