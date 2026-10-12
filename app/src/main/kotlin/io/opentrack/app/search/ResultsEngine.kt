@@ -232,25 +232,25 @@ class ResultsEngine(
         val aggregator = io.opentrack.app.source.FirstWinsAggregator<StatusOutcome>()
         val rungs = listOfNotNull(
             ntes?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung("NTES (mobile JSON)") {
+                FirstWinsAggregator.Rung<StatusOutcome>("NTES (mobile JSON)") {
                     when (val r = it.fetch(train, NtesRunningStatusSource.Form.PLAIN_JSON)) {
                         is NtesStatusResult.Live ->
-                            statusFromNtes(r.status, train, "NTES live running status")
+                            statusFromNtes(r.status, train, "NTES live running status"): StatusOutcome
                         is NtesStatusResult.Failed -> null
                     }
                 }
             },
             ntes?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung("NTES (encrypted)") {
+                FirstWinsAggregator.Rung<StatusOutcome>("NTES (encrypted)") {
                     when (val r = it.fetch(train, NtesRunningStatusSource.Form.ENCRYPTED)) {
                         is NtesStatusResult.Live ->
-                            statusFromNtes(r.status, train, "NTES live running status")
+                            statusFromNtes(r.status, train, "NTES live running status"): StatusOutcome
                         is NtesStatusResult.Failed -> null
                     }
                 }
             },
             route?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung("erail.in schedule") {
+                FirstWinsAggregator.Rung<StatusOutcome>("erail.in schedule") {
                     when (val r = it.fetch(train)) {
                         is RouteLookupResult.Live -> StatusOutcome.Live(
                             trainNo = train,
@@ -278,7 +278,7 @@ class ResultsEngine(
                 }
             },
             erailSource?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung("erail.in train times") {
+                FirstWinsAggregator.Rung<StatusOutcome>("erail.in train times") {
                     when (val r = it.fetch(train)) {
                         is io.opentrack.app.source.TrainLookup.Live -> {
                             val p = r.payload
@@ -319,7 +319,7 @@ class ResultsEngine(
                     }
                 }
             },
-            io.opentrack.app.source.FirstWinsAggregator.Rung("offline asset (labelled)") {
+            FirstWinsAggregator.Rung<StatusOutcome>("offline asset (labelled)") {
                 val hit = asset.trains.firstOrNull { it.number == train }
                 if (hit != null) StatusOutcome.Live(
                     trainNo = hit.number,
