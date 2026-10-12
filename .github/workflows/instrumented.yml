@@ -8,12 +8,8 @@ on:
 jobs:
   instrumented:
     runs-on: ubuntu-latest
-    # UNTESTED, WITH A REASON is the honest verdict for this job on these runners:
-    # /dev/kvm exists, but `avdmanager create avd` exits 0 after answering its hardware
-    # prompt and writes NO AVD directory (measured 2026-10-11, runs 38178953830, 38179369449,
-    # 38179767383, 38179889555 - both image families). This job therefore never claims a pass;
-    # continue-on-error keeps the reason visible (neutral conclusion) instead of a red run that
-    # hides real failures, and QA_MATRIX row 12 records the verdict. NEVER a fake pass (11.1).
+    # UNTESTED, WITH A REASON is the honest verdict when the runner cannot boot an AVD; the job
+    # never claims a pass it did not make (11.1). QA_MATRIX row 12 records the verdict.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +19,7 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: install Android SDK components (AGP needs platforms;android-35)
+      - name: install Android SDK components
         run: |
           SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
           echo "using sdkmanager: $SDKM"
@@ -36,7 +32,7 @@ jobs:
         id: kvm
         run: |
           if [ -e /dev/kvm ]; then echo "available=true" >> "$GITHUB_OUTPUT"; else echo "available=false" >> "$GITHUB_OUTPUT"; fi
-          echo "kvm available: $(cat "$GITHUB_OUTPUT")"
+          echo "kvm available: $(grep -h available "$GITHUB_OUTPUT" || true)"
 
       - name: "UNTESTED with a reason: no KVM (11.1)"
         if: steps.kvm.outputs.available == 'false'
@@ -45,37 +41,20 @@ jobs:
           echo "flows are reported 'untested, with a reason' - never a fake pass (11.1)."
           echo "The Robolectric job (L2) remains the screen-level proof for this commit."
 
-      - name: create + boot AVD (L3)
+      # L3 on a REAL emulator: the standard community action creates AND boots the AVD, which is
+      # the part my hand-rolled avdmanager step got wrong (QA_MATRIX row 12).
+      - name: L3 flows on a real emulator
         if: steps.kvm.outputs.available == 'true'
-        run: |
-          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
-          AVDM="$(dirname "$SDKM")/avdmanager"
-          "$SDKM" "system-images;android-34;google_apis;x86_64" "emulator"
-          echo "no" | "$AVDM" create avd -n opentrack_test \
-            -k "system-images;android-34;google_apis;x86_64" --force > create_avd.log 2>&1
-          RC=$?
-          echo "avdmanager create exit=$RC"; cat create_avd.log
-          ls -la "$HOME/.android/avd" 2>&1 || true
-          if [ "$RC" != "0" ] || [ ! -f "$HOME/.android/avd/opentrack_test.ini" ]; then
-            echo "SKIPPED, WITH A REASON: AVD create did not produce $HOME/.android/avd/opentrack_test.ini"
-            exit 1
-          fi
-          nohup "$ANDROID_HOME"/emulator/emulator -avd opentrack_test -no-window -no-audio -no-boot-anim \
-            > emulator.log 2>&1 &
-          # BOUNDED waits only (10.8: a diagnostic may never outrank the user's request):
-          # 240 s to see a device, 240 s more to see it boot; a miss is a stated reason, not a hang.
-          timeout 240 "$ANDROID_HOME"/platform-tools/adb wait-for-device \
-            || { echo "SKIPPED, WITH A REASON: no adb device appeared within 240 s"; \
-                 tail -20 emulator.log || true; exit 1; }
-          timeout 240 "$ANDROID_HOME"/platform-tools/adb shell \
-            'for i in $(seq 1 120); do [[ -n $(getprop sys.boot_completed) ]] && exit 0; sleep 2; done; exit 1' \
-            || { echo "SKIPPED, WITH A REASON: emulator did not report boot_completed within 240 s"; \
-                 tail -20 emulator.log || true; exit 1; }
-          echo "PROVED: emulator booted (sys.boot_completed)"
-
-      - name: run L3 flows on emulator
-        if: steps.kvm.outputs.available == 'true'
-        run: ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel
+          target: google_apis
+          force-avd-creation: false
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -camera-back none
+          disable-animations: true
+          script: ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace
 
       - name: upload emulator + test logs
         if: always()
@@ -85,8 +64,6 @@ jobs:
           path: |
             app/build/reports/androidTests/
             app/build/outputs/androidTest-results/
-            emulator.log
-            create_avd.log
           if-no-files-found: warn
 
       - name: verdict summary (what this job PROVED / SKIPPED)
@@ -95,9 +72,8 @@ jobs:
           {
             echo "## instrumented verdict"
             echo ""
-            echo "- If the AVD booted and tests ran: PROVED L3 flows (navigation/override flow) on API 34."
-            echo "- If it stopped at AVD create: **SKIPPED, WITH A REASON** - avdmanager on this runner"
-            echo "  exits 0 without creating the AVD directory (4 measured attempts, both image families)."
-            echo "  L3 is therefore UNTESTED on CI, not passed. L1/L2 (Robolectric) remain the screen proof."
-            echo "- L7 (owner phone) covers the rest; see QA_MATRIX rows 9/12/13."
+            echo "- If L3 ran green: PROVED install + navigation + store flows on a real API 34 emulator."
+            echo "- If the AVD never booted: SKIPPED, WITH A REASON - L3 UNTESTED (never a fake pass)."
+            echo "- Network egress from runners is still datacenter IP: NTES times out, erail pair"
+            echo "  endpoint throttles. A real device here still cannot answer live railway data."
           } >> "$GITHUB_STEP_SUMMARY"
