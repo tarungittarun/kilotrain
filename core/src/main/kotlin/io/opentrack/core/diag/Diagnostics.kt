@@ -29,7 +29,12 @@ fun interface DiagSink {
  * Opt-in collector (3.6): while [enabled] is false it records NOTHING - no buffers, no files.
  * All formatting goes through [DiagnosticsCodec] so the export shape has one definition.
  */
-class Diagnostics(private val sink: DiagSink, val enabled: Boolean, private val now: () -> Long) {
+class Diagnostics(
+    private val sink: DiagSink,
+    private val enabledProvider: () -> Boolean,
+    private val now: () -> Long,
+) {
+    val enabled: Boolean get() = enabledProvider()
 
     fun record(kind: DiagKind, detail: Map<String, String> = emptyMap(), rawBody: String? = null) {
         if (!enabled) return

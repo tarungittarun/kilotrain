@@ -29,7 +29,7 @@ class DiagnosticsStore(
         logFile.appendText(line + "\n")
         trim()
     }
-    val diagnostics = Diagnostics(sink, enabled, clock)
+    val diagnostics = Diagnostics(sink, { enabled }, clock)
 
     var enabled: Boolean = enabled
         set(value) {

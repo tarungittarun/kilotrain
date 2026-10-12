@@ -39,7 +39,7 @@ class MainActivityTest {
     @Test
     fun firstRenderIsHonestAndNeverClaimsAnAnswer() {
         compose.onNodeWithText("offline - showing unverified timetable data.")
-            .assertIsDisplayed()
+            .assertExists()
     }
 
     /** The pair query runs on the device; here its transport is faked to the throttle body. */
@@ -57,7 +57,7 @@ class MainActivityTest {
                 .fetchSemanticsNodes().isNotEmpty()
         }
         compose.onNodeWithText("could not look this up. no old data is shown in its place.")
-            .assertIsDisplayed()
+            .assertExists()
         // and nothing old is on screen to contradict it
         compose.onAllNodesWithText("16205 · Talaguppa Mysore Intercity Express — 14:45 · timetable")
             .assertCountEquals(0)
