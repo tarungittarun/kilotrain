@@ -35,3 +35,7 @@ Waived rows (with reason) will be listed here; none waived yet.
 | 23 | a pair query is NEVER answered from years-old data (ADR 0009) | L1/L2 | GREEN | aPairQueryIsNeverAnsweredFromThe2016Fallback + MainActivityTest pair assertion |
 | 24 | the APK installs and runs on a REAL emulator (L3) | L3 | GREEN | run 38207293417, test result on emulator-5554 API 34 |
 | 25 | COULD_NOT_LOOK copy matches what is actually shown | L2 | GREEN | StateCopyTest.couldNotLookIsNotAnEmptyAnswer |
+
+| 26 | the STATION-PAIR capture parses to the four current trains | L1 | GREEN | ErailPairParserTest.parsesTheRealStationPairCapture (capture 2026-10-12) |
+| 27 | live pair response has NO retired 0-prefix numbers (unlike the 2016 asset) | L1 | GREEN | livePairResponseHasNoRetiredPrefixNumbers |
+| 28 | pair stamp is the feed's day, not the device's (10.3) | L1 | GREEN | feedStampIsTheEnquiryDayNotTheDeviceDay |

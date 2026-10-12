@@ -74,10 +74,10 @@ class MainActivityTest {
         compose.onNodeWithText("or train number").performTextInput("56269")
         compose.onNodeWithText("show train").performClick()
         compose.waitUntil(5_000) {
-            compose.onAllNodesWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
+            compose.onAllNodesWithText("16228 · TLGP MYS EXP — 23:00 · via erail.in")
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
+        compose.onNodeWithText("16228 · TLGP MYS EXP — 23:00 · via erail.in")
             .assertExists()
     }
 
@@ -98,4 +98,6 @@ class MainActivityTest {
     }
 
     private val liveCapture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
+    private val pairCapture =
+        java.io.File("src/test/resources/erail_pair_smet_mys_capture.txt").readText()
 }

@@ -27,8 +27,14 @@ class ErailPairSource(
             return PairLookupResult.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
         }
         val reply = try {
+            // The parameters and constants below are MEASURED from erail's own site JS
+            // (js5/cmp/erail_all_35.js) and confirmed by a live 200 that returned 4 trains for
+            // SMET->MYS stamped 2026-10-12 - not invented names.
             // a handful of requests per user action only (3.5): exactly one per search
-            transport.get("/rail/getTrains.aspx?l=$fromStation&c=$toStation")
+            transport.get(
+                "/rail/getTrains.aspx?Station_From=$fromStation&Station_To=$toStation"
+                    + "&DataSource=AVLSOURCE_IRCTC_NGET&Language=EN&Cache=false"
+            )
         } catch (e: IOException) {
             return PairLookupResult.Failed(
                 if (e is java.net.SocketTimeoutException) SourceFailure.TIMEOUT else SourceFailure.OFFLINE,

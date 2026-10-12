@@ -49,19 +49,19 @@ class ResultsEngineTest {
      * the CAPTURED payload, proving the parse+label path end to end.
      */
     @Test
-    fun aPairQueryAnswersLiveFromTheCapturedFamily() {
-        val capture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
+    fun aPairQueryAnswersLiveFromTheCapturedPairResponse() {
+        val capture = java.io.File("src/test/resources/erail_pair_smet_mys_capture.txt").readText()
         val pairSource = ErailPairSource({ TransportReply(200, capture) }, enabled = true)
         val outcome = ResultsEngine(asset, store, clock, null, pairSource).lookup("SMET", "MYS")
         assertEquals(ResultsEngine.UiStateName.LIVE, outcome.state)
-        assertEquals(1, outcome.rows.size)
-        val row = outcome.rows.single()
-        assertEquals("56269", row.number)
-        assertEquals("SMET MYS FAST PASS", row.name)
-        assertEquals("10:20", row.timeDue)
+        assertEquals(4, outcome.rows.size)
+        val row = outcome.rows.first()
+        assertEquals("16228", row.number)
+        assertEquals("TLGP MYS EXP", row.name)
+        assertEquals("23:00", row.timeDue)
         assertEquals("via erail.in", row.provenanceLabel) // 3.2: never looks like a timetable
-        assertTrue(outcome.note!!.contains("1 trains between SMET and MYS"))
-        assertTrue(outcome.note!!.startsWith("as of 2026-10-06"))
+        assertTrue(outcome.note!!.contains("4 trains between SMET and MYS"))
+        assertTrue(outcome.note!!.startsWith("as of 2026-10-12"))
     }
 
     /** 12.3: a throttle body is a stated failure with a signature - never a parse, never stale. */

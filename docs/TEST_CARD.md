@@ -1,6 +1,6 @@
 # TEST_CARD.md — owner-facing, 5 lines max. What to check on the phone this round.
 
-Round 5 (pair search from your phone): install the new `latest-apk` and search **SMET → MYS**.
-Expect either a list of current trains, each labelled `via erail.in` with an "as of" stamp, OR
-"could not look this up" naming the exact failure - both are correct behaviour; neither shows old
-rows. Then type **56269** -> "show train" for the single-train live answer. Do not bother with CI.
+Round 6 (LIVE pair search): install the new `latest-apk`, search **SMET → MYS**. Expect four
+current trains (16228, 16205, 16226, 16221) with departure times, each labelled `via erail.in`
+and an "as of" stamp. Type **56269** -> "show train" for the single-train answer. Do not bother
+with CI.

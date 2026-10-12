@@ -1,6 +1,14 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.5.0 (rolling `latest-apk`) — LIVE PAIR SEARCH WORKS (current trains, measured endpoint)
+- **On screen:** SMET -> MYS returns the four current trains (16228 TLGP MYS EXP, 16205 MYSURU EXP,
+  16226 SMET-MYS UR EXP, 16221 TLGP-MYS KUVEMPU EXPRESS) with departure times, each labelled
+  `via erail.in` and an "as of" stamp from the feed itself. Verified against a live capture
+  stamped 2026-10-12 10:33 IST.
+- **How:** erail's real pair endpoint (parameters read from their own site code — earlier attempts
+  used guessed names and were throttled).
+
 ## 2.4.0 (rolling `latest-apk`) — PAIR SEARCH QUERIED FROM YOUR OWN PHONE
 - **On screen:** station-pair search now makes a REAL request from your phone (its network reaches
   these sources; my CI runners are throttled, yours is not). Results are labelled `via erail.in`

@@ -1,14 +1,18 @@
 package io.opentrack.core.parse
 
 /**
- * Parses the CAPTURED S2 erail.in payload family (poc/fixtures/s2_erail/trainno_param.txt,
- * captured 2026-10-11). Per KICKOFF 7.2/7.4 the parser is written against a real capture only, and
- * every use is guarded: a body that does not match the captured family returns null and the caller
- * says "the feed may have changed" (12.3) - it never guesses.
+ * Parses the CAPTURED S2 erail.in payload family (core/src/test/resources/
+ * erail_pair_smet_mys_capture.txt captured 2026-10-12 from
+ * `getTrains.aspx?Station_From=SMET&Station_To=MYS&DataSource=AVLSOURCE_IRCTC_NGET&Language=EN&Cache=false`;
+ * erail_trainno_56269_capture.txt from the single-train call, captured 2026-10-11). Per KICKOFF
+ * 7.2/7.4 the parser is written against real captures only, and every use is guarded: a body that
+ * does not match the captured family returns null and the caller says "the feed may have changed"
+ * (12.3) - it never guesses.
  *
- * Captured family: `~~...~~<feedStamp>~^<number>~<name>~<fromName>~<fromCode>~<toName>~<toCode>~
- * ...~<dep HH.MM>~<arr HH.MM>~<dur HH.MM>~<runDays 7 chars>~...` where each train row is anchored
- * by `^<number>`. The station-PAIR response is the same family with one row per train.
+ * Captured family: a header carrying the enquiry pair and the feed stamp
+ * (`~<from>~<fromName>~<to>~<toName>~~<feedStamp>~` or `~~...~~<feedStamp>~`), then one row per
+ * train anchored by `^<number>~<name>~<fromName>~<fromCode>~<toName>~<toCode>~<viaName>~<viaCode>~
+ * <toName>~<toCode>~<dep HH.MM>~<arr HH.MM>~<dur HH.MM>~<runDays 7 chars>~...`
  */
 data class ErailPairResponse(
     val trains: List<ErailTrainPayload>,
@@ -17,7 +21,7 @@ data class ErailPairResponse(
 
 object ErailPairParser {
 
-    private val HEADER = Regex("""^~+(\d{4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2})~+(.*)$""")
+    private val HEADER = Regex("""^~.*?(\d{4}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2}-\d{1,2})~+(.*)$""", RegexOption.DOT_MATCHES_ALL)
     private const val MILLIS_PER_DAY = 86_400_000L
     private const val IST_OFFSET_MILLIS = 5 * 60 * 60 * 1000L + 30 * 60 * 1000L
 
