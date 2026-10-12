@@ -90,7 +90,13 @@ class ResultsViewModel(
     fun showLiveStatus(number: String) {
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {
+                // resolved at CALL time: production builds the real transport on first use, tests
+                // install a fake through SourceLocator before the click
                 val source = ntesStatusSource ?: SourceLocator.ntesStatusSource
+                    ?: NtesRunningStatusSource(
+                        openConnection = { it.openConnection() as java.net.HttpURLConnection },
+                        diagnostics = diagnostics,
+                    )
                 ResultsEngine(
                     asset = asset,
                     store = store,
