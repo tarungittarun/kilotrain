@@ -35,6 +35,8 @@
     booted a real API-34 emulator and ran the instrumented tests green in 15m. And a real device in
     CI proves the APP (install, navigation, store flows) - it does NOT change network egress, so
     live railway data still needs a capture from the owner's network. Two different problems.
+    Its boot is FLAKY (one green, one 600s timeout on the next push), so the job keeps
+    continue-on-error and a stated-reason verdict; the durable proof is the green run's test result.
 10. **When a CI tool fails silently, instrument the exit code and the file it should have
     written.** `avdmanager create avd` exiting 0 while writing nothing cost four rounds; the
     moment the step checked for `$HOME/.android/avd/opentrack_test.ini` it failed WITH THE

@@ -52,6 +52,7 @@ jobs:
           profile: pixel
           target: google_apis
           force-avd-creation: false
+          emulator-boot-timeout: 900  # default 600s flaked on a re-run; a miss reports 'untested, with a reason' (never a fake pass)
           emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -camera-back none
           disable-animations: true
           script: ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace

@@ -17,7 +17,7 @@ phone (reserved for what only a phone can witness).
 | 9 | fetch→parse→store→UI with local mock, no railway egress | L4 | BLOCKED-with-reason | no source has a captured payload (ADR 0002); no parser exists to prove; QA row stays open until M2's capture |
 | 10 | migration failure clears cache and says so | L1 | GREEN | OpenTrackStoreTest.upgradeClearsCacheRatherThanShowingStaleAsFresh |
 | 11 | known-truths gate verdict recorded in artefact; build stays green on data contradiction | L6 | GREEN | gate verdict in CI (checks job) + gate_selftest asserts it never exits non-zero on data |
-| 12 | instrumented L3 on a REAL API-34 emulator | L3 | **GREEN** (run 38207293417, 15m17s): reactivecircus/android-emulator-runner booted a real AVD (emulator-5554, API 34) and `anOpenedTrainCorrectsTheColdStartCopy` ran with 0 failures | TEST-emulator-5554-14-_app-.xml in the run artefact |
+| 12 | instrumented L3 on a REAL API-34 emulator | L3 | **PROVEN** (run 38207293417, 15m17s: emulator-5554 API 34, `anOpenedTrainCorrectsTheColdStartCopy`, 0 failures) **AND FLAKY** (run 38208479376: 'Timeout waiting for emulator to boot' at the 600s default cap - an infrastructure flake, reported as untested-with-reason, never a pass); boot timeout raised to 900s | TEST-emulator-5554-14-_app-.xml + run logs |
 | 13 | owner phone: real TLS/egress, Doze alarm, look and feel | L7 | deferred to M4/M6 | needs-device row when opened |
 
 Waived rows (with reason) will be listed here; none waived yet.
