@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material3.Switch
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -150,6 +151,7 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
                     enabled = it
                     store.enabled = it
                 },
+                modifier = Modifier.testTag("diagnostics-toggle"),
             )
         }
         if (enabled) {

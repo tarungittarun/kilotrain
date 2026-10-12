@@ -3,6 +3,7 @@ package io.opentrack.app.diag
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -40,8 +41,7 @@ class DiagnosticsFlowTest {
 
     private fun enableDiagnostics() {
         compose.onNodeWithText("diagnostics").assertIsDisplayed()
-        // the switch is the second Switch in the bar; toggle it by clicking its row
-        compose.onAllNodesWithText("off")[0].performClick()
+        compose.onNodeWithTag("diagnostics-toggle").performClick()
         compose.waitForIdle()
     }
 
