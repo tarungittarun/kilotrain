@@ -22,24 +22,41 @@ data class RouteStopSchedule(
 )
 
 object ErailRouteParser {
-    private val ROW = Regex("""\^(\d+)~([A-Z0-9]+)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~(\d+)~([^~]*)~""")
+    private val ROW = Regex("""\^(\d+)~([A-Z0-9]+)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~([^~]*)~""")
 
+    /**
+     * Captured layout is positionally identical for middle stops
+     * (`^<n>~<code>~<name>~<arr>~<dep>~<day>~<dist>~...`) and shifts by one for the first/last stop,
+     * which carry a role token (`First`/`Last`): `^<n>~<code>~<name>~First~<arr>~<dep>~...`.
+     * A `0` in a time position is the source's "not stated" sentinel and renders as null so the UI
+     * draws the em dash (3.3) - it is never replaced by an invented time (3.4).
+     */
     fun parse(body: String): List<RouteStopSchedule>? {
         val stops = ROW.findAll(body).mapNotNull { m ->
             val code = m.groupValues[2].trim().uppercase()
             val name = m.groupValues[3].trim()
             if (code.isBlank() || name.isBlank()) return@mapNotNull null
+            val tokens = m.groupValues
+            val hasRole = tokens[4].trim().let { it == "First" || it == "Last" }
+            val role = if (hasRole) tokens[4].trim() else ""
+            val arrivalIdx = if (hasRole) 5 else 4
+            val departureIdx = arrivalIdx + 1
+            val dayIdx = departureIdx + 2
+            val distanceIdx = departureIdx + 3
             RouteStopSchedule(
-                stopNumber = m.groupValues[1].toIntOrNull() ?: return@mapNotNull null,
+                stopNumber = tokens[1].toIntOrNull() ?: return@mapNotNull null,
                 stationCode = code,
                 stationName = name,
-                role = m.groupValues[4].trim(),
-                arrival = m.groupValues[5].trim().takeIf { it.isNotBlank() },
-                departure = m.groupValues[6].trim().takeIf { it.isNotBlank() },
-                dayOffset = m.groupValues[7].toIntOrNull() ?: 1,
-                distanceKm = m.groupValues[8].trim().toIntOrNull(),
+                role = role,
+                arrival = timeOrNull(tokens[arrivalIdx]),
+                departure = timeOrNull(tokens[departureIdx]),
+                dayOffset = tokens[dayIdx].trim().toIntOrNull() ?: 1,
+                distanceKm = tokens[distanceIdx].trim().toIntOrNull(),
             )
         }.toList()
         return stops.ifEmpty { null }
     }
+
+    private fun timeOrNull(raw: String): String? =
+        raw.trim().takeIf { it.isNotBlank() && it != "0" }
 }
