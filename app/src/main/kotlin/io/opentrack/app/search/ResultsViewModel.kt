@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.HttpErailTransport
+import io.opentrack.app.source.SourceLocator
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
 import kotlinx.coroutines.Dispatchers
@@ -48,7 +50,11 @@ class ResultsViewModel(
     ) {
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {
-                block(ResultsEngine(asset, store, clock, erailSource), a, b)
+                // resolved at CALL time (not construction) so tests install a fake before the
+                // click; production resolves to the real transport here.
+                val source = erailSource ?: SourceLocator.erailSource
+                    ?: ErailTrainSource(HttpErailTransport())
+                block(ResultsEngine(asset, store, clock, source), a, b)
             }
             _state.value = UiState(outcome.state, outcome.rows, outcome.bannerSource, outcome.note)
         }
