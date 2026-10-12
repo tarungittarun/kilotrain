@@ -102,7 +102,7 @@ object ErailTrainParser {
     }
 
     /** Inverse of daysFromCivil: epoch day -> [year, month, day]. */
-    internal fun civilFromDays(days: Long): IntArray {
+    fun civilFromDays(days: Long): IntArray {
         var z = days + 719_468L
         val era = (if (z >= 0) z else z - 146_096) / 146_097
         val doe = z - era * 146_097
