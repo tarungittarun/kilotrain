@@ -109,9 +109,30 @@ fun ResultsScreen(
                         TextButton(onClick = { viewModel.showStops(row.number) }) {
                             Text("stop times")
                         }
+                        TextButton(onClick = { viewModel.showLiveStatus(row.number) }) {
+                            Text("live status")
+                        }
                     }
                 }
                 val stopsNote = ui.stopsNote
+                val status = ui.status
+                if (status is ResultsEngine.StatusOutcome.Live) {
+                    item {
+                        Text(
+                            text = StateCopy.liveStatus(status),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                } else if (status is ResultsEngine.StatusOutcome.Unavailable) {
+                    item {
+                        Text(
+                            text = status.reason,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                }
                 if (ui.stops.isEmpty() && stopsNote != null) {
                     item {
                         Text(

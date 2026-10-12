@@ -13,4 +13,7 @@ object SourceLocator {
 
     @Volatile
     var erailRouteSource: ErailRouteSource? = null
+
+    @Volatile
+    var ntesStatusSource: NtesRunningStatusSource? = null
 }

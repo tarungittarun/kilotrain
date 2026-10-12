@@ -6,6 +6,7 @@ import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.source.HttpErailTransport
 import io.opentrack.app.source.SourceLocator
 import io.opentrack.app.store.OpenTrackStore
@@ -24,6 +25,7 @@ class ResultsViewModel(
     private val erailSource: ErailTrainSource? = null,
     private val erailPairSource: ErailPairSource? = null,
     private val erailRouteSource: ErailRouteSource? = null,
+    private val ntesStatusSource: NtesRunningStatusSource? = null,
     private val diagnostics: Diagnostics? = null,
 ) : ViewModel() {
 
@@ -34,6 +36,7 @@ class ResultsViewModel(
         val note: String?,
         val stops: List<ResultsEngine.StopView> = emptyList(),
         val stopsNote: String? = null,
+        val status: ResultsEngine.StatusOutcome? = null,
     )
 
     private val _state = MutableStateFlow(
@@ -72,6 +75,28 @@ class ResultsViewModel(
                 )
             }
             _state.value = UiState(outcome.state, outcome.rows, outcome.bannerSource, outcome.note)
+        }
+    }
+
+    /** Priority 3: the live running status for a train from the current rows. */
+    fun showLiveStatus(number: String) {
+        viewModelScope.launch {
+            val outcome = withContext(Dispatchers.Default) {
+                val source = ntesStatusSource ?: SourceLocator.ntesStatusSource
+                    ?: return@withContext null
+                ResultsEngine(
+                    asset = asset,
+                    store = store,
+                    clock = clock,
+                    ntesStatusSource = source,
+                    diagnostics = diagnostics,
+                ).liveStatus(number)
+            } ?: return@launch
+            val current = _state.value
+            _state.value = when (outcome) {
+                is ResultsEngine.StatusOutcome.Live -> current.copy(status = outcome, stops = emptyList(), stopsNote = null)
+                is ResultsEngine.StatusOutcome.Unavailable -> current.copy(stops = emptyList(), stopsNote = outcome.reason)
+            }
         }
     }
 

@@ -4,6 +4,8 @@ import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailRouteSource
+import io.opentrack.app.source.LiveStatusLookup
+import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.core.diag.Diagnostics
@@ -39,6 +41,7 @@ class ResultsEngine(
     private val erailSource: ErailTrainSource? = null,
     private val erailPairSource: ErailPairSource? = null,
     private val erailRouteSource: ErailRouteSource? = null,
+    private val ntesStatusSource: NtesRunningStatusSource? = null,
     private val diagnostics: Diagnostics? = null,
 ) {
     data class Outcome(
@@ -208,6 +211,39 @@ class ResultsEngine(
                 )
             }
         }
+    }
+
+    /** Priority 3: the live status fields the NTES API documents (no per-stop array yet). */
+    fun liveStatus(trainNumber: String): StatusOutcome {
+        val result = ntesStatusSource?.fetch(trainNumber)
+            ?: return StatusOutcome.Unavailable("live status source not installed (12.6)")
+        return when (result) {
+            is LiveStatusLookup.Live -> StatusOutcome.Live(
+                trainName = result.status.trainName ?: "train ${result.status.trainNo ?: trainNumber}",
+                lastUpdate = result.status.lastUpdate ?: "no position published right now",
+                delayDeparture = result.status.delayDeparture,
+                delayArrival = result.status.delayArrival,
+                currentStationName = result.status.currentStationName,
+                platform = result.status.platform,
+                nextStationName = result.status.nextStationName,
+            )
+            is LiveStatusLookup.Failed -> StatusOutcome.Unavailable(
+                "could not get the live status (${result.failure}: ${result.detail})"
+            )
+        }
+    }
+
+    sealed interface StatusOutcome {
+        data class Live(
+            val trainName: String,
+            val lastUpdate: String,
+            val delayDeparture: String?,
+            val delayArrival: String?,
+            val currentStationName: String?,
+            val platform: String?,
+            val nextStationName: String?,
+        ) : StatusOutcome
+        data class Unavailable(val reason: String) : StatusOutcome
     }
 
     sealed interface RouteOutcome {

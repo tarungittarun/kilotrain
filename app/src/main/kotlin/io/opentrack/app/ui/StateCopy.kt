@@ -33,6 +33,25 @@ object StateCopy {
         return "$code $name — arr $arr · dep $dep"
     }
 
+    /**
+     * Live status line (priority 3). Every field is what NTES published; an unstated one is an em
+     * dash. The per-stop ACTUAL array is NOT shown because it is not captured yet - the line says
+     * so instead of inventing times (3.4).
+     */
+    fun liveStatus(status: io.opentrack.app.search.ResultsEngine.StatusOutcome.Live): String = buildString {
+        append("live status · ${status.trainName}\n")
+        append(status.lastUpdate)
+        append("\ndelay: dep ")
+        append(status.delayDeparture ?: "—")
+        append(" · arr ")
+        append(status.delayArrival ?: "—")
+        append("\nplatform: ")
+        append(status.platform ?: "—")
+        append("\nnext station: ")
+        append(status.nextStationName ?: "—")
+        append("\nvia NTES · per-stop actual times are not published by this source yet")
+    }
+
     /** Provenance-readable row line (10.5). */
     fun row(number: String, name: String, timeDue: String, provenanceLabel: String): String =
         "$number · $name — $timeDue · $provenanceLabel"

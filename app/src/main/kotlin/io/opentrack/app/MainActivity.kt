@@ -8,6 +8,7 @@ import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
 import io.opentrack.app.diag.DiagnosticsStore
 import io.opentrack.app.search.ResultsViewModel
+import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.app.ui.ResultsScreen
 import io.opentrack.core.contract.SystemClock
@@ -46,6 +47,7 @@ class MainActivity : ComponentActivity() {
             // no source passed here: the ViewModel resolves it at search time, so tests can
             // install a fake (SourceLocator) while production gets the real transport (3.1)
             diagnostics = diagnosticsStore.diagnostics,
+            ntesStatusSource = NtesRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }),
         )
 
         setContent {
