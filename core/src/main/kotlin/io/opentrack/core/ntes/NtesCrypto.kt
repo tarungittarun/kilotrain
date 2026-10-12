@@ -31,8 +31,10 @@ object NtesCrypto {
     /** Decrypts a response's jsonIn; null when the layers do not decode (never a guessed parse). */
     fun decodeResponse(jsonIn: String): String? {
         val enc = if (jsonIn.contains("#")) jsonIn.substringAfter("#") else jsonIn
+        if (enc.isBlank() || enc.length % 2 != 0) return null
+        if (!enc.all { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }) return null
         val cipherBytes = try {
-            base64Decode(unhex(enc).let { String(it, Charsets.US_ASCII) })
+            base64Decode(String(unhex(enc), Charsets.US_ASCII))
         } catch (e: Exception) {
             return null
         }
