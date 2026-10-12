@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.opentrack.core.contract.Provenance
 import io.opentrack.core.contract.ProvenanceKind
+import io.opentrack.app.BuildConfig
 import io.opentrack.core.contract.label
 import io.opentrack.app.search.ResultsEngine
 import io.opentrack.app.search.ResultsViewModel
@@ -98,6 +99,12 @@ fun ResultsScreen(
                 Text(text = note, style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(top = 4.dp))
             }
+
+            Text(
+                text = "OpenTrack India ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
 
             LazyColumn(
                 modifier = Modifier.padding(top = 8.dp),
