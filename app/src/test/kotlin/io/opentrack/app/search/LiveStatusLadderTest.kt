@@ -88,7 +88,7 @@ class LiveStatusLadderTest {
             asset, store, clock, null, null, routeSource(), ntesSource(ntesAnswer), diagnostics,
         )
         val outcome = engine.liveStatus("16228")
-        assertTrue(outcome is ResultsEngine.StatusOutcome.Live)
+        assertTrue("GOT: $outcome", outcome is ResultsEngine.StatusOutcome.Live)
         val live = outcome as ResultsEngine.StatusOutcome.Live
         assertEquals("NTES live running status", live.sourceLabel)
         assertEquals(2, live.stops.size)
