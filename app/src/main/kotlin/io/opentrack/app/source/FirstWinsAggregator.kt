@@ -3,15 +3,15 @@ package io.opentrack.app.source
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.delay
 
 /**
  * ADR 0014: the FIRST-WINS aggregator. The owner's rule - "have at least 5 fast, reliable,
  * easy-connectable sources and display the first received info to the user".
  *
- * Every rung is a named, independently-cancellable attempt (6.3/3.8: nothing blocks the first
- * answer; a slow rung is cancelled the moment a faster one lands). Fast rungs that finish before
- * the race loop starts are honoured in rung order, so a synchronous answer is still "first".
+ * Rungs run concurrently; the first to produce a non-null answer wins and the rest are cancelled
+ * (3.8: nothing blocks the first answer). Completion order is observed by polling the deferreds,
+ * which keeps the semantics deterministic for both fast in-process sources and slow network ones.
  */
 class FirstWinsAggregator<T> {
 
@@ -28,51 +28,35 @@ class FirstWinsAggregator<T> {
         val attempts = java.util.concurrent.ConcurrentLinkedQueue<String>()
         val started = rungs.map { rung -> rung to async { tryAttempt(rung, attempts) } }
 
-        // 1) fast path: rungs that already answered (fakes, caches, instant sources), in order
-        for ((rung, deferred) in started) {
-            if (deferred.isCompleted) {
-                val value = completedValue(deferred)
-                if (value != null) {
-                    cancelRest(started, rung.name, attempts)
-                    return@coroutineScope Outcome(value, rung.name, attempts.toList())
-                }
-            }
-        }
-
-        // 2) race the pending rungs: the first to land wins, the rest are cancelled
         var winner: T? = null
         var winnerName: String? = null
         while (winner == null) {
-            val pending = started.filter { it.second.isActive }
-            if (pending.isEmpty()) break
-            select<Unit> {
-                pending.forEach { (rung, deferred) ->
-                    deferred.onAwait { value ->
-                        if (value != null) {
-                            winner = value
-                            winnerName = rung.name
-                        } else {
-                            attempts.add("${rung.name}: no answer")
-                        }
+            val landed = started.firstOrNull { (_, deferred) ->
+                deferred.isCompleted && completedValue(deferred) != null
+            }
+            if (landed != null) {
+                winner = completedValue(landed.second)
+                winnerName = landed.first.name
+                break
+            }
+            if (started.all { (_, deferred) -> deferred.isCompleted }) break
+            delay(POLL_MS) // observe completion order without blocking the first answer
+        }
+
+        started.forEach { (rung, deferred) ->
+            if (rung.name != winnerName) {
+                if (deferred.isActive) {
+                    attempts.add("${rung.name}: cancelled (a faster source answered)")
+                    deferred.cancel()
+                } else {
+                    val value = completedValue(deferred)
+                    if (value == null && attempts.none { it.startsWith(rung.name + ":") }) {
+                        attempts.add("${rung.name}: no answer")
                     }
                 }
             }
         }
-        cancelRest(started, winnerName, attempts)
         Outcome(winner, winnerName, attempts.toList())
-    }
-
-    private fun cancelRest(
-        started: List<Pair<Rung<T>, Deferred<T?>>>,
-        winnerName: String?,
-        attempts: java.util.Queue<String>,
-    ) {
-        started.forEach { (rung, deferred) ->
-            if (rung.name != winnerName && deferred.isActive) {
-                attempts.add("${rung.name}: cancelled (a faster source answered)")
-                deferred.cancel()
-            }
-        }
     }
 
     private fun completedValue(deferred: Deferred<T?>): T? =
@@ -83,5 +67,9 @@ class FirstWinsAggregator<T> {
     } catch (e: Exception) {
         attempts.add("${rung.name}: ${e.javaClass.simpleName}")
         null
+    }
+
+    private companion object {
+        const val POLL_MS = 20L
     }
 }
