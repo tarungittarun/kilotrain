@@ -122,11 +122,15 @@ class ResultsEngineTest {
         assertEquals("MYS", ResultsEngine.codePreserved("mys"))
     }
 
-    /** Flags follow captures: the number endpoint has one (ADR 0008); pair and NTES do not. */
+    /**
+     * Flags follow captures: the erail train-number endpoint has one (ADR 0008), the erail pair
+     * endpoint is guarded by the measured live call (ADR 0011), and NTES carries the official app's
+     * documented public envelope plus documented status fields (ADR 0012).
+     */
     @Test
     fun flagsFollowCaptures() {
         assertTrue(io.opentrack.app.source.FeatureFlags.ERAIL_TRAIN_NUMBER)  // capture 2026-10-11
         assertTrue(io.opentrack.app.source.FeatureFlags.ERAIL_PAIR)          // guarded runtime query (ADR 0010)
-        assertTrue(!io.opentrack.app.source.FeatureFlags.NTES)               // no envelope capture
+        assertTrue(io.opentrack.app.source.FeatureFlags.NTES)                 // documented public envelope, guarded (ADR 0012)
     }
 }

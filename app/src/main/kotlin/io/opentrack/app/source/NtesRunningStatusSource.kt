@@ -4,6 +4,7 @@ import io.opentrack.core.contract.SourceFailure
 import io.opentrack.core.ntes.NtesCrypto
 import io.opentrack.core.ntes.NtesLiveStatus
 import io.opentrack.core.ntes.NtesLiveStatusParser
+import io.opentrack.core.parse.ErailTrainParser
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -103,7 +104,7 @@ class NtesRunningStatusSource(
             fun defaultDate(millis: Long): String {
                 val ist = millis + 5 * 60 * 60 * 1000L + 30 * 60 * 1000L
                 val days = Math.floorDiv(ist, 86_400_000L)
-                val ymd = civilFromDays(days)
+                val ymd = ErailTrainParser.civilFromDays(days) // the core's tested inverse (7.3)
                 val months = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun",
                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
                 return "%02d-%s-%04d".format(ymd[2], months[ymd[1] - 1], ymd[0])
