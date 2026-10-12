@@ -10,7 +10,7 @@ class DiagnosticsTest {
     @Test
     fun disabledCollectorWritesNothing() {
         var lines = 0
-        val diag = Diagnostics({ lines++ }, enabled = false, now = { 1L })
+        val diag = Diagnostics({ lines++ }, { false }, now = { 1L })
         diag.pairSearch(mapOf("from" to "SMET"))
         diag.deviceInfo(mapOf("model" to "x"))
         diag.record(DiagKind.SCREEN_STATE, mapOf("state" to "LIVE"))
@@ -20,7 +20,7 @@ class DiagnosticsTest {
     @Test
     fun enabledCollectorWritesOneLinePerEvent() {
         val lines = mutableListOf<String>()
-        val diag = Diagnostics({ lines.add(it) }, enabled = true, now = { 42L })
+        val diag = Diagnostics({ lines.add(it) }, { true }, now = { 42L })
         diag.pairSearch(mapOf("from" to "SMET", "to" to "MYS"))
         assertEquals(1, lines.size)
         assertTrue(lines.single().contains("\"ts\":42"))
