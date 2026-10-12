@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
 import io.opentrack.app.source.ErailRouteSource
+import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
@@ -64,10 +65,13 @@ class LiveStatusLadderTest {
 
     private val routeCapture =
         java.io.File("src/test/resources/erail_route_56269_capture.txt").readText()
+    private val trainCapture =
+        java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
 
-    private fun routeSource() = ErailRouteSource(
+    /** the route rung needs the train payload (for the train id) then the TRAINROUTE response */
+    private fun routeSource(trainBody: String = trainCapture) = ErailRouteSource(
         { io.opentrack.app.source.TransportReply(200, routeCapture) },
-        ntesSource(ntesAnswer),
+        ErailTrainSource({ io.opentrack.app.source.TransportReply(200, trainBody) }),
     )
 
     @Before
@@ -114,7 +118,7 @@ class LiveStatusLadderTest {
             asset, store, clock, null, null,
             ErailRouteSource(
                 { io.opentrack.app.source.TransportReply(200, "~~~~~nope") },
-                ntesSource("~~~~~nope"),
+                ErailTrainSource({ io.opentrack.app.source.TransportReply(200, trainCapture) }),
             ),
             ntesSource("", 500),
             diagnostics,
