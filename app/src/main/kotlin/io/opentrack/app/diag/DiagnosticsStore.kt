@@ -29,7 +29,7 @@ class DiagnosticsStore(
         logFile.appendText(line + "\n")
         trim()
     }
-    val diagnostics = Diagnostics(sink, { enabled }, clock)
+    val diagnostics = Diagnostics(sink, { this.enabled }, clock) // the PROPERTY, not the ctor param
 
     var enabled: Boolean = enabled
         set(value) {
