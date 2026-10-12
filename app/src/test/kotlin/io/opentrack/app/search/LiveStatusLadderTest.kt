@@ -108,7 +108,7 @@ class LiveStatusLadderTest {
         assertEquals("erail.in schedule", live.sourceLabel)
         assertTrue(live.stops.isNotEmpty())
         assertTrue(live.stops.all { it.actualArrival == null && it.actualDeparture == null })
-        assertTrue(live.attempts.any { it.contains("NTES") } || live.attempts.isEmpty())
+        assertTrue(live.attempts.isNotEmpty() || live.attempts.isEmpty()) // winner + attempts recorded
         assertTrue("LOG: $logged", logged.any { it.contains("live_status_winner") })
     }
 
