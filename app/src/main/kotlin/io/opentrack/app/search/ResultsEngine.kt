@@ -73,12 +73,14 @@ class ResultsEngine(
                         .label(clock.nowMillis()),
                 )
             }
+            recordOutcome(diagnostics, "pair", from, to, live.wire, UiStateName.LIVE, rows,
+                rows.size)
             return Outcome(
                 state = UiStateName.LIVE,
                 rows = rows,
                 bannerSource = response.trains.firstOrNull()?.source ?: "erail.in",
                 note = "as of ${ErailTrainParser.formatIstOfDay(response.feedStampMillis)} "
-                    + "(${response.trains.size} trains between $from and $to, the feed's own stamp)",
+                + "(${response.trains.size} trains between $from and $to, the feed's own stamp)",
             )
         }
         val failure = live as? PairLookupResult.Failed
@@ -132,16 +134,18 @@ class ResultsEngine(
         if (live is TrainLookup.Live) {
             val p = live.payload
             val provenance = Provenance(ProvenanceKind.VIA_SOURCE, p.source, p.feedStampMillis)
+            val rows = listOf(
+                RowView(
+                    number = p.number,
+                    name = p.name,
+                    timeDue = p.departureMinutesOfDay?.let { formatMinutes(it) },
+                    provenanceLabel = provenance.label(clock.nowMillis()),
+                )
+            )
+            recordOutcome(diagnostics, "number", p.number, "-", live.wire, UiStateName.LIVE, rows, 1)
             return Outcome(
                 state = UiStateName.LIVE,
-                rows = listOf(
-                    RowView(
-                        number = p.number,
-                        name = p.name,
-                        timeDue = p.departureMinutesOfDay?.let { formatMinutes(it) },
-                        provenanceLabel = provenance.label(clock.nowMillis()),
-                    )
-                ),
+                rows = rows,
                 bannerSource = p.source,
                 note = "as of ${ErailTrainParser.formatIstOfDay(p.feedStampMillis)} (the feed's own stamp, not this phone's clock)",
             )
