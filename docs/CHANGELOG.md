@@ -1,6 +1,14 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.9.0 (rolling `latest-apk`) — ATTACHABLE DIAGNOSTICS + LIVE-STATUS LOGGING
+- **On screen:** the diagnostics panel's file button is now **"save + share file"**: it copies the
+  log into the public **Downloads** folder as `opentrack-diagnostics-<time>.jsonl` and shares that
+  real file, so it can be attached in a chat or opened from a file manager (the previous share sent
+  a private content URI, which many apps refuse).
+- **The live-status path now records itself:** every NTES request logs its HTTP status, a structural
+  signature of the response, or the typed failure - the gap in the owner's log is closed.
+
 ## 2.8.0 (rolling `latest-apk`) — PER-STOP ACTUAL vs SCHEDULED (NTES, reference payload)
 - **On screen:** each train row's "live status" now shows the NTES summary PLUS per-stop rows:
   station · scheduled arr/dep · ACTUAL arr/dep · delay in minutes · "here now" marker. Unstated
