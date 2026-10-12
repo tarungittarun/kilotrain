@@ -52,6 +52,8 @@ class NtesRunningStatusSourceTest {
 
     private fun source(clock: () -> Long) = NtesRunningStatusSource(connectionFactory(), clock)
 
+    // 2026-10-14T17:46:40Z == 2026-10-14 23:16 IST
+
     @Test
     fun sendsTheDocumentedJsonBody() {
         val src = source { 1_792_000_000_000L }
@@ -59,7 +61,7 @@ class NtesRunningStatusSourceTest {
         assertTrue(result is NtesRunningStatusSource.NtesStatusResult.Live)
         assertTrue(lastBody.contains("\"queryType\":\"6\""))
         assertTrue(lastBody.contains("\"trainNo\":\"16228\""))
-        assertTrue(lastBody.contains("\"startDate\":\"13-Oct-2026\""))
+        assertTrue(lastBody.contains("\"startDate\":\"14-Oct-2026\""))
         assertTrue(lastBody.contains("\"stationCode\":\"\""))
         assertTrue(lastBody.contains("\"lang\":\"en\""))
     }
@@ -114,10 +116,10 @@ class NtesRunningStatusSourceTest {
 
     @Test
     fun theDateUsesThreeLetterMonthsNeverNumericMonths() {
-        val src = source { 1_792_000_000_000L } // 2026-10-13T05:46:40Z -> IST 11:16 13-Oct-2026
+        val src = source { 1_792_000_000_000L } // 2026-10-14T17:46:40Z -> 23:16 IST 14-Oct-2026
         src.fetch("16228")
         val date = Regex("\"startDate\":\"([^\"]+)\"").find(lastBody)!!.groupValues[1]
-        assertEquals("13-Oct-2026", date)
+        assertEquals("14-Oct-2026", date)
         assertTrue(date.matches(Regex("\\d{2}-[A-Z][a-z]{2}-\\d{4}")))
     }
 }
