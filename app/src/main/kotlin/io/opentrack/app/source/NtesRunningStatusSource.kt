@@ -39,9 +39,9 @@ class NtesRunningStatusSource(
     }
 
     fun fetch(trainNumber: String): NtesStatusResult {
-        if (!enabled) return Result.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
+        if (!enabled) return NtesStatusResult.Failed(SourceFailure.OFFLINE, "source disabled by flag (12.6)")
         val train = trainNumber.trim()
-        cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it) } // protection 3
+        cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it.value) } // protection 3
         val started = clock()
         val date = defaultDate(started) // protection 1
         val reply = post(plainBody(train, date), DALVIK_UA)
