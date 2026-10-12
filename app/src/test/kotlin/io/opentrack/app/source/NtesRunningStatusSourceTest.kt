@@ -19,48 +19,42 @@ class NtesRunningStatusSourceTest {
         {"trainNo":"16228","currentStatusStr":"Train is running 9 min late",
          "trainFullStatus":[
            {"stnCode":"SMET","stnName":"Shivamogga Town","schArrTime":"22:55","schDepTime":"23:00",
-            "actArrTime":"23:05","actDepTime":"23:10","arrDelay":"10","depDelay":"10","isCurrentStn":"false"},
+            "actArrTime":"23:05","actDepTime":"23:10","arrDelay":"10","depDelay":"10","isCurrentStn":false},
            {"stnCode":"SME","stnName":"Shivamogga H","schArrTime":"23:05","schDepTime":"23:10",
-            "actArrTime":"23:15","actDepTime":"23:20","arrDelay":"10","depDelay":"10","isCurrentStn":"true"}
+            "actArrTime":"23:15","actDepTime":"23:20","arrDelay":"10","depDelay":"10","isCurrentStn":true}
          ]}
     """.trimIndent()
 
     private var requests = 0
-    private var lastBody: String? = null
-    private var lastUserAgent: String? = null
+    private var lastBody: String = ""
+    private var response: Pair<Int, String> = 200 to documentedAnswer
 
-    private fun connection(respond: () -> Pair<Int, String>) = { url: URL ->
+    private fun connectionFactory() = { url: URL ->
         requests += 1
         object : HttpURLConnection(url) {
             override fun disconnect() {}
             override fun usingProxy(): Boolean = false
-            private val bytes = respond().let { (status, body) ->
-                lastBody = ""
-                body.toByteArray()
-            }
-            private var written: ByteArray = ByteArray(0)
+            override fun connect() {}
             override fun getOutputStream(): OutputStream =
                 object : OutputStream() {
                     override fun write(b: Int) {}
                     override fun write(b: ByteArray, off: Int, len: Int) {
-                        written = b.copyOfRange(off, off + len)
-                        lastBody = String(written)
+                        lastBody = String(b, off, len, Charsets.UTF_8)
                     }
                 }
-            override fun getResponseCode(): Int = respondCode()
-            private fun respondCode(): Int = 200
-            override fun getInputStream() = ByteArrayInputStream(bytes)
-            override fun getErrorStream(): java.io.InputStream? = null
+            override fun getResponseCode(): Int = response.first
+            override fun getInputStream() =
+                ByteArrayInputStream(response.second.toByteArray(Charsets.UTF_8))
+            override fun getErrorStream(): java.io.InputStream? =
+                ByteArrayInputStream(response.second.toByteArray(Charsets.UTF_8))
         }
     }
 
-    private fun source(clock: () -> Long, respond: () -> Pair<Int, String> = { 200 to documentedAnswer }) =
-        NtesRunningStatusSource(connection(respond), clock)
+    private fun source(clock: () -> Long) = NtesRunningStatusSource(connectionFactory(), clock)
 
     @Test
-    fun sendsTheDocumentedJsonBodyAndDalvikAgent() {
-        var now = 1_792_000_000_000L
-        val src = source({ now })
+    fun sendsTheDocumentedJsonBody() {
+        val src = source { 1_792_000_000_000L }
         val result = src.fetch("16228")
         assertTrue(result is NtesRunningStatusSource.NtesStatusResult.Live)
         val body = org.json.JSONObject(lastBody)
@@ -73,7 +67,7 @@ class NtesRunningStatusSourceTest {
 
     @Test
     fun parsesPerStopScheduledAgainstActual() {
-        val src = source({ 1_792_000_000_000L })
+        val src = source { 1_792_000_000_000L }
         val live = src.fetch("16228") as NtesRunningStatusSource.NtesStatusResult.Live
         assertEquals("Train is running 9 min late", live.status.currentStatus)
         val stops = live.status.stops
@@ -90,7 +84,7 @@ class NtesRunningStatusSourceTest {
     @Test
     fun theNinetySecondCacheProtectsTheEndpoint() {
         var now = 1_792_000_000_000L
-        val src = source({ now })
+        val src = source { now }
         src.fetch("16228")
         assertEquals(1, requests)
         now += 60_000
@@ -104,26 +98,27 @@ class NtesRunningStatusSourceTest {
 
     @Test
     fun aThrottleBodyIsAStatedFailure() {
-        val src = source({ 1L }, { 200 to "~~~~~Please try again after some time." })
+        response = 200 to "~~~~~Please try again after some time."
+        val src = source { 1L }
         val failed = src.fetch("16228") as NtesRunningStatusSource.NtesStatusResult.Failed
         assertEquals(SourceFailure.SHAPE_UNKNOWN, failed.failure)
         assertTrue(failed.detail.contains("protocol may have changed"))
     }
 
     @Test
-    fun httpErrorAndOfflineAreTyped() {
-        val http = source({ 1L }, { 503 to "unavailable" })
-        assertTrue((http.fetch("1") as NtesRunningStatusSource.NtesStatusResult.Failed).failure
-            == SourceFailure.HTTP)
+    fun httpErrorIsTyped() {
+        response = 503 to "unavailable"
+        val src = source { 1L }
+        val failed = src.fetch("16228") as NtesRunningStatusSource.NtesStatusResult.Failed
+        assertEquals(SourceFailure.HTTP, failed.failure)
     }
 
     @Test
     fun theDateUsesThreeLetterMonthsNeverNumericMonths() {
-        var now = 1_792_000_000_000L // 2026-10-13T05:46:40Z -> IST 11:16 13-Oct-2026
-        val src = source({ now })
+        val src = source { 1_792_000_000_000L } // 2026-10-13T05:46:40Z -> IST 11:16 13-Oct-2026
         src.fetch("16228")
         val date = org.json.JSONObject(lastBody).getString("startDate")
-        assertTrue(date.matches(Regex("\\d{2}-[A-Z][a-z]{2}-\\d{4}")))
         assertEquals("13-Oct-2026", date)
+        assertTrue(date.matches(Regex("\\d{2}-[A-Z][a-z]{2}-\\d{4}")))
     }
 }
