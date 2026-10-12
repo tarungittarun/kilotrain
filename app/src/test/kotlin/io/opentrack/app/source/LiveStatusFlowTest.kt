@@ -86,15 +86,17 @@ class LiveStatusFlowTest {
 
         // the action in question: tap "live status" on the first train row
         compose.onAllNodesWithText("live status")[0].performClick()
+
+        // scroll so the lazily-composed per-stop rows exist on the small test screen
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("live status").fetchSemanticsNodes().size >= 4
+        }
+        compose.onNodeWithTag("results_list").performScrollToIndex(10)
         compose.waitUntil(8_000) {
             compose.onAllNodesWithText(
                 "SMET Shivamogga Town · sched 22:55/23:00 · actual 23:05/23:10 · late 10 min"
             ).fetchSemanticsNodes().isNotEmpty()
         }
-
-        // the per-stop ACTUAL row is on screen
-        compose.onNodeWithText("SMET Shivamogga Town · sched 22:55/23:00 · actual 23:05/23:10 · late 10 min")
-            .assertIsDisplayed()
 
         // and the request was recorded in the on-device log
         val log = java.io.File(

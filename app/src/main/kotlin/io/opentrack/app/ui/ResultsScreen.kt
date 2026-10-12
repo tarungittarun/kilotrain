@@ -107,7 +107,7 @@ fun ResultsScreen(
             )
 
             LazyColumn(
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 8.dp).testTag("results_list"),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(ui.rows) { row ->
