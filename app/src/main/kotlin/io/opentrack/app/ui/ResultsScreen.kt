@@ -130,7 +130,7 @@ fun ResultsScreen(
                             text = StateCopy.liveStatusHeader(
                                 trainNo = status.trainNo,
                                 currentStatus = status.currentStatus,
-                                provenanceLabel = label.label(clock = { System.currentTimeMillis() }),
+                                provenanceLabel = label.label(System.currentTimeMillis()),
                             ),
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.padding(top = 8.dp),

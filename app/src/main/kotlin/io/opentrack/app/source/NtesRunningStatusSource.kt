@@ -44,10 +44,10 @@ class NtesRunningStatusSource(
         cache.get(train, TTL_MS)?.let { return NtesStatusResult.Live(it) } // protection 3
         val started = clock()
         val date = defaultDate(started) // protection 1
-        val primary = post { body = plainBody(train, date); ua = DALVIK_UA }
-        val body = when (primary) {
-            is Wire.Ok -> primary.body
-            is Wire.Failure -> return NtesStatusResult.Failed(primary.failure, primary.detail)
+        val reply = post(plainBody(train, date), DALVIK_UA)
+        val body = when (reply) {
+            is Wire.Ok -> reply.body
+            is Wire.Failure -> return NtesStatusResult.Failed(reply.failure, reply.detail)
         }
         // The documented plain-JSON answer; if the gateway answers with the older encrypted form
         // (public client documents it too), decode that instead of failing.
@@ -68,23 +68,20 @@ class NtesRunningStatusSource(
         return NtesCrypto.decodeResponse(jsonIn)
     }
 
-    private data class Body(val body: String, val ua: String)
-
-    private fun post(builder: () -> Body): Wire {
-        val spec = builder()
+    private fun post(requestBody: String, userAgent: String): Wire {
         return try {
             val connection = openConnection(URL(NtesCrypto.BASE_URL))
             connection.requestMethod = "POST"
             connection.connectTimeout = 10_000
             connection.readTimeout = 20_000
             connection.setRequestProperty("Content-Type", "application/json; charset=utf-8")
-            connection.setRequestProperty("User-Agent", spec.ua)
+            connection.setRequestProperty("User-Agent", userAgent)
             if (connection is HttpsURLConnection) {
                 // protection 2: widen the offered suites, KEEP verification on
                 connection.sslSocketFactory = legacyTlsFactory()
             }
             connection.doOutput = true
-            connection.outputStream.use { it.write(spec.body.toByteArray(Charsets.UTF_8)) }
+            connection.outputStream.use { it.write(requestBody.toByteArray(Charsets.UTF_8)) }
             val status = connection.responseCode
             val text = try {
                 connection.inputStream.bufferedReader().use { it.readText() }
