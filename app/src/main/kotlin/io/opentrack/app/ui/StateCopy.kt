@@ -26,6 +26,14 @@ object StateCopy {
             "${source ?: "the source"}'s feed may have changed. Nothing to show until it is re-checked."
     }
 
+    /** Per-stop schedule line: only what the source states; an unstated time renders as an em dash. */
+    fun stop(code: String, name: String, arrival: String?, departure: String?, dayOffset: Int): String {
+        val arr = arrival ?: "—"
+        val dep = departure ?: "—"
+        val day = if (dayOffset > 1) " (day $dayOffset)" else ""
+        return "$code $name — arr $arr · dep $dep$day"
+    }
+
     /** Provenance-readable row line (10.5). */
     fun row(number: String, name: String, timeDue: String, provenanceLabel: String): String =
         "$number · $name — $timeDue · $provenanceLabel"

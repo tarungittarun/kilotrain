@@ -3,7 +3,9 @@ package io.opentrack.app.search
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.PairLookupResult
+import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.app.source.FeatureFlags
 import io.opentrack.app.source.TrainLookup
 import io.opentrack.app.store.OpenTrackStore
@@ -35,6 +37,7 @@ class ResultsEngine(
     private val clock: Clock,
     private val erailSource: ErailTrainSource? = null,
     private val erailPairSource: ErailPairSource? = null,
+    private val erailRouteSource: ErailRouteSource? = null,
 ) {
     data class Outcome(
         val state: UiStateName,
@@ -133,6 +136,43 @@ class ResultsEngine(
         val name: String,
         val timeDue: String?,
         val provenanceLabel: String,
+    )
+
+    /** Priority 3 (schedule half): the per-stop schedule, only what the source states. */
+    fun lookupRoute(number: String): RouteOutcome {
+        val result = erailRouteSource?.fetch(number.trim())
+            ?: return RouteOutcome.Unavailable("route source not installed (12.6)")
+        return when (result) {
+            is RouteLookupResult.Live -> RouteOutcome.Stops(
+                result.stops.map { stop ->
+                    StopView(
+                        code = stop.stationCode,
+                        name = stop.stationName,
+                        arrival = stop.arrival,
+                        departure = stop.departure,
+                        dayOffset = stop.dayOffset,
+                        distanceKm = stop.distanceKm,
+                    )
+                }
+            )
+            is RouteLookupResult.Failed -> RouteOutcome.Unavailable(
+                "could not get the stop times (${result.failure}: ${result.detail})"
+            )
+        }
+    }
+
+    sealed interface RouteOutcome {
+        data class Stops(val stops: List<StopView>) : RouteOutcome
+        data class Unavailable(val reason: String) : RouteOutcome
+    }
+
+    data class StopView(
+        val code: String,
+        val name: String,
+        val arrival: String?,
+        val departure: String?,
+        val dayOffset: Int,
+        val distanceKm: Int?,
     )
 
     enum class UiStateName {

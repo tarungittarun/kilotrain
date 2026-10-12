@@ -22,6 +22,9 @@ data class ErailTrainPayload(
     val runDaysRaw: String,
     /** feed stamp parsed from the payload - freshness comes from HERE, never System.now (10.3). */
     val feedStampMillis: Long,
+    /** erail's internal train id, needed to ask for the per-stop route (measured field). */
+    val trainId: String?,
+    val stopCount: Int?,
     val source: String = "erail.in",
 )
 
@@ -51,6 +54,8 @@ object ErailTrainParser {
             durationMinutes = parseTime(fields[11]),
             runDaysRaw = fields[12].trim(),
             feedStampMillis = stampMillis,
+            trainId = fields.getOrNull(32)?.trim()?.takeIf { it.isNotBlank() },
+            stopCount = fields.getOrNull(27)?.trim()?.toIntOrNull(),
         )
     }
 

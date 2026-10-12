@@ -10,4 +10,7 @@ object SourceLocator {
 
     @Volatile
     var erailPairSource: ErailPairSource? = null
+
+    @Volatile
+    var erailRouteSource: ErailRouteSource? = null
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.source.ErailPairSource
+import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.HttpErailTransport
 import io.opentrack.app.source.SourceLocator
@@ -21,6 +22,7 @@ class ResultsViewModel(
     private val clock: Clock,
     private val erailSource: ErailTrainSource? = null,
     private val erailPairSource: ErailPairSource? = null,
+    private val erailRouteSource: ErailRouteSource? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -28,6 +30,8 @@ class ResultsViewModel(
         val rows: List<ResultsEngine.RowView>,
         val bannerSource: String?,
         val note: String?,
+        val stops: List<ResultsEngine.StopView> = emptyList(),
+        val stopsNote: String? = null,
     )
 
     private val _state = MutableStateFlow(
@@ -61,6 +65,26 @@ class ResultsViewModel(
                 block(ResultsEngine(asset, store, clock, source, pairSource), a, b)
             }
             _state.value = UiState(outcome.state, outcome.rows, outcome.bannerSource, outcome.note)
+        }
+    }
+
+    /** Priority 3: show the stop times for a train from the current rows. */
+    fun showStops(number: String) {
+        viewModelScope.launch {
+            val outcome = withContext(Dispatchers.Default) {
+                val routeSource = erailRouteSource ?: SourceLocator.erailRouteSource ?: return@withContext null
+                ResultsEngine(
+                    asset = asset,
+                    store = store,
+                    clock = clock,
+                    erailRouteSource = routeSource,
+                ).lookupRoute(number)
+            } ?: return@launch
+            val current = _state.value
+            _state.value = when (outcome) {
+                is ResultsEngine.RouteOutcome.Stops -> current.copy(stops = outcome.stops, stopsNote = null)
+                is ResultsEngine.RouteOutcome.Unavailable -> current.copy(stops = emptyList(), stopsNote = outcome.reason)
+            }
         }
     }
 }

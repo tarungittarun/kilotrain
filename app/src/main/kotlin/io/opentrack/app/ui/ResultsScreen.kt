@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -90,11 +91,33 @@ fun ResultsScreen(viewModel: ResultsViewModel) {
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 items(ui.rows) { row ->
-                    Text(
-                        text = StateCopy.row(row.number, row.name, row.timeDue ?: "—", row.provenanceLabel),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = StateCopy.row(row.number, row.name, row.timeDue ?: "—", row.provenanceLabel),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        TextButton(onClick = { viewModel.showStops(row.number) }) {
+                            Text("stop times")
+                        }
+                    }
+                }
+                if (ui.stops.isEmpty() && ui.stopsNote != null) {
+                    item {
+                        Text(
+                            text = ui.stopsNote,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                } else {
+                    items(ui.stops) { stop ->
+                        Text(
+                            text = StateCopy.stop(stop.code, stop.name, stop.arrival, stop.departure, stop.dayOffset),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }
