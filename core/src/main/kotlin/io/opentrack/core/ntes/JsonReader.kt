@@ -7,7 +7,7 @@ package io.opentrack.core.ntes
  */
 sealed interface JsonValue {
     data class JsonObject(val entries: Map<String, JsonValue>) : JsonValue {
-        fun getEntries(): Map<String, JsonValue> = entries
+        fun entryMap(): Map<String, JsonValue> = entries
         fun get(key: String): JsonValue? = entries[key]
         fun getString(key: String): String? = (entries[key] as? JsonString)?.value
         fun optString(key: String): String = getString(key) ?: ""

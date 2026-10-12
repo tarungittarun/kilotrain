@@ -90,7 +90,7 @@ object DiagnosticsCodec {
         val shape = LinkedHashMap<String, String>()
         fun walk(obj: io.opentrack.core.ntes.JsonValue.JsonObject, prefix: String, depth: Int) {
             if (depth > 3) return
-            obj.getEntries().forEach { (k, v) ->
+            obj.entryMap().forEach { (k, v) ->
                 when (v) {
                     is io.opentrack.core.ntes.JsonValue.JsonObject -> {
                         shape["obj.${prefix}$k"] = "object"
