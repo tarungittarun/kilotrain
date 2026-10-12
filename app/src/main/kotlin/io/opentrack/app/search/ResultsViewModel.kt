@@ -70,7 +70,15 @@ class ResultsViewModel(
                 val routeSource = erailRouteSource ?: SourceLocator.erailRouteSource
                     ?: ErailRouteSource(HttpErailTransport(), source)
                 block(
-                    ResultsEngine(asset, store, clock, source, pairSource, routeSource, diagnostics),
+                    ResultsEngine(
+                        asset = asset,
+                        store = store,
+                        clock = clock,
+                        erailSource = source,
+                        erailPairSource = pairSource,
+                        erailRouteSource = routeSource,
+                        diagnostics = diagnostics,
+                    ),
                     a, b,
                 )
             }

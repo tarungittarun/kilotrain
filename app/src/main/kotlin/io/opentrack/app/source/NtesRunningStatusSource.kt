@@ -119,7 +119,7 @@ class NtesRunningStatusSource(
             val mp = (5 * doy + 2) / 153
             val day = (doy - (153 * mp + 2) / 5 + 1).toInt()
             val month = (if (mp < 10) mp + 3 else mp - 9).toInt()
-            return intArrayOf(if (month <= 2) y + 1 else y.toInt(), month, day)
+            return intArrayOf((if (month <= 2) y + 1 else y).toInt(), month, day)
         }
     }
 }
