@@ -25,14 +25,6 @@ class MainActivity : ComponentActivity() {
             OfflineAsset(0, emptyList(), false, "this phone carries no offline data")
         }
         val store = OpenTrackStore(applicationContext, SystemClock)
-        val viewModel = ResultsViewModel(
-            asset = asset,
-            store = store,
-            clock = SystemClock,
-            // no source passed here: the ViewModel resolves it at search time, so tests can
-            // install a fake (SourceLocator) while production gets the real transport (3.1)
-            diagnostics = diagnosticsStore.diagnostics,
-        )
 
         // opt-in diagnostics (3.6): off by default, stays on the device until the user exports
         val diagnosticsStore = DiagnosticsStore(applicationContext, enabled = false)
@@ -47,6 +39,15 @@ class MainActivity : ComponentActivity() {
                 "timezone" to java.util.TimeZone.getDefault().id,
             )
         )
+        val viewModel = ResultsViewModel(
+            asset = asset,
+            store = store,
+            clock = SystemClock,
+            // no source passed here: the ViewModel resolves it at search time, so tests can
+            // install a fake (SourceLocator) while production gets the real transport (3.1)
+            diagnostics = diagnosticsStore.diagnostics,
+        )
+
         setContent {
             ResultsScreen(viewModel = viewModel, diagnosticsStore = diagnosticsStore)
         }
