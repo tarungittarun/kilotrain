@@ -31,3 +31,6 @@ Waived rows (with reason) will be listed here; none waived yet.
 | 20 | live failure names itself and falls back to the labelled asset | L1/L2 | GREEN | liveFailureFallsBackToTheLabelledAsset |
 | 21 | freshness comes from the feed stamp, never the device clock (10.3) | L1 | GREEN | feedStampIsParsedAsFixedIST |
 | 22 | throttle body is SHAPE_UNKNOWN, never a parse (LEARNINGS 1) | L1 | GREEN | throttleBodyIsShapeUnknownNotATrain |
+
+| 23 | a pair query is NEVER answered from years-old data (ADR 0009) | L1/L2 | GREEN | aPairQueryIsNeverAnsweredFromThe2016Fallback + MainActivityTest pair assertion |
+| 24 | COULD_NOT_LOOK copy matches what is actually shown | L2 | GREEN | StateCopyTest.couldNotLookIsNotAnEmptyAnswer |

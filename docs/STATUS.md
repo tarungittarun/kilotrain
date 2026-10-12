@@ -15,10 +15,9 @@ owner-action only. Any behaviour-changing commit must change this table (docs-fr
 | M1-4 | SQLite store: TTL cache + overrides + tested migration | DONE:2026-10-11 | OpenTrackStoreTest (TTL, override correction, upgrade clears) | read runs | no | none |
 | M1-5 | debug APK published on rolling `latest-apk` release | DONE:2026-10-11 | debug-apk run 38177316606 PASS; release API: app-debug.apk 9,511,991 bytes 2026-10-11T21:42:19Z | none | no | none |
 | M1-6 | M1 exit criterion: no time without a provenance label, enforced by a test | DONE:2026-10-11 | unit-screens 38176954520 PASS: ProvenanceEnforcementTest + StateCopyTest + ResultsEngineTest | none | no | none |
-| M2-0 | live pair search (S1 primary, S2 fallback) | BLOCKED:no captured payload for either source (CI: S1 blocked-by-network 0/3, S2 throttle-only; sandbox S2 throttled with cookies warmed) | docs/spike-verdicts.md + ADR 0002 | needs-device capture: paste one SMET→MYS export from the NTES app | yes | none - the 2nd station is now known: MYS (owner confirmed by installing the APK) |
-| M2-1 | pair search over the labelled S3 fallback (SMET→MYS) | DONE:2026-10-11 | ResultsEngineTest.theOwnerRouteReturnsItsLabelledRow + aPairMissingFromTheFallbackIsNeverAnEmptyAnswer | none | no | none |
+| M2-0 | live pair search + per-stop ACTUALS (S1; the S2 pair endpoint is SignalR-gated and throttled) | BLOCKED:no captured payload from a source that publishes either | docs/spike-verdicts.md + ADR 0002/0008/0009 | needs-device capture: ONE paste from the NTES app (either running-status for 56269, or between-stations for TLGP->MYS) unlocks both rows | yes | one paste from the NTES app |
+| M2-3 | pair search MUST NOT answer from years-old data (owner 2026-10-12) | DONE:2026-10-11 | aPairQueryIsNeverAnsweredFromThe2016Fallback + aPairAbsentFromTheFallbackIsAlsoCouldNotLookNotEmptyAnswer | none | no | none |
 | M2-2 | LIVE train-number search via S2 (ADR 0008) | DONE:2026-10-11 | unit-screens 38184388238 PASS (46 tests) + LIVE re-verification 2026-10-11T23:32:27Z: TrainNo=56269 -> 56269 SMET MYS FAST PASS, SMET->MYS, 10.20/16.30, runDays 1111111, stamp 2026-10-06 16:57 IST | none | no | none |
-| M3-0 | per-stop ACTUAL arrival/departure + schedule (priority 3) | BLOCKED:no NTES (S1) capture - only S1 publishes per-stop actuals | docs/spike-verdicts.md + ADR 0008 | needs-device capture: NTES app -> train 56269 -> running status -> paste text/screenshot (14.3) | yes | none |
 
 ## Metrics (§13.6)
 | metric | value |

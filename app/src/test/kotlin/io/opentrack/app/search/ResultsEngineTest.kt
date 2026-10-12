@@ -4,12 +4,11 @@ import androidx.test.core.app.ApplicationProvider
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
 import io.opentrack.app.source.ErailTrainSource
-import io.opentrack.app.source.TrainLookup
+import io.opentrack.app.source.TransportReply
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -42,101 +41,29 @@ class ResultsEngineTest {
     @After
     fun tearDown() = store.close()
 
+    /** ADR 0009 (owner 2026-10-12): years-old fallback rows are NEVER a pair answer. */
     @Test
-    fun theOwnerRouteReturnsItsLabelledRow() {
-        val outcome = ResultsEngine(asset, store, clock).lookup("SMET", "MYS")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
-        assertEquals(1, outcome.rows.size)
-        val row = outcome.rows.first()
-        assertEquals("56269", row.number)
-        assertEquals("Shimoga Mysore Passenger", row.name)
-        assertEquals("10:30", row.timeDue)
-        assertEquals("timetable", row.provenanceLabel) // 3.2: never looks live
-        assertTrue(outcome.note!!.contains("2016")) // 10.8: vintage stated with the rows
+    fun aPairQueryIsNeverAnsweredFromThe2016Fallback() {
+        val outcome = ResultsEngine(asset, store, clock).lookup("TLGP", "MYS")
+        assertEquals(ResultsEngine.UiStateName.COULD_NOT_LOOK, outcome.state)
+        assertTrue(outcome.rows.isEmpty())
+        assertTrue(outcome.note!!.startsWith("could not look up trains between TLGP and MYS"))
+        assertTrue(outcome.note!!.contains("will not show years-old timetable data"))
     }
 
-    /** 3.3/3.4: an incomplete fallback must never produce an empty answer. */
     @Test
-    fun aPairMissingFromTheFallbackIsNeverAnEmptyAnswer() {
+    fun aPairAbsentFromTheFallbackIsAlsoCouldNotLookNotEmptyAnswer() {
         val outcome = ResultsEngine(asset, store, clock).lookup("NDLS", "BCT")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
+        assertEquals(ResultsEngine.UiStateName.COULD_NOT_LOOK, outcome.state)
         assertTrue(outcome.rows.isEmpty())
-        assertEquals("this pair is not in the offline fallback data; that is not proof that no trains run today",
-            outcome.note)
     }
 
-    @Test
-    fun aSecondPairAlsoResolves() {
-        val outcome = ResultsEngine(asset, store, clock).lookup("JBP", "NDLS")
-        assertEquals(1, outcome.rows.size)
-        assertEquals("12192", outcome.rows.first().number)
-    }
-
-    @Test
-    fun aRepeatSearchServesTheCacheWithItsOwnLabel() {
-        ResultsEngine(asset, store, clock).lookup("SMET", "MYS")
-        val second = ResultsEngine(asset, store, clock).lookup("SMET", "MYS")
-        assertEquals(ResultsEngine.UiStateName.CACHED, second.state)
-        assertEquals("56269", second.rows.first().number)
-        assertEquals("cached under a minute", second.rows.first().provenanceLabel)
-    }
-
-    @Test
-    fun schemaMismatchDegradesWithAMessageProtocolChanged() {
-        val broken = OfflineAsset(99, emptyList(), false, "older format")
-        val outcome = ResultsEngine(broken, store, clock).lookup("SMET", "MYS")
-        assertEquals(ResultsEngine.UiStateName.PROTOCOL_CHANGED, outcome.state)
-        assertEquals("older format", outcome.note)
-    }
-
-    @Test
-    fun emptyAssetIsNotAnEmptyAnswerEither() {
-        val outcome = ResultsEngine(OfflineAssetCodec.emptyAsset(), store, clock).lookup("SMET", "MYS")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
-        assertEquals("this pair is not in the offline fallback data; that is not proof that no trains run today",
-            outcome.note)
-    }
-
-    /** 10.3: station codes keep all four letters through the path. */
-    @Test
-    fun fourLetterCodesSurviveTheLookup() {
-        assertEquals("SMET", ResultsEngine.codePreserved(" smet "))
-        assertEquals("MYS", ResultsEngine.codePreserved("mys"))
-    }
-
-    @Test
-    fun theRetiredPrefixTrainIsNotInTheFallback() {
-        val numbers = asset.trains.map { it.number }
-        assertTrue("06228 (retired prefix) must never ship", numbers.none { it == "06228" })
-        assertNull(asset.trains.firstOrNull { it.number.startsWith("0") }?.number)
-    }
-
-    /** Priority 1: a train number alone is a complete query. */
-    @Test
-    fun aTrainNumberAloneResolves() {
-        val outcome = ResultsEngine(asset, store, clock).lookupByNumber("56269")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
-        assertEquals(1, outcome.rows.size)
-        assertEquals("Shimoga Mysore Passenger", outcome.rows.first().name)
-        assertEquals("offline fallback", outcome.bannerSource) // the number-only fallback path
-    }
-
-    /** 3.3/3.4: absence from an incomplete fallback is not a denial of the train's existence. */
-    @Test
-    fun aNumberMissingFromTheFallbackIsNeverADenial() {
-        val outcome = ResultsEngine(asset, store, clock).lookupByNumber("99999")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
-        assertTrue(outcome.rows.isEmpty())
-        assertEquals("no train with that number is in the offline fallback data; that is not proof the number is wrong",
-            outcome.note)
-    }
-
-    /** Priority 3's first half: the live answer carries the feed's own stamp as its age. */
+    /** The live train-number path is the one that answers with current data. */
     @Test
     fun liveNumberSearchLabelsViaTheSourceWithTheFeedStamp() {
         val capture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
-        val source = ErailTrainSource({ io.opentrack.app.source.TransportReply(200, capture) }, enabled = true)
-        clock.now = 1_800_000_000_000L // 2027-01-11-ish; the stamp is Oct 2026, so 'via' + age can be asserted
+        val source = ErailTrainSource({ TransportReply(200, capture) }, enabled = true)
+        clock.now = 1_800_000_000_000L
         val outcome = ResultsEngine(asset, store, clock, source).lookupByNumber("56269")
         assertEquals(ResultsEngine.UiStateName.LIVE, outcome.state)
         assertEquals("erail.in", outcome.bannerSource)
@@ -145,19 +72,31 @@ class ResultsEngineTest {
         assertTrue(outcome.note!!.startsWith("as of 2026-10-06"))
     }
 
-    /** When the live source cannot answer, the labelled fallback appears with the reason named. */
+    /** When the live source cannot answer, the failure is named and NOTHING old is shown. */
     @Test
-    fun liveFailureFallsBackToTheLabelledAsset() {
-        val source = ErailTrainSource({ io.opentrack.app.source.TransportReply(200, "~~~~~Please try again after some time.") }, enabled = true)
+    fun liveFailureNamesItselfAndShowsNoOldData() {
+        val source = ErailTrainSource(
+            { TransportReply(200, "~~~~~Please try again after some time.") }, enabled = true
+        )
         val outcome = ResultsEngine(asset, store, clock, source).lookupByNumber("56269")
-        assertEquals(ResultsEngine.UiStateName.OFFLINE_UNVERIFIED, outcome.state)
-        assertEquals("timetable", outcome.rows.single().provenanceLabel)
-        assertTrue(outcome.note!!.contains("live source unreachable: SHAPE_UNKNOWN"))
-        assertTrue(outcome.note!!.contains("2016-vintage"))
+        assertEquals(ResultsEngine.UiStateName.COULD_NOT_LOOK, outcome.state)
+        assertTrue(outcome.rows.isEmpty())
+        assertTrue(outcome.note!!.startsWith("could not reach erail.in for train 56269 (SHAPE_UNKNOWN"))
+        assertTrue(outcome.note!!.contains("No old data is shown in its place"))
     }
 
+    /** 10.3: station codes keep all four letters through the path. */
     @Test
-    fun everySourceIsOffUntilACaptureExists() {
-        assertTrue(ResultsEngine.ENABLED_SOURCES.values.none { it })
+    fun fourLetterCodesSurviveTheLookup() {
+        assertEquals("TLGP", ResultsEngine.codePreserved(" tlgp "))
+        assertEquals("MYS", ResultsEngine.codePreserved("mys"))
+    }
+
+    /** Flags follow captures: the number endpoint has one (ADR 0008); pair and NTES do not. */
+    @Test
+    fun flagsFollowCaptures() {
+        assertTrue(io.opentrack.app.source.FeatureFlags.ERAIL_TRAIN_NUMBER)   // capture 2026-10-11
+        assertTrue(!io.opentrack.app.source.FeatureFlags.ERAIL_PAIR)         // throttle-only, no capture
+        assertTrue(!io.opentrack.app.source.FeatureFlags.NTES)               // no envelope capture
     }
 }

@@ -1,6 +1,17 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.3.0 (rolling `latest-apk`) — NO YEARS-OLD ANSWERS (owner's correction)
+- **On screen:** a station-pair search (e.g. TLGP → MYS) now says "could not look this up. no old
+  data is shown in its place." with the reason. The 2016-vintage fallback is no longer served as a
+  pair answer at all (ADR 0009) - it was labelled but still old, and old is not an answer.
+  Train-NUMBER search still answers live from erail.in (ADR 0008), and when it cannot, it says so
+  instead of showing old rows.
+- **Why:** measured - the S2 pair endpoint answers throttle messages from every environment
+  measured, and erail serves its pair search through a private SignalR hub, so no plain pair source
+  exists without a capture. Reference app "Where Is My Train" gets pair data from NTES, which needs
+  one paste from the owner's phone.
+
 ## 2.2.0 (rolling `latest-apk`) — LIVE TRAIN-NUMBER SEARCH (S2, keyless, captured) — TESTED
 - **On screen:** type a train number (e.g. 56269) -> "show train" returns the CURRENT identity,
   departure, arrival, duration and run-days from erail.in, labelled `via erail.in` with the

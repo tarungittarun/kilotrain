@@ -19,7 +19,7 @@ object StateCopy {
             "offline - showing unverified timetable data."
         ScreenState.ANSWERED_EMPTY -> "no trains found for this route today"
         ScreenState.COULD_NOT_LOOK ->
-            "could not reach ${source ?: "the source"}. showing what is already on screen."
+            "could not look this up. no old data is shown in its place."
         ScreenState.PARTIAL ->
             "showing what ${source ?: "a source"} answered; the rest could not be looked up."
         ScreenState.PROTOCOL_CHANGED ->

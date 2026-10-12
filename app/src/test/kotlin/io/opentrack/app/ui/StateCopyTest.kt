@@ -38,10 +38,10 @@ class StateCopyTest {
 
     /** 3.3: "could not look" and "answered empty" are different words for different truths. */
     @Test
-    fun couldNotLookNamesTheSourceAndIsNotAnEmptyAnswer() {
+    fun couldNotLookIsNotAnEmptyAnswer() {
         val could = StateCopy.banner(ScreenState.COULD_NOT_LOOK, source = "erail.in", age = null)
         val empty = StateCopy.banner(ScreenState.ANSWERED_EMPTY, source = null, age = null)
-        assertEquals("could not reach erail.in. showing what is already on screen.", could)
+        assertEquals("could not look this up. no old data is shown in its place.", could)
         assertEquals(false, could == empty)
     }
 

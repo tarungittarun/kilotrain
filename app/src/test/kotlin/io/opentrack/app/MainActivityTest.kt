@@ -79,11 +79,9 @@ class MainActivityTest {
         compose.onNodeWithText("to station code").performTextInput("NDLS")
         compose.onNodeWithText("search").performClick()
         compose.waitUntil(5_000) {
-            compose.onAllNodesWithText("this pair is not in the offline fallback data; that is not proof that no trains run today")
+            compose.onAllNodesWithText("could not look this up. no old data is shown in its place.")
                 .fetchSemanticsNodes().isNotEmpty()
         }
-        compose.onNodeWithText("this pair is not in the offline fallback data; that is not proof that no trains run today")
-            .assertExists()
         compose.onAllNodesWithText("no trains found for this route today")
             .assertCountEquals(0)
     }

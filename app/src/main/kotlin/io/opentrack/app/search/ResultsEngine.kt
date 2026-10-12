@@ -26,6 +26,8 @@ import org.json.JSONObject
  */
 class ResultsEngine(
     private val asset: OfflineAsset,
+    /** Reserved for the live pair cache (TTL) - unused until a pair source is captured (ADR 0009);
+     *  deliberately NOT consulted for pairs today, so years-old rows can never surface as answers. */
     private val store: OpenTrackStore,
     private val clock: Clock,
     private val erailSource: ErailTrainSource? = null,
@@ -37,48 +39,32 @@ class ResultsEngine(
         val note: String?,
     )
 
+    /**
+     * Station-pair search. Rule (ADR 0009, owner 2026-10-12): a pair query is answered ONLY by a
+     * current source. The S3 fallback is 2016-vintage identity data - presenting it as an answer
+     * to "what runs between TLGP and MYS" would be exactly the defect the owner rejected. So when
+     * no current source answers, the screen says so (3.1: "we don't have that feature yet").
+     */
     fun lookup(from: String, to: String): Outcome {
         if (!asset.schemaCompatible) {
             return Outcome(UiStateName.PROTOCOL_CHANGED, emptyList(), "offline asset", asset.degradeMessage)
         }
-        val cached = store.freshCache(from, to, CACHE_TTL_MS)
-        if (cached != null) {
-            val rows = renderCachePayload(cached.payload, cached.fetchedAtMillis)
-            if (rows != null) {
-                return Outcome(UiStateName.CACHED, rows, "offline cache",
-                    "cached from an earlier lookup")
-            }
-            return Outcome(UiStateName.COULD_NOT_LOOK, emptyList(), "offline cache",
-                "the rows saved on this phone could not be read")
-        }
-
-        val hits = asset.lookupByPair(from, to)
-        if (hits.isEmpty()) {
-            // NOT an empty answer: an incomplete fallback must not claim "no trains exist" (3.3/3.4).
-            return Outcome(
-                UiStateName.OFFLINE_UNVERIFIED, emptyList(), null,
-                "this pair is not in the offline fallback data; that is not proof that no trains run today",
-            )
-        }
-        val rows = hits.map { t ->
-            RowView(
-                number = t.number,
-                name = t.name,
-                timeDue = t.departure.ifBlank { null },
-                provenanceLabel = t.toIdentity().provenance.label(clock.nowMillis()),
-            )
-        }
-        store.putCache(from, to, cachePayloadFor(hits), clock.nowMillis())
+        // No stale pair answers: the cache is NOT consulted for pairs (it may hold 2016 rows from
+        // an earlier build), and the flag-gated live pair source has no capture yet (ADR 0002/0008).
         return Outcome(
-            state = UiStateName.OFFLINE_UNVERIFIED,
-            rows = rows,
-            bannerSource = "offline fallback",
-            note = "unverified 2016-vintage fallback timetable - not the railway's current timetable",
+            state = UiStateName.COULD_NOT_LOOK,
+            rows = emptyList(),
+            bannerSource = null,
+            note = ("could not look up trains between $from and $to. No current source answered - "
+                + "this app will not show years-old timetable data as an answer. Live pair search "
+                + "arrives with a captured source (ADR 0002/0008); a train NUMBER answers live today."),
         )
     }
 
-    /** Priority 1+2+3: search by train number. Live S2 first (when its flag is on and it
-     * answers), the labelled fallback second - and the fallback NEVER pretends to be live. */
+    /**
+     * Priority 1+2: train-number search. The live S2 endpoint (ADR 0008) answers when it can;
+     * when it cannot, the app says so instead of substituting years-old data (ADR 0009).
+     */
     fun lookupByNumber(number: String): Outcome {
         if (!asset.schemaCompatible) {
             return Outcome(UiStateName.PROTOCOL_CHANGED, emptyList(), "offline asset", asset.degradeMessage)
@@ -102,36 +88,14 @@ class ResultsEngine(
                 note = "as of ${formatStamp(p.feedStampMillis)} (the feed's own stamp, not this phone's clock)",
             )
         }
-        val failureDetail = if (live is TrainLookup.Failed) {
-            "live source unreachable: ${live.failure} - ${live.detail}"
-        } else null
-
-        val hits = asset.trains.filter { it.number == normalised }
-        if (hits.isEmpty()) {
-            return Outcome(
-                UiStateName.OFFLINE_UNVERIFIED, emptyList(), null,
-                listOfNotNull(
-                    failureDetail,
-                    "no train with that number is in the offline fallback data; that is not proof the number is wrong",
-                ).joinToString(". "),
-            )
-        }
-        val rows = hits.map { t ->
-            RowView(
-                number = t.number,
-                name = t.name,
-                timeDue = t.departure.ifBlank { null },
-                provenanceLabel = t.toIdentity().provenance.label(clock.nowMillis()),
-            )
-        }
+        val failure = (live as? TrainLookup.Failed)
         return Outcome(
-            state = UiStateName.OFFLINE_UNVERIFIED,
-            rows = rows,
-            bannerSource = "offline fallback",
-            note = listOfNotNull(
-                failureDetail,
-                "unverified 2016-vintage fallback timetable - not the railway's current timetable",
-            ).joinToString(". "),
+            state = UiStateName.COULD_NOT_LOOK,
+            rows = emptyList(),
+            bannerSource = null,
+            note = ("could not reach erail.in for train $normalised"
+                + (failure?.let { " (${it.failure}: ${it.detail})" } ?: " (source disabled)")
+                + ". No old data is shown in its place."),
         )
     }
 
@@ -159,46 +123,6 @@ class ResultsEngine(
         val day = (doy - (153 * mp + 2) / 5 + 1).toInt()
         val month = (if (mp < 10) mp + 3 else mp - 9).toInt()
         return Triple((if (month <= 2) y + 1 else y).toInt(), month, day)
-    }
-
-    private fun renderCachePayload(payload: String, fetchedAtMillis: Long): List<RowView>? = try {
-        val obj = JSONObject(payload)
-        val rows = obj.optJSONArray("rows") ?: return null
-        buildList {
-            for (i in 0 until rows.length()) {
-                val r = rows.optJSONObject(i) ?: continue
-                val number = r.optString("number", "")
-                val name = r.optString("name", "")
-                if (number.isBlank() || name.isBlank()) continue
-                val provenance = Provenance(ProvenanceKind.CACHED, "offline cache", fetchedAtMillis)
-                add(
-                    RowView(
-                        number = number,
-                        name = name,
-                        timeDue = r.optString("departure").takeIf { it.isNotBlank() },
-                        provenanceLabel = provenance.label(clock.nowMillis()),
-                    )
-                )
-            }
-        }
-    } catch (e: Exception) { // named: corrupt cache payload is a read failure, never an empty answer
-        null
-    }
-
-    private fun cachePayloadFor(hits: List<io.opentrack.app.asset.AssetTrain>): String {
-        val arr = org.json.JSONArray()
-        hits.forEach { t ->
-            arr.put(
-                JSONObject().apply {
-                    put("number", t.number)
-                    put("name", t.name)
-                    put("departure", t.departure)
-                    put("from", t.fromStation)
-                    put("to", t.toStation)
-                }
-            )
-        }
-        return JSONObject().put("rows", arr).toString()
     }
 
     data class RowView(
