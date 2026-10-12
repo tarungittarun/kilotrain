@@ -1,7 +1,5 @@
 package io.opentrack.core.diag
 
-import kotlinx.serialization.Serializable
-
 /**
  * The event kinds the collector records. One per user-facing operation, so an exported log reads
  * as the story of a session: what was asked, what the wire answered, what the screen then said.
