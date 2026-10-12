@@ -102,8 +102,10 @@ class LiveStatusLadderTest {
         val engine = ResultsEngine(
             asset, store, clock, null, null, routeSource(), ntesSource("~~~~~nope"), diagnostics,
         )
+        val probe = routeSource().fetch("16228")
+        assertTrue("ROUTE RUNG GOT: $probe", probe is RouteLookupResult.Live)
         val outcome = engine.liveStatus("16228")
-        assertTrue(outcome is ResultsEngine.StatusOutcome.Live)
+        assertTrue("LADDER GOT: $outcome", outcome is ResultsEngine.StatusOutcome.Live)
         val live = outcome as ResultsEngine.StatusOutcome.Live
         assertEquals("GOT: ${live.sourceLabel}", "erail.in schedule", live.sourceLabel)
         assertTrue(live.stops.isNotEmpty())
