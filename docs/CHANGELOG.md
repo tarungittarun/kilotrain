@@ -1,6 +1,18 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.13.0 (rolling `latest-apk`) — ACTUAL vs EXPECTED, LOADER, POSITION MARKER
+- **On screen:** fetching shows a "fetching live data…" loader until the first answer lands.
+  Stops split into three honest states: ACTUAL where NTES reported one; EXPECTED
+  (schedule + the published delay, labelled "expected", never "actual") where the train has not
+  reached yet; and an em dash where neither is known. The train's position is marked
+  "⬅ TRAIN HERE" - the published current stop, or the last stop with a reported actual.
+- **Static schedule stays instant:** stations/times/distances come from the fast erail route rung
+  (about a second on the owner's phone); the live overlay then replaces the expected times with
+  actuals as they are published.
+- **Sources:** the five-rung first-wins ladder is unchanged (NTES mobile JSON, NTES encrypted,
+  erail route, erail train times, offline asset); each rung's outcome is recorded.
+
 ## 2.12.0 (rolling `latest-apk`) — NO ECHOED ACTUALS, NO PHONEY DATES
 - **On screen:** the NTES rung now shows ACTUAL times only where NTES actually reported them.
   Stops whose ETA/ETD merely repeat the schedule render as an em dash (never the schedule dressed
