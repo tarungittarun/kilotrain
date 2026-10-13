@@ -105,6 +105,10 @@ object StateCopy {
         else -> "Position not reported yet by the live source"
     }
 
+    /** The schedule-only rung's line: what the source states, nothing more. */
+    fun routeStop(code: String, name: String, timeDue: String?): String =
+        "$code $name · ${timeDue ?: "not stated"}"
+
     /** The detail header's provenance line (3.2): which source, how old. */
     fun sourceBadge(sourceLabel: String, provenanceLabel: String): String =
         "via $sourceLabel · $provenanceLabel"

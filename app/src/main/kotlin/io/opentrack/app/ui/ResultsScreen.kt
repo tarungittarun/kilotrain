@@ -245,15 +245,7 @@ private fun DetailView(
             } else {
                 items(ui.stops) { stop ->
                     Text(
-                        text = StateCopy.stopStatus(
-                            stop.code, stop.name,
-                            stop.scheduledArrival, stop.scheduledDeparture,
-                            stop.actualArrival, stop.actualDeparture,
-                            stop.arrivalDelayMinutes, stop.departureDelayMinutes,
-                            stop.isCurrentStation, stop.isTrainHere,
-                            stop.expectedDeparture, stop.distanceKm, stop.haltMinutes,
-                            stop.isDepartedHere, stop.isNextStation, stop.kmToNext,
-                        ),
+                        text = StateCopy.routeStop(stop.number, stop.name, stop.timeDue),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
