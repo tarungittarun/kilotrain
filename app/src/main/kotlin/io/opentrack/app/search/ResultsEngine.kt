@@ -413,7 +413,7 @@ class ResultsEngine(
         stops: List<StopStatus>,
         delayDeparture: String?,
     ): List<StopStatus> {
-        val delayMinutes = Regex("(\d+)").find(delayDeparture ?: "")?.groupValues?.get(1)?.toIntOrNull()
+        val delayMinutes = Regex("\\d+").find(delayDeparture ?: "")?.value?.toIntOrNull()
             ?: if (delayDeparture?.contains("On Time", ignoreCase = true) == true) 0 else null
         val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
         val positionIndex = stops.indexOfFirst { it.isCurrentStation }.let { if (it >= 0) it else lastReported }
