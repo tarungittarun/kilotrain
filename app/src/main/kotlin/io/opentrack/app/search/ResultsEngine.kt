@@ -328,7 +328,8 @@ class ResultsEngine(
                         StopStatus(
                             code = hit.fromStation, name = hit.fromStation, scheduledArrival = hit.departure,
                             scheduledDeparture = null, actualArrival = null, actualDeparture = null,
-                            arrivalDelayMinutes = null, departureDelayMinutes = null, isCurrentStation = true,
+                            arrivalDelayMinutes = null, departureDelayMinutes = null,
+                            isCurrentStation = true, isTrainHere = true, expectedDeparture = null,
                         ),
                     ),
                     viaCache = false,
