@@ -1,6 +1,15 @@
 # CHANGELOG.md — user-facing, per published artefact (KICKOFF §11.6). Artefact size+date READ
 from the release API (never assumed).
 
+## 2.14.0 (rolling `latest-apk`) — POSITION BETWEEN STATIONS + INTERMEDIATE STATION INFO
+- **Position:** the marker is now the reference app's model - the last stop NTES reported is
+  "⬅ TRAIN LEFT HERE" and the next one is "⬅ NEXT · ~N km away", with the kilometres computed from
+  the published distances. With nothing reported, no position is claimed at all.
+- **Placeholders:** NTES's `**UA**`, `Source/`, `Destination/`, null and 0 are all treated as
+  "not published" for ACTUALS, so they can no longer appear as times.
+- **Intermediate stations:** every stop now shows its distance from origin and its scheduled halt
+  ("Kardi 241 km · halt 2 min"), like the reference app.
+
 ## 2.13.0 (rolling `latest-apk`) — ACTUAL vs EXPECTED, LOADER, POSITION MARKER
 - **On screen:** fetching shows a "fetching live data…" loader until the first answer lands.
   Stops split into three honest states: ACTUAL where NTES reported one; EXPECTED
