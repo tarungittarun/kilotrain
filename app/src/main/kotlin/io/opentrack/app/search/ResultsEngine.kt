@@ -266,6 +266,8 @@ class ResultsEngine(
                                     arrivalDelayMinutes = null,
                                     departureDelayMinutes = null,
                                     isCurrentStation = false,
+                                    isTrainHere = false,
+                                    expectedDeparture = null,
                                 )
                             },
                             viaCache = false,
@@ -296,6 +298,8 @@ class ResultsEngine(
                                         arrivalDelayMinutes = null,
                                         departureDelayMinutes = null,
                                         isCurrentStation = true,
+                                        isTrainHere = true,
+                                        expectedDeparture = null,
                                     ),
                                     StopStatus(
                                         code = p.toStation,
@@ -307,6 +311,8 @@ class ResultsEngine(
                                         arrivalDelayMinutes = null,
                                         departureDelayMinutes = null,
                                         isCurrentStation = false,
+                                        isTrainHere = false,
+                                        expectedDeparture = null,
                                     ),
                                 ),
                                 viaCache = false,
