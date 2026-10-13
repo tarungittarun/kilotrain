@@ -8,9 +8,9 @@ class ExpectedTimingTest {
 
     @Test
     fun shiftWrapsPastMidnight() {
-        assertEquals("00:10", ResultsEngine.shiftMinutes("23:59", 11))
-        assertEquals("00:08", ResultsEngine.shiftMinutes("23:58", 10))
-        assertEquals("17:45", ResultsEngine.shiftMinutes("17:35", 10))
+        assertEquals("00:10", shiftMinutes("23:59", 11))
+        assertEquals("00:08", shiftMinutes("23:58", 10))
+        assertEquals("17:45", shiftMinutes("17:35", 10))
     }
 
     @Test
@@ -20,7 +20,7 @@ class ExpectedTimingTest {
             ResultsEngine.StopStatus("B", "b", "10:30", "10:35", null, null, null, null, false, false, "10:45"),
             ResultsEngine.StopStatus("C", "c", "11:00", "11:05", null, null, null, null, false, false, "11:15"),
         )
-        val out = ResultsEngine.withPositionAndExpectations(stops, "10 min")
+        val out = withPositionAndExpectations(stops, "10 min")
         assertTrue(out[0].isTrainHere) // the last stop with a reported actual
         assertEquals("10:45", out[1].expectedDeparture) // expected, not actual
         assertTrue(out[1].actualDeparture == null)
@@ -32,7 +32,7 @@ class ExpectedTimingTest {
         val stops = listOf(
             ResultsEngine.StopStatus("A", "a", "10:00", "10:05", null, null, null, null, false, false, null),
         )
-        val out = ResultsEngine.withPositionAndExpectations(stops, "On Time")
+        val out = withPositionAndExpectations(stops, "On Time")
         assertEquals("10:05", out.single().expectedDeparture)
     }
 
