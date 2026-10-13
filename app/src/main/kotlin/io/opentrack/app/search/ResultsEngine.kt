@@ -516,7 +516,8 @@ internal fun withPositionAndExpectations(
         ?: if (delayDeparture?.contains("On Time", ignoreCase = true) == true) 0 else null
     // the last stop NTES has REPORTED an actual for: the train is PAST it, not standing at it.
     val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
-    val nextIndex = if (lastReported + 1 in stops.indices) lastReported + 1 else null
+    // with nothing reported we do not know where the train is: no marker at all
+    val nextIndex = if (lastReported >= 0 && lastReported + 1 in stops.indices) lastReported + 1 else null
     return stops.mapIndexed { index, stop ->
         val expected = if (stop.actualDeparture == null && delayMinutes != null) {
             stop.scheduledDeparture?.let { shiftMinutes(it, delayMinutes) }
