@@ -52,8 +52,8 @@ object NtesRunningStatusParser {
             val s = raw as? JsonValue.JsonObject ?: return@mapNotNull null
             val schArr = time(s.optString("STA"))
             val schDep = time(s.optString("STD"))
-            var actArr = time(s.optString("ETA"))
-            var actDep = time(s.optString("ETD"))
+            var actArr = actualTime(s.optString("ETA"))
+            var actDep = actualTime(s.optString("ETD"))
             // NTES echoes the schedule into ETA/ETD when no actual has been reported, and stamps
             // the ORIGIN as "Source". Claiming those as actuals would be fabrication (3.4), so an
             // echo is treated as "not reported" and renders as an em dash (3.3).
@@ -98,19 +98,29 @@ object NtesRunningStatusParser {
     private val COMPOUND = Regex("""^(Source|Destination)?\s*/?\s*(\d{1,2}:\d{2})(?:\s+\d{1,2}-[A-Za-z]{3})?$""")
 
     /**
-     * NTES uses several "not published" placeholders: blank, "null", "0", "**UA**",
-     * "Source/…", "Destination/…", and the echoed schedule itself. None is an actual (3.4).
+     * A SCHEDULED time: NTES may stamp the origin "Source/20:55 12-Oct" or the destination
+     * "Destination/08:20 13-Oct" - the marker and the query date are not the stop's schedule, so
+     * only HH:mm is kept (3.4).
      */
     private fun time(raw: String): String? {
         val value = raw.trim()
         if (value.isBlank() || value == "null" || value == "0") return null
-        if (value.contains("UA")) return null // the **UA** marker
-        if (value.startsWith("Source") || value.startsWith("Destination")) return null
         val match = COMPOUND.find(value)
         if (match != null) {
             val hhmm = match.groupValues[2]
             return if (hhmm.count { it == ':' } == 1) hhmm else value
         }
         return value
+    }
+
+    /**
+     * An ACTUAL time: the same compound form, PLUS NTES's "not published" markers - blank, "null",
+     * "0", "**UA**" - none of which is an actual (3.4). The caller also drops echoes separately.
+     */
+    private fun actualTime(raw: String): String? {
+        val value = raw.trim()
+        if (value.isBlank() || value == "null" || value == "0") return null
+        if (value.contains("UA")) return null // the **UA** placeholder
+        return time(value)
     }
 }
