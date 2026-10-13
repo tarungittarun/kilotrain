@@ -76,6 +76,7 @@ private fun SearchView(
     var from by rememberSaveable { mutableStateOf("") }
     var to by rememberSaveable { mutableStateOf("") }
     var trainNumber by rememberSaveable { mutableStateOf("") }
+    var searchExpanded by rememberSaveable { mutableStateOf(true) }
 
     Column(modifier = Modifier.padding(16.dp)) {
         Text(
@@ -83,34 +84,61 @@ private fun SearchView(
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(bottom = 8.dp),
         )
-        OutlinedTextField(
-            value = from,
-            onValueChange = { from = it },
-            label = { Text("from station code") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = to,
-            onValueChange = { to = it },
-            label = { Text("to station code") },
-            modifier = Modifier.fillMaxWidth(),
-        )
-        Button(
-            onClick = { viewModel.search(from.trim().uppercase(), to.trim().uppercase()) },
-            modifier = Modifier.padding(top = 8.dp),
-        ) { Text("search") }
+        
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Search",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.weight(1f)
+            )
+            if (ui.rows.isNotEmpty() || ui.note != null || from.isNotBlank() || to.isNotBlank() || trainNumber.isNotBlank()) {
+                TextButton(onClick = { searchExpanded = !searchExpanded }) {
+                    Text(if (searchExpanded) "hide" else "show")
+                }
+            }
+        }
+        
+        if (searchExpanded) {
+            OutlinedTextField(
+                value = from,
+                onValueChange = { from = it },
+                label = { Text("from station code") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = to,
+                onValueChange = { to = it },
+                label = { Text("to station code") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Button(
+                onClick = { viewModel.search(from.trim().uppercase(), to.trim().uppercase()) },
+                modifier = Modifier.padding(top = 8.dp),
+            ) { Text("search") }
 
-        DiagnosticsBar(diagnosticsStore)
+            DiagnosticsBar(diagnosticsStore)
 
-        OutlinedTextField(
-            value = trainNumber,
-            onValueChange = { trainNumber = it },
-            label = { Text("or train number") },
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-        )
-        Button(onClick = { viewModel.searchByNumber(trainNumber.trim()) }) { Text("show train") }
+            OutlinedTextField(
+                value = trainNumber,
+                onValueChange = { trainNumber = it },
+                label = { Text("or train number") },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
+            Button(onClick = { viewModel.searchByNumber(trainNumber.trim()) }) { Text("show train") }
+        }
 
         LoaderRow(ui.loading)
+
+        if (ui.rows.isNotEmpty() || (!ui.loading && ui.note != null)) {
+            Text(
+                text = "Results",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+        }
 
         LazyColumn(
             modifier = Modifier.padding(top = 8.dp).testTag("results_list"),
@@ -143,6 +171,8 @@ private fun DetailView(
     viewModel: ResultsViewModel,
     diagnosticsStore: DiagnosticsStore?,
 ) {
+    var showSearchInDetail by rememberSaveable { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         // header: back to search + the train
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -151,13 +181,60 @@ private fun DetailView(
             Text(
                 text = ui.trainLabel ?: "train",
                 style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.weight(1f),
             )
+            TextButton(onClick = { showSearchInDetail = !showSearchInDetail }) {
+                Text(if (showSearchInDetail) "hide search" else "search again")
+            }
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = "OpenTrack India ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
             style = MaterialTheme.typography.labelSmall,
         )
+
+        if (showSearchInDetail) {
+            val context = LocalContext.current
+            var from by rememberSaveable { mutableStateOf("") }
+            var to by rememberSaveable { mutableStateOf("") }
+            var trainNumber by rememberSaveable { mutableStateOf("") }
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    OutlinedTextField(
+                        value = from,
+                        onValueChange = { from = it },
+                        label = { Text("from station code") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    OutlinedTextField(
+                        value = to,
+                        onValueChange = { to = it },
+                        label = { Text("to station code") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Button(
+                        onClick = {
+                            viewModel.search(from.trim().uppercase(), to.trim().uppercase())
+                            showSearchInDetail = false
+                            viewModel.clearSelection()
+                        },
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) { Text("search") }
+                    OutlinedTextField(
+                        value = trainNumber,
+                        onValueChange = { trainNumber = it },
+                        label = { Text("or train number") },
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    )
+                    Button(onClick = {
+                        viewModel.searchByNumber(trainNumber.trim())
+                        showSearchInDetail = false
+                        viewModel.clearSelection()
+                    }) { Text("show train") }
+                }
+            }
+        }
 
         LoaderRow(ui.loading)
 
