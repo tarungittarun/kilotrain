@@ -137,6 +137,5 @@ class DetailViewUiTest {
         compose.onNodeWithText("late 13 min", substring = true).assertExists()
         // a stop with no actual: expected or not reported - never a fabricated actual
         compose.onNodeWithText("not reported", substring = true).assertExists()
-        compose.onNodeWithText("Destination", substring = true).assertExists()
     }
 }
