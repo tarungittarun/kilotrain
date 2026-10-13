@@ -37,6 +37,7 @@ class ResultsViewModel(
         val stops: List<ResultsEngine.StopView> = emptyList(),
         val stopsNote: String? = null,
         val status: ResultsEngine.StatusOutcome? = null,
+        val loading: Boolean = false,
     )
 
     private val _state = MutableStateFlow(
@@ -88,6 +89,9 @@ class ResultsViewModel(
 
     /** Priority 3: the live running status for a train from the current rows. */
     fun showLiveStatus(number: String) {
+        _state.value = _state.value.copy(
+            loading = true, stops = emptyList(), stopsNote = null, status = null,
+        )
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {
                 // resolved at CALL time: production builds the real transport on first use, tests
@@ -113,14 +117,17 @@ class ResultsViewModel(
             } ?: return@launch
             val current = _state.value
             _state.value = when (outcome) {
-                is ResultsEngine.StatusOutcome.Live -> current.copy(status = outcome, stops = emptyList(), stopsNote = null)
-                is ResultsEngine.StatusOutcome.Unavailable -> current.copy(stops = emptyList(), stopsNote = outcome.reason)
+                is ResultsEngine.StatusOutcome.Live ->
+                    current.copy(status = outcome, stops = emptyList(), stopsNote = null, loading = false)
+                is ResultsEngine.StatusOutcome.Unavailable ->
+                    current.copy(stops = emptyList(), stopsNote = outcome.reason, loading = false)
             }
         }
     }
 
     /** Priority 3: show the stop times for a train from the current rows. */
     fun showStops(number: String) {
+        _state.value = _state.value.copy(loading = true, stops = emptyList(), stopsNote = null, status = null)
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {
                 val routeSource = erailRouteSource ?: SourceLocator.erailRouteSource
@@ -138,8 +145,10 @@ class ResultsViewModel(
             } ?: return@launch
             val current = _state.value
             _state.value = when (outcome) {
-                is ResultsEngine.RouteOutcome.Stops -> current.copy(stops = outcome.stops, stopsNote = null)
-                is ResultsEngine.RouteOutcome.Unavailable -> current.copy(stops = emptyList(), stopsNote = outcome.reason)
+                is ResultsEngine.RouteOutcome.Stops ->
+                    current.copy(stops = outcome.stops, stopsNote = null, loading = false)
+                is ResultsEngine.RouteOutcome.Unavailable ->
+                    current.copy(stops = emptyList(), stopsNote = outcome.reason, loading = false)
             }
         }
     }

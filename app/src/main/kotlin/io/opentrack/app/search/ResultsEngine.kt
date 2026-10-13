@@ -372,24 +372,61 @@ class ResultsEngine(
     ): StatusOutcome.Live = StatusOutcome.Live(
         trainNo = status.trainNo ?: train,
         currentStatus = status.currentStatus ?: "no position published right now",
-        stops = status.stops.map { stop ->
-            StopStatus(
-                code = stop.stationCode ?: "—",
-                name = stop.stationName ?: "",
-                scheduledArrival = stop.scheduledArrival,
-                scheduledDeparture = stop.scheduledDeparture,
-                actualArrival = stop.actualArrival,
-                actualDeparture = stop.actualDeparture,
-                arrivalDelayMinutes = stop.arrivalDelayMinutes,
-                departureDelayMinutes = stop.departureDelayMinutes,
-                isCurrentStation = stop.isCurrentStation,
-            )
-        },
+        stops = withPositionAndExpectations(
+            status.stops.map { stop ->
+                StopStatus(
+                    code = stop.stationCode ?: "—",
+                    name = stop.stationName ?: "",
+                    scheduledArrival = stop.scheduledArrival,
+                    scheduledDeparture = stop.scheduledDeparture,
+                    actualArrival = stop.actualArrival,
+                    actualDeparture = stop.actualDeparture,
+                    arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                    departureDelayMinutes = stop.departureDelayMinutes,
+                    isCurrentStation = stop.isCurrentStation,
+                    isTrainHere = false,
+                    expectedDeparture = null,
+                )
+            },
+            status.delayDeparture,
+        ),
         viaCache = status.viaCache,
         fetchedAtMillis = status.fetchedAtMillis,
         sourceLabel = label,
         attempts = emptyList(),
     )
+
+    /**
+     * Position + expectations, computed from what NTES published and nothing else:
+     *  * the train's position is the last stop with a reported actual, or the CURR stop;
+     *  * stops with no reported actual show an EXPECTED time = schedule + the published delay
+     *    (labelled expected, never actual - 3.4).
+     */
+    internal fun withPositionAndExpectations(
+        stops: List<StopStatus>,
+        delayDeparture: String?,
+    ): List<StopStatus> {
+        val delayMinutes = Regex("(\d+)").find(delayDeparture ?: "")?.groupValues?.get(1)?.toIntOrNull()
+            ?: if (delayDeparture?.contains("On Time", ignoreCase = true) == true) 0 else null
+        val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
+        val positionIndex = stops.indexOfFirst { it.isCurrentStation }.let { if (it >= 0) it else lastReported }
+        return stops.mapIndexed { index, stop ->
+            val here = index == positionIndex
+            val expected = if (stop.actualDeparture == null && delayMinutes != null) {
+                stop.scheduledDeparture?.let { shiftMinutes(it, delayMinutes) }
+            } else null
+            stop.copy(isTrainHere = here, expectedDeparture = expected)
+        }
+    }
+
+    /** HH:mm + minutes, wrapping past midnight (10.3). */
+    internal fun shiftMinutes(hhmm: String, minutes: Int): String {
+        val parts = hhmm.split(":")
+        val h = parts.getOrNull(0)?.toIntOrNull() ?: return hhmm
+        val m = parts.getOrNull(1)?.toIntOrNull() ?: return hhmm
+        val total = (h * 60 + m + minutes).mod(24 * 60)
+        return "%02d:%02d".format(total / 60, total % 60)
+    }
 
     data class StopStatus(
         val code: String,
@@ -401,6 +438,10 @@ class ResultsEngine(
         val arrivalDelayMinutes: Int?,
         val departureDelayMinutes: Int?,
         val isCurrentStation: Boolean,
+        /** the train's position as published: the last stop with a reported actual, or CURR. */
+        val isTrainHere: Boolean,
+        /** schedule + the published delay, for stops with no reported actual (labelled expected). */
+        val expectedDeparture: String?,
     )
 
     sealed interface StatusOutcome {

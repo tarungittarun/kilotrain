@@ -1,6 +1,7 @@
 package io.opentrack.app.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Spacer
 import android.content.Intent
 import androidx.compose.material3.Switch
@@ -161,7 +162,8 @@ fun ResultsScreen(
                                 stop.scheduledArrival, stop.scheduledDeparture,
                                 stop.actualArrival, stop.actualDeparture,
                                 stop.arrivalDelayMinutes, stop.departureDelayMinutes,
-                                stop.isCurrentStation,
+                                stop.isCurrentStation, stop.isTrainHere,
+                                stop.expectedDeparture,
                             ),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.fillMaxWidth(),

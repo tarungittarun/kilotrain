@@ -56,13 +56,23 @@ object StateCopy {
         arrivalDelayMinutes: Int?,
         departureDelayMinutes: Int?,
         isCurrentStation: Boolean,
+        isTrainHere: Boolean,
+        expectedDeparture: String?,
     ): String {
-        val here = if (isCurrentStation) " ⬅ here now" else ""
+        val marker = if (isTrainHere) "  ⬅ TRAIN HERE" else ""
+        val reported = actualDeparture ?: actualArrival
+        val timing = if (reported != null) {
+            "actual ${actualArrival ?: "—"}/${actualDeparture ?: "—"}"
+        } else if (expectedDeparture != null) {
+            "expected $expectedDeparture (not yet reported)"
+        } else {
+            "actual — (not reported)"
+        }
+        val delay = arrivalDelayMinutes ?: departureDelayMinutes
         return "$code $name · sched ${scheduledArrival ?: "—"}/${scheduledDeparture ?: "—"}" +
-            " · actual ${actualArrival ?: "—"}/${actualDeparture ?: "—"}" +
-            (arrivalDelayMinutes?.let { " · late ${it} min" } ?: "") +
-            (if (arrivalDelayMinutes == null && departureDelayMinutes != null) " · dep late ${departureDelayMinutes} min" else "") +
-            here
+            " · $timing" +
+            (delay?.let { " · late ${it} min" } ?: "") +
+            marker
     }
 
     /** Provenance-readable row line (10.5). */
