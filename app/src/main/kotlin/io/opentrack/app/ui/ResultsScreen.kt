@@ -1,161 +1,235 @@
 package io.opentrack.app.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.foundation.layout.Spacer
 import android.content.Intent
-import androidx.compose.material3.Switch
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import io.opentrack.core.contract.Provenance
-import io.opentrack.core.contract.ProvenanceKind
 import io.opentrack.app.BuildConfig
-import io.opentrack.core.contract.label
+import io.opentrack.app.diag.DiagnosticsStore
 import io.opentrack.app.search.ResultsEngine
 import io.opentrack.app.search.ResultsViewModel
+import io.opentrack.core.contract.Provenance
+import io.opentrack.core.contract.ProvenanceKind
+import io.opentrack.core.contract.label
 
 /**
- * The one results screen. State copy comes ONLY from StateCopy (3.2); provenance is part of
- * every row (10.5); the banner is a full sentence for TalkBack.
+ * Two views, as the owner asked: the SEARCH view (fields, diagnostics, results) and the DETAIL
+ * view (one train's schedule/actual info). Opening a train hides the search; a back button
+ * returns to it. All state copy comes from StateCopy only (3.2).
  */
 @Composable
 fun ResultsScreen(
     viewModel: ResultsViewModel,
-    diagnosticsStore: io.opentrack.app.diag.DiagnosticsStore? = null,
+    diagnosticsStore: DiagnosticsStore? = null,
 ) {
     val ui by viewModel.state.collectAsState()
+    val detail = ui.selectedTrainNumber
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+        if (detail != null) {
+            DetailView(ui = ui, viewModel = viewModel, diagnosticsStore = diagnosticsStore)
+        } else {
+            SearchView(ui = ui, viewModel = viewModel, diagnosticsStore = diagnosticsStore)
+        }
+    }
+}
+
+@Composable
+private fun SearchView(
+    ui: ResultsViewModel.UiState,
+    viewModel: ResultsViewModel,
+    diagnosticsStore: DiagnosticsStore?,
+) {
+    val context = LocalContext.current
     var from by rememberSaveable { mutableStateOf("") }
     var to by rememberSaveable { mutableStateOf("") }
     var trainNumber by rememberSaveable { mutableStateOf("") }
 
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            OutlinedTextField(
-                value = from,
-                onValueChange = { from = it },
-                label = { Text("from station code") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = to,
-                onValueChange = { to = it },
-                label = { Text("to station code") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Button(
-                onClick = { viewModel.search(from.trim().uppercase(), to.trim().uppercase()) },
-                modifier = Modifier.padding(top = 8.dp),
-            ) {
-                Text("search")
-            }
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text(
+            text = "OpenTrack India ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        OutlinedTextField(
+            value = from,
+            onValueChange = { from = it },
+            label = { Text("from station code") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        OutlinedTextField(
+            value = to,
+            onValueChange = { to = it },
+            label = { Text("to station code") },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Button(
+            onClick = { viewModel.search(from.trim().uppercase(), to.trim().uppercase()) },
+            modifier = Modifier.padding(top = 8.dp),
+        ) { Text("search") }
 
-            DiagnosticsBar(diagnosticsStore)
+        DiagnosticsBar(diagnosticsStore)
 
-            OutlinedTextField(
-                value = trainNumber,
-                onValueChange = { trainNumber = it },
-                label = { Text("or train number") },
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-            )
-            Button(
-                onClick = { viewModel.searchByNumber(trainNumber.trim()) },
-                modifier = Modifier.padding(top = 8.dp),
-            ) {
-                Text("show train")
-            }
+        OutlinedTextField(
+            value = trainNumber,
+            onValueChange = { trainNumber = it },
+            label = { Text("or train number") },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+        Button(onClick = { viewModel.searchByNumber(trainNumber.trim()) }) { Text("show train") }
 
-            val banner = StateCopy.banner(screenStateOf(ui.state), ui.bannerSource, age = null)
-            Text(
-                text = banner,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .semantics { contentDescription = "status: $banner" },
-            )
-            ui.note?.let { note ->
-                Text(text = note, style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 4.dp))
-            }
+        LoaderRow(ui.loading)
 
-            Text(
-                text = "OpenTrack India ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
-                style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-
-            LazyColumn(
-                modifier = Modifier.padding(top = 8.dp).testTag("results_list"),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(ui.rows) { row ->
-                    Column(modifier = Modifier.fillMaxWidth()) {
+        LazyColumn(
+            modifier = Modifier.padding(top = 8.dp).testTag("results_list"),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            items(ui.rows) { row ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.padding(12.dp)) {
                         Text(
                             text = StateCopy.row(row.number, row.name, row.timeDue ?: "—", row.provenanceLabel),
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth(),
                         )
-                        TextButton(onClick = { viewModel.showStops(row.number) }) {
-                            Text("stop times")
-                        }
-                        TextButton(onClick = { viewModel.showLiveStatus(row.number) }) {
-                            Text("live status")
+                        Row {
+                            TextButton(onClick = { viewModel.showStops(row.number) }) { Text("schedule") }
+                            TextButton(onClick = { viewModel.showLiveStatus(row.number) }) { Text("live status") }
                         }
                     }
                 }
-                val stopsNote = ui.stopsNote
-                val status = ui.status
-                if (status is ResultsEngine.StatusOutcome.Live) {
-                    item {
-                        val label = if (status.viaCache) {
-                            Provenance(ProvenanceKind.CACHED, "NTES", status.fetchedAtMillis)
-                        } else {
-                            Provenance(ProvenanceKind.LIVE, "NTES", status.fetchedAtMillis)
+            }
+            if (ui.rows.isEmpty() && !ui.loading && ui.note != null) {
+                item { Text(ui.note, style = MaterialTheme.typography.bodySmall) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DetailView(
+    ui: ResultsViewModel.UiState,
+    viewModel: ResultsViewModel,
+    diagnosticsStore: DiagnosticsStore?,
+) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // header: back to search + the train
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = { viewModel.clearSelection() }) { Text("← search") }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = ui.trainLabel ?: "train",
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = "OpenTrack India ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
+            style = MaterialTheme.typography.labelSmall,
+        )
+
+        LoaderRow(ui.loading)
+
+        val status = ui.status
+        val label = status?.let {
+            val p = Provenance(
+                if (it.viaCache) ProvenanceKind.CACHED else ProvenanceKind.LIVE,
+                "NTES", it.fetchedAtMillis,
+            )
+            StateCopy.sourceBadge(it.sourceLabel, p.label(now = System.currentTimeMillis()))
+        }
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+        ui.note?.let { note ->
+            Text(text = note, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+        }
+
+        LazyColumn(modifier = Modifier.padding(top = 8.dp).testTag("results_list")) {
+            if (status is ResultsEngine.StatusOutcome.Live) {
+                // the position card: one glance answer
+                item {
+                    val departed = status.stops.firstOrNull { it.isDepartedHere }
+                    val next = status.stops.firstOrNull { it.isNextStation }
+                    Card(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = StateCopy.positionSummary(
+                                    departedStation = departed?.let { "${it.code} ${it.name}" },
+                                    nextStation = next?.let { "${it.code} ${it.name}" },
+                                    expectedNext = next?.expectedDeparture,
+                                    delayMinutes = next?.arrivalDelayMinutes,
+                                ),
+                                style = MaterialTheme.typography.bodyLarge,
+                            )
+                            Text(
+                                text = "as of ${status.currentStatus}",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                            TextButton(onClick = { ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                Text("refresh")
+                            }
                         }
+                    }
+                }
+            }
+            if (ui.stops.isEmpty() && ui.stopsNote != null) {
+                item {
+                    Text(
+                        text = ui.stopsNote,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp),
+                    )
+                }
+            }
+            if (status is ResultsEngine.StatusOutcome.Live) {
+                if (status.attempts.size > 1) {
+                    item {
                         Text(
-                            text = StateCopy.liveStatusHeader(
-                                trainNo = status.trainNo,
-                                currentStatus = status.currentStatus,
-                                provenanceLabel = label.label(System.currentTimeMillis()),
-                                sourceLabel = status.sourceLabel,
-                            ),
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(top = 8.dp),
+                            text = "tried: " + status.attempts.joinToString(" · "),
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(bottom = 4.dp),
                         )
                     }
-                    if (status.attempts.size > 1) {
-                        item {
-                            Text(
-                                text = "tried: " + status.attempts.joinToString(" · "),
-                                style = MaterialTheme.typography.labelSmall,
-                                modifier = Modifier.padding(bottom = 4.dp),
-                            )
-                        }
-                    }
-                    items(status.stops) { stop ->
+                }
+                items(status.stops) { stop ->
+                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
                         Text(
                             text = StateCopy.stopStatus(
                                 stop.code, stop.name,
@@ -167,37 +241,40 @@ fun ResultsScreen(
                                 stop.isDepartedHere, stop.isNextStation, stop.kmToNext,
                             ),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.fillMaxWidth(),
                         )
-                    }
-                } else if (status is ResultsEngine.StatusOutcome.Unavailable) {
-                    item {
-                        Text(
-                            text = status.reason,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
+                        Divider()
                     }
                 }
-                if (ui.stops.isEmpty() && stopsNote != null) {
-                    item {
-                        Text(
-                            text = stopsNote,
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 8.dp),
-                        )
-                    }
-                } else {
-                    items(ui.stops) { stop ->
-                        Text(
-                            text = StateCopy.stop(stop.code, stop.name, stop.arrival, stop.departure),
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
+            } else {
+                items(ui.stops) { stop ->
+                    Text(
+                        text = StateCopy.stopStatus(
+                            stop.code, stop.name,
+                            stop.scheduledArrival, stop.scheduledDeparture,
+                            stop.actualArrival, stop.actualDeparture,
+                            stop.arrivalDelayMinutes, stop.departureDelayMinutes,
+                            stop.isCurrentStation, stop.isTrainHere,
+                            stop.expectedDeparture, stop.distanceKm, stop.haltMinutes,
+                            stop.isDepartedHere, stop.isNextStation, stop.kmToNext,
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LoaderRow(loading: Boolean) {
+    if (!loading) return
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("fetching live data…", style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -211,7 +288,7 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
     Column(modifier = Modifier.padding(top = 16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("diagnostics", style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.width(8.dp))
             Switch(
                 checked = enabled,
                 onCheckedChange = {
@@ -224,7 +301,7 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
         if (enabled) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("include raw responses", style = MaterialTheme.typography.bodySmall)
-                Spacer(modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(8.dp))
                 Switch(
                     checked = captureRaw,
                     onCheckedChange = {
@@ -236,19 +313,14 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
             Row(modifier = Modifier.padding(top = 4.dp)) {
                 TextButton(onClick = {
                     store.saveAndShare(context)?.let { context.startActivity(Intent.createChooser(it, "Share diagnostics file")) }
-                }) {
-                    Text("save + share file")
-                }
-                TextButton(onClick = { context.startActivity(store.shareAsText(context)) }) {
-                    Text("share as copy")
-                }
+                }) { Text("save + share file") }
+                TextButton(onClick = { context.startActivity(store.shareAsText(context)) }) { Text("share as copy") }
                 TextButton(onClick = { store.clear() }) { Text("clear") }
             }
         }
     }
 }
 
-@Composable
 internal fun screenStateOf(name: ResultsEngine.UiStateName): ScreenState = when (name) {
     ResultsEngine.UiStateName.LIVE -> ScreenState.LIVE
     ResultsEngine.UiStateName.LIVE_STALE -> ScreenState.LIVE_STALE

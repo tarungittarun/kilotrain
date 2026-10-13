@@ -38,6 +38,9 @@ class ResultsViewModel(
         val stopsNote: String? = null,
         val status: ResultsEngine.StatusOutcome? = null,
         val loading: Boolean = false,
+        /** the train whose detail view is open; null = the search view (the owner's 3-section ask). */
+        val selectedTrainNumber: String? = null,
+        val trainLabel: String? = null,
     )
 
     private val _state = MutableStateFlow(
@@ -91,6 +94,7 @@ class ResultsViewModel(
     fun showLiveStatus(number: String) {
         _state.value = _state.value.copy(
             loading = true, stops = emptyList(), stopsNote = null, status = null,
+            selectedTrainNumber = number, trainLabel = "train $number",
         )
         viewModelScope.launch {
             val outcome = withContext(Dispatchers.Default) {

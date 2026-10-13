@@ -87,6 +87,28 @@ object StateCopy {
             distance + halt + marker
     }
 
+    /**
+     * The detail view's position card: one sentence a passenger can read at a glance - where the
+     * train was last reported, where it is going, and by when. Computed only from published facts.
+     */
+    fun positionSummary(
+        departedStation: String?,
+        nextStation: String?,
+        expectedNext: String?,
+        delayMinutes: Int?,
+    ): String = when {
+        departedStation != null && nextStation != null ->
+            "Last reported: $departedStation\n→ Next: $nextStation" +
+                (expectedNext?.let { " · expected about $it" } ?: "") +
+                (delayMinutes?.let { " · running ${if (it > 0) "$it min late" else "on time"} " } ?: "")
+        departedStation != null -> "Last reported: $departedStation (destination ahead)"
+        else -> "Position not reported yet by the live source"
+    }
+
+    /** The detail header's provenance line (3.2): which source, how old. */
+    fun sourceBadge(sourceLabel: String, provenanceLabel: String): String =
+        "via $sourceLabel · $provenanceLabel"
+
     /** Provenance-readable row line (10.5). */
     fun row(number: String, name: String, timeDue: String, provenanceLabel: String): String =
         "$number · $name — $timeDue · $provenanceLabel"
