@@ -161,17 +161,14 @@ private fun DetailView(
 
         LoaderRow(ui.loading)
 
-        val status = ui.status
-        val label = status?.let {
-            val p = Provenance(
-                if (it.viaCache) ProvenanceKind.CACHED else ProvenanceKind.LIVE,
-                "NTES", it.fetchedAtMillis,
+        val status = ui.status as? ResultsEngine.StatusOutcome.Live
+        if (status != null) {
+            val provenance = Provenance(
+                if (status.viaCache) ProvenanceKind.CACHED else ProvenanceKind.LIVE,
+                "NTES", status.fetchedAtMillis,
             )
-            StateCopy.sourceBadge(it.sourceLabel, p.label(now = System.currentTimeMillis()))
-        }
-        if (label != null) {
             Text(
-                text = label,
+                text = StateCopy.sourceBadge(status.sourceLabel, provenance.label(System.currentTimeMillis())),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = 8.dp),
             )
@@ -181,7 +178,7 @@ private fun DetailView(
         }
 
         LazyColumn(modifier = Modifier.padding(top = 8.dp).testTag("results_list")) {
-            if (status is ResultsEngine.StatusOutcome.Live) {
+            if (status != null) {
                 // the position card: one glance answer
                 item {
                     val departed = status.stops.firstOrNull { it.isDepartedHere }

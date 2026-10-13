@@ -91,6 +91,14 @@ class ResultsViewModel(
     }
 
     /** Priority 3: the live running status for a train from the current rows. */
+    /** Back from the detail view to the search view (the owner's hide/show ask). */
+    fun clearSelection() {
+        _state.value = _state.value.copy(
+            selectedTrainNumber = null, trainLabel = null, stops = emptyList(),
+            status = null, stopsNote = null, loading = false,
+        )
+    }
+
     fun showLiveStatus(number: String) {
         _state.value = _state.value.copy(
             loading = true, stops = emptyList(), stopsNote = null, status = null,
