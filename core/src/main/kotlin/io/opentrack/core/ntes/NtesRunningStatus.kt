@@ -70,6 +70,8 @@ object NtesRunningStatusParser {
                 departureDelayMinutes = s.optString("DDEP").trim().toIntOrNull(),
                 platform = s.optString("PF").trim().takeIf { it.isNotBlank() },
                 isCurrentStation = s.optString("CURR").trim() == "Y",
+                distanceKm = s.optString("DIST").trim().takeIf { it.isNotBlank() && it.toIntOrNull() != null },
+                haltMinutes = s.optString("Halt").trim().takeIf { it.isNotBlank() && it.toIntOrNull() != null },
             )
         }
         if (stops.none { it.stationCode != null }) return null
