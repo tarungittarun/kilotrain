@@ -403,37 +403,6 @@ class ResultsEngine(
         attempts = emptyList(),
     )
 
-    /**
-     * Position + expectations, computed from what NTES published and nothing else:
-     *  * the train's position is the last stop with a reported actual, or the CURR stop;
-     *  * stops with no reported actual show an EXPECTED time = schedule + the published delay
-     *    (labelled expected, never actual - 3.4).
-     */
-    internal fun withPositionAndExpectations(
-        stops: List<StopStatus>,
-        delayDeparture: String?,
-    ): List<StopStatus> {
-        val delayMinutes = Regex("\\d+").find(delayDeparture ?: "")?.value?.toIntOrNull()
-            ?: if (delayDeparture?.contains("On Time", ignoreCase = true) == true) 0 else null
-        val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
-        val positionIndex = stops.indexOfFirst { it.isCurrentStation }.let { if (it >= 0) it else lastReported }
-        return stops.mapIndexed { index, stop ->
-            val here = index == positionIndex
-            val expected = if (stop.actualDeparture == null && delayMinutes != null) {
-                stop.scheduledDeparture?.let { shiftMinutes(it, delayMinutes) }
-            } else null
-            stop.copy(isTrainHere = here, expectedDeparture = expected)
-        }
-    }
-
-    /** HH:mm + minutes, wrapping past midnight (10.3). */
-    internal fun shiftMinutes(hhmm: String, minutes: Int): String {
-        val parts = hhmm.split(":")
-        val h = parts.getOrNull(0)?.toIntOrNull() ?: return hhmm
-        val m = parts.getOrNull(1)?.toIntOrNull() ?: return hhmm
-        val total = (h * 60 + m + minutes).mod(24 * 60)
-        return "%02d:%02d".format(total / 60, total % 60)
-    }
 
     data class StopStatus(
         val code: String,
@@ -495,5 +464,37 @@ class ResultsEngine(
 
         /** 10.3: 4-letter codes are never truncated anywhere in this path. */
         fun codePreserved(code: String): String = code.trim().uppercase()
+    }
+
+    /**
+     * Position + expectations, computed from what NTES published and nothing else:
+     *  * the train's position is the last stop with a reported actual, or the CURR stop;
+     *  * stops with no reported actual show an EXPECTED time = schedule + the published delay
+     *    (labelled expected, never actual - 3.4).
+     */
+    internal fun withPositionAndExpectations(
+        stops: List<StopStatus>,
+        delayDeparture: String?,
+    ): List<StopStatus> {
+        val delayMinutes = Regex("\\d+").find(delayDeparture ?: "")?.value?.toIntOrNull()
+            ?: if (delayDeparture?.contains("On Time", ignoreCase = true) == true) 0 else null
+        val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
+        val positionIndex = stops.indexOfFirst { it.isCurrentStation }.let { if (it >= 0) it else lastReported }
+        return stops.mapIndexed { index, stop ->
+            val here = index == positionIndex
+            val expected = if (stop.actualDeparture == null && delayMinutes != null) {
+                stop.scheduledDeparture?.let { shiftMinutes(it, delayMinutes) }
+            } else null
+            stop.copy(isTrainHere = here, expectedDeparture = expected)
+        }
+    }
+
+    /** HH:mm + minutes, wrapping past midnight (10.3). */
+    internal fun shiftMinutes(hhmm: String, minutes: Int): String {
+        val parts = hhmm.split(":")
+        val h = parts.getOrNull(0)?.toIntOrNull() ?: return hhmm
+        val m = parts.getOrNull(1)?.toIntOrNull() ?: return hhmm
+        val total = (h * 60 + m + minutes).mod(24 * 60)
+        return "%02d:%02d".format(total / 60, total % 60)
     }
 }
