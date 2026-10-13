@@ -96,28 +96,52 @@ class NtesRunningStatusSource(
 
     /** GET the mobile site once per source instance and keep its cookies (documented warmup). */
     private fun warmUp(): String {
-        if (sessionCookies != null) return sessionCookies!!
-        return try {
-            val connection = openConnection(URL(WARMUP_URL))
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 10_000
-            connection.readTimeout = 15_000
-            connection.setRequestProperty("User-Agent", DALVIK_UA)
-            connection.responseCode
-            val cookies = connection.headerFields["Set-Cookie"]
-                ?.flatMap { it.split(";") }
-                ?.map { it.trim() }
-                ?.filter { it.contains("=") }
-                ?.joinToString("; ")
-                .orEmpty()
-            sessionCookies = cookies
-            cookies
-        } catch (e: Exception) {
-            "" // a failed warmup is not fatal; the POST still goes out (documented clients retry)
+        var attempts = 0
+        while (attempts < 2) {
+            try {
+                val connection = openConnection(URL(WARMUP_URL))
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 10_000
+                connection.readTimeout = 15_000
+                connection.setRequestProperty("User-Agent", DALVIK_UA)
+                connection.responseCode
+                val cookies = connection.headerFields["Set-Cookie"]
+                    ?.flatMap { it.split(";") }
+                    ?.map { it.trim() }
+                    ?.filter { it.contains("=") }
+                    ?.joinToString("; ")
+                    .orEmpty()
+                sessionCookies = cookies
+                return cookies
+            } catch (e: Exception) {
+                attempts++
+            }
         }
+        return sessionCookies ?: ""
     }
 
     private fun post(requestBody: String, userAgent: String, cookies: String = ""): Wire {
+        var lastFailure: Wire.Failure? = null
+        for (attempt in 1..3) {
+            val result = doPost(requestBody, userAgent, cookies)
+            when (result) {
+                is Wire.Ok -> return result
+                is Wire.Failure -> {
+                    lastFailure = result
+                    if (attempt < 3) {
+                        try {
+                            Thread.sleep(300L * attempt)
+                        } catch (e: Exception) {
+                            // ignore
+                        }
+                    }
+                }
+            }
+        }
+        return lastFailure ?: Wire.Failure(SourceFailure.OFFLINE, "unknown failure")
+    }
+
+    private fun doPost(requestBody: String, userAgent: String, cookies: String = ""): Wire {
         return try {
             val connection = openConnection(URL(NtesCrypto.BASE_URL))
             connection.requestMethod = "POST"
