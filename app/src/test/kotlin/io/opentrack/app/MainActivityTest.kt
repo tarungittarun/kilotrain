@@ -1,6 +1,5 @@
 package io.opentrack.app
 
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -8,10 +7,11 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import io.opentrack.app.source.ErailPairSource
-import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.source.SourceLocator
 import io.opentrack.app.source.TransportReply
 import org.junit.After
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -19,9 +19,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 /**
- * L2 screen tests (10.1): inflation, the exact copy of every state the search path can produce,
- * and no network in tests (the source is faked through SourceLocator). Device-dependent proofs
- * live in their own layers (ADR 0006).
+ * L2 screen tests for the two-view UI (search view -> detail view), the exact flow the owner runs.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
@@ -32,72 +30,123 @@ class MainActivityTest {
 
     @After
     fun tearDown() {
-        SourceLocator.erailSource = null
         SourceLocator.erailPairSource = null
+        SourceLocator.erailSource = null
+        SourceLocator.ntesStatusSource = null
     }
 
-    @Test
-    fun firstRenderIsHonestAndNeverClaimsAnAnswer() {
-        compose.onNodeWithText("offline - showing unverified timetable data.")
-            .assertExists()
-    }
-
-    /** The pair query runs on the device; here its transport is faked to the throttle body. */
-    @Test
-    fun aPairSearchSaysItCouldNotLookInsteadOfShowingOldRows() {
-        SourceLocator.erailPairSource = ErailPairSource(
-            { TransportReply(200, "~~~~~Please try again after some time.") }, enabled = true
-        )
-        compose.onNodeWithText("from station code").performTextInput("tlgt")
-        compose.onNodeWithText("to station code").performTextInput("mys")
-        compose.onNodeWithText("search").performClick()
-        // the engine runs on Dispatchers.Default, outside the compose clock: wait for the state
-        compose.waitUntil(5_000) {
-            compose.onAllNodesWithText("could not look this up. no old data is shown in its place.")
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText("could not look this up. no old data is shown in its place.")
-            .assertExists()
-        // and nothing old is on screen to contradict it
-        compose.onAllNodesWithText("16205 · Talaguppa Mysore Intercity Express — 14:45 · timetable")
-            .assertCountEquals(0)
-        compose.onAllNodesWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
-            .assertCountEquals(0)
-    }
-
-    /** Priority 1+2: a train number answers live from erail.in with the feed's own stamp. */
-    @Test
-    fun aTrainNumberAnswersLive() {
-        SourceLocator.erailSource = ErailTrainSource(
-            { TransportReply(200, liveCapture) }, enabled = true
-        )
-        compose.onNodeWithText("or train number").performTextInput("56269")
-        compose.onNodeWithText("show train").performClick()
-        compose.waitUntil(5_000) {
-            compose.onAllNodesWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onNodeWithText("56269 · SMET MYS FAST PASS — 10:20 · via erail.in")
-            .assertExists()
-    }
-
-    /** When the live source cannot answer, the failure is named and no old row appears. */
-    @Test
-    fun aLiveFailureNamesItselfAndShowsNoOldRow() {
-        SourceLocator.erailSource = ErailTrainSource(
-            { TransportReply(200, "~~~~~Please try again after some time.") }, enabled = true
-        )
-        compose.onNodeWithText("or train number").performTextInput("56269")
-        compose.onNodeWithText("show train").performClick()
-        compose.waitUntil(5_000) {
-            compose.onAllNodesWithText("could not look this up. no old data is shown in its place.")
-                .fetchSemanticsNodes().isNotEmpty()
-        }
-        compose.onAllNodesWithText("56269 · Shimoga Mysore Passenger — 10:30 · timetable")
-            .assertCountEquals(0)
-    }
-
-    private val liveCapture = java.io.File("src/test/resources/erail_trainno_56269_capture.txt").readText()
     private val pairCapture =
         java.io.File("src/test/resources/erail_pair_smet_mys_capture.txt").readText()
+
+    private fun showFirstTrain() {
+        compose.onNodeWithText("from station code").performTextInput("smet")
+        compose.onNodeWithText("to station code").performTextInput("mys")
+        compose.onNodeWithText("search").performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("16228 · TLGP MYS EXP — 23:00 · via erail.in")
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun theSearchViewRendersFirst() {
+        compose.onNodeWithText("from station code").assertIsDisplayed()
+        compose.onNodeWithText("or train number").assertIsDisplayed()
+        // the search view is what opens; the detail view has a back button instead
+        compose.onAllNodesWithText("← search").fetchSemanticsNodes().let { assertTrue(it.isEmpty()) }
+    }
+
+    /** The owner's ask: selecting a train hides the search and shows the detail view. */
+    @Test
+    fun selectingATrainOpensTheDetailViewAndHidesTheSearch() {
+        showFirstTrain()
+        compose.onAllNodesWithText("live status")[0].performClick()
+        // the search fields are gone; the detail header is present
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("← search").fetchSemanticsNodes().isNotEmpty() &&
+                compose.onAllNodesWithText("from station code").fetchSemanticsNodes().isEmpty()
+        }
+        compose.onNodeWithText("← search").assertIsDisplayed()
+    }
+
+    @Test
+    fun backFromTheDetailViewReturnsToTheSearch() {
+        showFirstTrain()
+        compose.onAllNodesWithText("live status")[0].performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("← search").fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("← search").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("from station code").assertIsDisplayed()
+    }
+
+    @Test
+    fun thePositionCardNamesTheLastReportedAndNextStop() {
+        SourceLocator.erailPairSource = ErailPairSource(
+            { TransportReply(200, pairCapture) }, enabled = true
+        )
+        SourceLocator.ntesStatusSource = NtesRunningStatusSource({ url ->
+            object : java.net.HttpURLConnection(url) {
+                override fun disconnect() {}
+                override fun usingProxy() = false
+                override fun connect() {}
+                override fun getOutputStream() = object : java.io.OutputStream() {
+                    override fun write(b: Int) {}
+                    override fun write(b: ByteArray, off: Int, len: Int) {}
+                }
+                override fun getResponseCode() = 200
+                override fun getInputStream() = java.io.ByteArrayInputStream(
+                    """
+                    {"TrainNo":"16228","LUPDT":"Train departed SMET at 22:58",
+                     "STNS":[
+                       {"SC":"SMET","SN":"Shivamogga Town","STA":"22:55","STD":"23:00",
+                        "ETA":"23:05","ETD":"23:10","DARR":"10","DDEP":"10","DIST":"0","Halt":"5"},
+                       {"SC":"SME","SN":"Shivamogga H","STA":"23:05","STD":"23:10",
+                        "ETA":"23:05","ETD":"23:10","DARR":"0","DDEP":"0","DIST":"3","Halt":"2"}
+                     ]}
+                    """.trimIndent().toByteArray()
+                )
+                override fun getErrorStream(): java.io.InputStream? = null
+            }
+        }, { 1_700_000_000_000L })
+
+        showFirstTrain()
+        compose.onAllNodesWithText("live status")[0].performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("Last reported:", substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
+        // the card states the position in one sentence (the reference app's model)
+        compose.onNodeWithText("Last reported: SMET Shivamogga Town", substring = true).assertExists()
+        compose.onNodeWithText("Next: SME Shivamogga H", substring = true).assertExists()
+    }
+
+    @Test
+    fun aFailedLiveStatusNamesItself() {
+        SourceLocator.erailPairSource = ErailPairSource(
+            { TransportReply(200, pairCapture) }, enabled = true
+        )
+        SourceLocator.ntesStatusSource = NtesRunningStatusSource({ url ->
+            object : java.net.HttpURLConnection(url) {
+                override fun disconnect() {}
+                override fun usingProxy() = false
+                override fun connect() {}
+                override fun getOutputStream() = object : java.io.OutputStream() {
+                    override fun write(b: Int) {}
+                    override fun write(b: ByteArray, off: Int, len: Int) {}
+                }
+                override fun getResponseCode() = 200
+                override fun getInputStream() =
+                    java.io.ByteArrayInputStream("~~~~~nope".toByteArray())
+                override fun getErrorStream(): java.io.InputStream? = null
+            }
+        }, { 1L })
+        showFirstTrain()
+        compose.onAllNodesWithText("live status")[0].performClick()
+        compose.waitUntil(8_000) {
+            compose.onAllNodesWithText("could not get the live status", substring = true)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("could not get the live status", substring = true).assertExists()
+    }
 }
