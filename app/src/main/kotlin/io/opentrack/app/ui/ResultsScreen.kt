@@ -19,6 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -57,7 +58,7 @@ fun ResultsScreen(
     val ui by viewModel.state.collectAsState()
     val detail = ui.selectedTrainNumber
 
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(modifier = Modifier.fillMaxSize().safeDrawingPadding()) {
         if (detail != null) {
             DetailView(ui = ui, viewModel = viewModel, diagnosticsStore = diagnosticsStore)
         } else {

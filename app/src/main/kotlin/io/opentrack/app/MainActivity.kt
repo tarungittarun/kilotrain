@@ -3,6 +3,7 @@ package io.opentrack.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import io.opentrack.app.BuildConfig
 import io.opentrack.app.asset.OfflineAsset
 import io.opentrack.app.asset.OfflineAssetCodec
@@ -14,6 +15,7 @@ import io.opentrack.core.contract.SystemClock
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         // The offline asset ships in assets/ (empty-but-honest today: no source is admitted).
