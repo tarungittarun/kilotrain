@@ -268,6 +268,11 @@ class ResultsEngine(
                                     isCurrentStation = false,
                                     isTrainHere = false,
                                     expectedDeparture = null,
+                                    distanceKm = null,
+                                    haltMinutes = null,
+                                    isDepartedHere = false,
+                                    isNextStation = false,
+                                    kmToNext = null,
                                 )
                             },
                             viaCache = false,
@@ -300,6 +305,11 @@ class ResultsEngine(
                                         isCurrentStation = true,
                                         isTrainHere = true,
                                         expectedDeparture = null,
+                                        distanceKm = null,
+                                        haltMinutes = null,
+                                        isDepartedHere = true,
+                                        isNextStation = false,
+                                        kmToNext = null,
                                     ),
                                     StopStatus(
                                         code = p.toStation,
@@ -313,6 +323,11 @@ class ResultsEngine(
                                         isCurrentStation = false,
                                         isTrainHere = false,
                                         expectedDeparture = null,
+                                        distanceKm = null,
+                                        haltMinutes = null,
+                                        isDepartedHere = false,
+                                        isNextStation = true,
+                                        kmToNext = null,
                                     ),
                                 ),
                                 viaCache = false,
@@ -336,6 +351,8 @@ class ResultsEngine(
                             scheduledDeparture = null, actualArrival = null, actualDeparture = null,
                             arrivalDelayMinutes = null, departureDelayMinutes = null,
                             isCurrentStation = true, isTrainHere = true, expectedDeparture = null,
+                            distanceKm = null, haltMinutes = null,
+                            isDepartedHere = true, isNextStation = false, kmToNext = null,
                         ),
                     ),
                     viaCache = false,
@@ -393,6 +410,11 @@ class ResultsEngine(
                     isCurrentStation = stop.isCurrentStation,
                     isTrainHere = false,
                     expectedDeparture = null,
+                    distanceKm = stop.distanceKm,
+                    haltMinutes = stop.haltMinutes,
+                    isDepartedHere = false,
+                    isNextStation = false,
+                    kmToNext = null,
                 )
             },
             status.delayDeparture,
@@ -418,6 +440,16 @@ class ResultsEngine(
         val isTrainHere: Boolean,
         /** schedule + the published delay, for stops with no reported actual (labelled expected). */
         val expectedDeparture: String?,
+        /** distance from the train's origin, as published by the source. */
+        val distanceKm: String?,
+        /** scheduled halt, as published. */
+        val haltMinutes: String?,
+        /** the stop the train has last been REPORTED at (it is past here, not "at" here). */
+        val isDepartedHere: Boolean,
+        /** the next stop after that - where the train is heading. */
+        val isNextStation: Boolean,
+        /** kilometres to the next stop, from the published distances. */
+        val kmToNext: String?,
     )
 
     sealed interface StatusOutcome {
@@ -482,14 +514,25 @@ internal fun withPositionAndExpectations(
 ): List<ResultsEngine.StopStatus> {
     val delayMinutes = Regex("\\d+").find(delayDeparture ?: "")?.value?.toIntOrNull()
         ?: if (delayDeparture?.contains("On Time", ignoreCase = true) == true) 0 else null
+    // the last stop NTES has REPORTED an actual for: the train is PAST it, not standing at it.
     val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
-    val positionIndex = stops.indexOfFirst { it.isCurrentStation }.let { if (it >= 0) it else lastReported }
+    val nextIndex = if (lastReported + 1 in stops.indices) lastReported + 1 else null
     return stops.mapIndexed { index, stop ->
-        val here = index == positionIndex
         val expected = if (stop.actualDeparture == null && delayMinutes != null) {
             stop.scheduledDeparture?.let { shiftMinutes(it, delayMinutes) }
         } else null
-        stop.copy(isTrainHere = here, expectedDeparture = expected)
+        val kmToNext = if (index == nextIndex && lastReported >= 0) {
+            val from = stops[lastReported].distanceKm?.toIntOrNull()
+            val to = stop.distanceKm?.toIntOrNull()
+            if (from != null && to != null && to >= from) (to - from).toString() else null
+        } else null
+        stop.copy(
+            isTrainHere = false, // never claim the train is AT a stop (the reference shows it between)
+            expectedDeparture = expected,
+            isDepartedHere = index == lastReported && lastReported >= 0,
+            isNextStation = index == nextIndex,
+            kmToNext = kmToNext,
+        )
     }
 }
 

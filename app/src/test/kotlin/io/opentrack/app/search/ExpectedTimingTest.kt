@@ -1,6 +1,7 @@
 package io.opentrack.app.search
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 
 /** The expected-time arithmetic is pure and wrap-safe (10.3); it never invents an actual. */

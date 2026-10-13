@@ -58,21 +58,33 @@ object StateCopy {
         isCurrentStation: Boolean,
         isTrainHere: Boolean,
         expectedDeparture: String?,
+        distanceKm: String?,
+        haltMinutes: String?,
+        isDepartedHere: Boolean,
+        isNextStation: Boolean,
+        kmToNext: String?,
     ): String {
-        val marker = if (isTrainHere) "  ⬅ TRAIN HERE" else ""
         val reported = actualDeparture ?: actualArrival
-        val timing = if (reported != null) {
-            "actual ${actualArrival ?: "—"}/${actualDeparture ?: "—"}"
-        } else if (expectedDeparture != null) {
-            "expected $expectedDeparture (not yet reported)"
-        } else {
-            "actual — (not reported)"
+        val timing = when {
+            reported != null -> "actual ${actualArrival ?: "—"}/${actualDeparture ?: "—"}"
+            expectedDeparture != null -> "expected $expectedDeparture (not yet reported)"
+            else -> "not reported"
         }
         val delay = arrivalDelayMinutes ?: departureDelayMinutes
+        val distance = distanceKm?.let { " · ${it} km" } ?: ""
+        val halt = haltMinutes?.let { h -> if (h != "0") " · halt ${h} min" else "" } ?: ""
+        // the train is BETWEEN stations: mark where it was last reported and where it is going.
+        val marker = when {
+            isDepartedHere -> "  ⬅ TRAIN LEFT HERE"
+            isNextStation && kmToNext != null -> "  ⬅ NEXT · ~${kmToNext} km away"
+            isNextStation -> "  ⬅ NEXT STATION"
+            isCurrentStation -> "  ⬅ HERE NOW"
+            else -> ""
+        }
         return "$code $name · sched ${scheduledArrival ?: "—"}/${scheduledDeparture ?: "—"}" +
             " · $timing" +
             (delay?.let { " · late ${it} min" } ?: "") +
-            marker
+            distance + halt + marker
     }
 
     /** Provenance-readable row line (10.5). */

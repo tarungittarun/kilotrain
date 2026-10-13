@@ -18,6 +18,8 @@ data class NtesStopStatus(
     val departureDelayMinutes: Int?,
     val platform: String?,
     val isCurrentStation: Boolean,
+    val distanceKm: String?,
+    val haltMinutes: String?,
 )
 
 data class NtesRunningStatus(
@@ -93,9 +95,15 @@ object NtesRunningStatusParser {
      */
     private val COMPOUND = Regex("""^(Source|Destination)?\s*/?\s*(\d{1,2}:\d{2})(?:\s+\d{1,2}-[A-Za-z]{3})?$""")
 
+    /**
+     * NTES uses several "not published" placeholders: blank, "null", "0", "**UA**",
+     * "Source/…", "Destination/…", and the echoed schedule itself. None is an actual (3.4).
+     */
     private fun time(raw: String): String? {
         val value = raw.trim()
         if (value.isBlank() || value == "null" || value == "0") return null
+        if (value.contains("UA")) return null // the **UA** marker
+        if (value.startsWith("Source") || value.startsWith("Destination")) return null
         val match = COMPOUND.find(value)
         if (match != null) {
             val hhmm = match.groupValues[2]
