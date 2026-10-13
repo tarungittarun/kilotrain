@@ -468,6 +468,7 @@ class ResultsEngine(
 
     }
 
+}
 
 /**
  * Position + expectations, computed from what NTES published and nothing else:
@@ -476,9 +477,9 @@ class ResultsEngine(
  *    (labelled expected, never actual - 3.4).
  */
 internal fun withPositionAndExpectations(
-    stops: List<StopStatus>,
+    stops: List<ResultsEngine.StopStatus>,
     delayDeparture: String?,
-): List<StopStatus> {
+): List<ResultsEngine.StopStatus> {
     val delayMinutes = Regex("\\d+").find(delayDeparture ?: "")?.value?.toIntOrNull()
         ?: if (delayDeparture?.contains("On Time", ignoreCase = true) == true) 0 else null
     val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
@@ -499,5 +500,4 @@ internal fun shiftMinutes(hhmm: String, minutes: Int): String {
     val m = parts.getOrNull(1)?.toIntOrNull() ?: return hhmm
     val total = (h * 60 + m + minutes).mod(24 * 60)
     return "%02d:%02d".format(total / 60, total % 60)
-}
 }
