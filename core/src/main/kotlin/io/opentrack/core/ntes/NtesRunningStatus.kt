@@ -58,7 +58,9 @@ object NtesRunningStatusParser {
             // the ORIGIN as "Source". Claiming those as actuals would be fabrication (3.4), so an
             // echo is treated as "not reported" and renders as an em dash (3.3).
             // Be more lenient if this is marked as current station
-            if (!s.optString("CURR").trim().equals("Y", ignoreCase = true)) {
+            if (s.optString("CURR").trim().equals("Y", ignoreCase = true)) {
+                // For current station, be more permissive - don't drop echoes
+            } else {
                 if (actArr != null && actArr == schArr) actArr = null
                 if (actDep != null && actDep == schDep) actDep = null
             }
