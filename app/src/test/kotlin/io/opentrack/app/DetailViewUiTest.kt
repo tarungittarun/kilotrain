@@ -109,7 +109,7 @@ class DetailViewUiTest {
         compose.setContent { io.opentrack.app.ui.ResultsScreen(viewModel = viewModel, null) }
 
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Current:", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("Last reported:", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
         // the position card, in one sentence
         compose.onNodeWithText("Left SMET Shivamogga Town", substring = true).assertExists()
