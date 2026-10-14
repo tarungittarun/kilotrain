@@ -98,10 +98,17 @@ object StateCopy {
         delayMinutes: Int?,
     ): String = when {
         departedStation != null && nextStation != null ->
-            "Last reported: $departedStation\n→ Next: $nextStation" +
-                (expectedNext?.let { " · expected about $it" } ?: "") +
-                (delayMinutes?.let { " · running ${if (it > 0) "$it min late" else "on time"} " } ?: "")
-        departedStation != null -> "Last reported: $departedStation (destination ahead)"
+            "🚂 Current: Left $departedStation\n" +
+            "📍 Next: $nextStation" +
+            (expectedNext?.let { " · ETA ~ $it" } ?: "") +
+            (delayMinutes?.let {
+                if (it > 0) " · Running $it min late"
+                else if (it < 0) " · Running ${-it} min early"
+                else " · On time"
+            } ?: "")
+        departedStation != null -> "🚂 Left $departedStation (en route to destination)"
+        nextStation != null -> "🚂 Approaching $nextStation" +
+            (expectedNext?.let { " · ETA ~ $it" } ?: "")
         else -> "Position not reported yet by the live source"
     }
 

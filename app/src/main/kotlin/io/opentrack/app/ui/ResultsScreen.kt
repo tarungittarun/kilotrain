@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -277,8 +278,19 @@ private fun DetailView(
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(top = 4.dp),
                             )
-                            TextButton(onClick = { ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                Text("refresh")
+                            Row {
+                                TextButton(onClick = { ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                    Text("refresh")
+                                }
+                                TextButton(onClick = { viewModel.setPreferredSource("ntes"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                    Text("NTES")
+                                }
+                                TextButton(onClick = { viewModel.setPreferredSource("erail"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                    Text("Schedule")
+                                }
+                                TextButton(onClick = { viewModel.setPreferredSource(null); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                    Text("Auto")
+                                }
                             }
                         }
                     }
@@ -293,17 +305,13 @@ private fun DetailView(
                     )
                 }
             }
-            if (status is ResultsEngine.StatusOutcome.Live) {
-                if (status.attempts.size > 1) {
+                if (showAllStops && status.stops.size > 6) {
                     item {
-                        Text(
-                            text = "tried: " + status.attempts.joinToString(" · "),
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier.padding(bottom = 4.dp),
-                        )
+                        TextButton(onClick = { showAllStops = false }) {
+                            Text("Show fewer stations")
+                        }
                     }
                 }
-                items(status.stops) { stop ->
                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
                         Text(
                             text = StateCopy.stopStatus(
