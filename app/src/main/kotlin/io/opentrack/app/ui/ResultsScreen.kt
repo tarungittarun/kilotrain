@@ -279,9 +279,20 @@ private fun DetailView(
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                             Row {
+                            Row {
                                 TextButton(onClick = { ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
                                     Text("refresh")
                                 }
+                                TextButton(onClick = { viewModel.setPreferredSource("ntes"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                    Text("NTES")
+                                }
+                                TextButton(onClick = { viewModel.setPreferredSource("erail"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                    Text("Schedule")
+                                }
+                                TextButton(onClick = { viewModel.setPreferredSource(null); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
+                                    Text("Auto")
+                                }
+                            }
                                 TextButton(onClick = { viewModel.setPreferredSource("ntes"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
                                     Text("NTES")
                                 }
