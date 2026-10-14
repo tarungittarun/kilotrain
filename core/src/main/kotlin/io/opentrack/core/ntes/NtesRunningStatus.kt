@@ -57,8 +57,11 @@ object NtesRunningStatusParser {
             // NTES echoes the schedule into ETA/ETD when no actual has been reported, and stamps
             // the ORIGIN as "Source". Claiming those as actuals would be fabrication (3.4), so an
             // echo is treated as "not reported" and renders as an em dash (3.3).
-            if (actArr != null && actArr == schArr) actArr = null
-            if (actDep != null && actDep == schDep) actDep = null
+            // Be more lenient if this is marked as current station
+            if (!s.optString("CURR").trim().equals("Y", ignoreCase = true)) {
+                if (actArr != null && actArr == schArr) actArr = null
+                if (actDep != null && actDep == schDep) actDep = null
+            }
             NtesStopStatus(
                 stationCode = s.optString("SC").trim().takeIf { it.isNotBlank() },
                 stationName = s.optString("SN").trim().takeIf { it.isNotBlank() },
