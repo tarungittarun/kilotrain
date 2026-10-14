@@ -316,30 +316,6 @@ private fun DetailView(
                     )
                 }
             }
-                if (showAllStops && status.stops.size > 6) {
-                    item {
-                        TextButton(onClick = { showAllStops = false }) {
-                            Text("Show fewer stations")
-                        }
-                    }
-                }
-                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
-                        Text(
-                            text = StateCopy.stopStatus(
-                                stop.code, stop.name,
-                                stop.scheduledArrival, stop.scheduledDeparture,
-                                stop.actualArrival, stop.actualDeparture,
-                                stop.arrivalDelayMinutes, stop.departureDelayMinutes,
-                                stop.isCurrentStation, stop.isTrainHere,
-                                stop.expectedDeparture, stop.distanceKm, stop.haltMinutes,
-                                stop.isDepartedHere, stop.isNextStation, stop.kmToNext,
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
-                        Divider()
-                    }
-                }
-            } else {
                 items(ui.stops) { stop ->
                     Text(
                         text = StateCopy.routeStop(stop.code, stop.name, stop.arrival),
