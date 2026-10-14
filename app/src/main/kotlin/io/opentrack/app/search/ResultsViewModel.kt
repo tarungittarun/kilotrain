@@ -41,6 +41,7 @@ class ResultsViewModel(
         /** the train whose detail view is open; null = the search view (the owner's 3-section ask). */
         val selectedTrainNumber: String? = null,
         val trainLabel: String? = null,
+        val preferredSource: String? = null,
     )
 
     private val _state = MutableStateFlow(
@@ -91,12 +92,15 @@ class ResultsViewModel(
     }
 
     /** Priority 3: the live running status for a train from the current rows. */
+    fun setPreferredSource(source: String?) {
+        _state.value = _state.value.copy(preferredSource = source)
+    }
+
     /** Back from the detail view to the search view (the owner's hide/show ask). */
     fun clearSelection() {
         _state.value = _state.value.copy(
             selectedTrainNumber = null, trainLabel = null, stops = emptyList(),
-            status = null, stopsNote = null, loading = false,
-        )
+            stopsNote = null, status = null, loading = false)
     }
 
     fun showLiveStatus(number: String) {
@@ -125,7 +129,7 @@ class ResultsViewModel(
                     ntesStatusSource = source,
                     erailRouteSource = routeSource,
                     diagnostics = diagnostics,
-                ).liveStatus(number)
+                ).liveStatus(number, _state.value.preferredSource)
             } ?: return@launch
             val current = _state.value
             _state.value = when (outcome) {
