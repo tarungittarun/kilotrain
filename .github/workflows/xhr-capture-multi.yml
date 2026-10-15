@@ -32,8 +32,31 @@ jobs:
       - name: Headless capture (180s)
         shell: bash
         run: |
-          timeout 180 mitmdump --quiet --set confdir=/tmp/mc --save-stream-file mitmproxy_flows/flows.mitm 2>&1 | tail -3 || true
+      - name: Generate traffic to target sites
+        shell: bash
+        run: |
+          mkdir -p /tmp/tgen
+          for u in "https://www.railyatri.in/live-train-status/16228" "https://www.confirmtkt.com/train-running-status?trainNo=16228" "https://www.ixigo.com/trains/train-running-status?trainNo=16228"; do
+            curl -s --connect-timeout 5 --max-time 10 "$u" > /dev/null 2>&1 || true
+          done
+          timeout 180 mitmdump --quiet --set confdir=/tmp/mc --save-stream-file mitmproxy_flows/flows.mitm 2>&1 | tail -3 || true &
+          MPID=$!
+          sleep 10
+          # generate traffic in background while proxy runs
+          for u in "https://www.railyatri.in/live-train-status/16228" "https://www.confirmtkt.com/train-running-status?trainNo=16228" "https://www.ixigo.com/trains/train-running-status?trainNo=16228"; do
+            curl -s --connect-timeout 5 --max-time 15 -L -A "Mozilla/5.0" "$u" >/dev/null 2>&1 || true
+            sleep 2
+          done
+          wait $MPID 2>&1 | tail -1 || true
 
+      - name: Extract JSON from flows if present
+        if: always()
+        shell: bash
+        run: |
+          if [ -f mitmproxy_flows/flows.mitm ]; then
+            mitmdump --read-flows mitmproxy_flows/flows.mitm > /tmp/flow_dump.txt 2>&1 || true
+            head -c 300000 /tmp/flow_dump.txt > /tmp/flow_head.txt 2>&1 || true
+          fi
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
