@@ -22,3 +22,6 @@ Set up emulator + traffic capture in GitHub Actions runner (ubuntu-latest). Opti
 - Need to install mitmproxy CA cert on emulator system store for HTTPS
 - Installing target apps in emulator requires APKs or Play Store (Play Store needs setup)
 - For reliability: self-hosted runner is better; in cloud runners, KVM is the limiting factor
+
+## Multi-runner attempt
+Workflow `xhr-capture-multi.yml` runs mitmdump headlessly on ubuntu-latest, windows-latest, macos-latest in parallel (180s each) to see if any environment yields flows. Uploads artifacts regardless.
