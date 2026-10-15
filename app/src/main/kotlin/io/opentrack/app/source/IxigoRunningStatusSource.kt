@@ -23,35 +23,39 @@ class IxigoRunningStatusSource(
     fun fetch(trainNumber: String): Result {
         if (!enabled) return Result.Failed(SourceFailure.OFFLINE, "source disabled")
         val train = trainNumber.trim()
-        val url = endpoint ?: "https://www.ixigo.com/api/v3/trains/running-status?trainNo=$train"
-        try {
-            val conn = openConnection(URL(url))
-            conn.requestMethod = "GET"
-            conn.connectTimeout = 8000
-            conn.readTimeout = 12000
-            conn.setRequestProperty("User-Agent", "Dalvik/2.1.0 (Linux; Android 11)")
-            conn.setRequestProperty("Accept", "application/json")
-            conn.setRequestProperty("X-Requested-With", "XMLHttpRequest")
-            conn.setRequestProperty("Referer", "https://www.ixigo.com/trains/train-running-status")
-            conn.setRequestProperty("Origin", "https://www.ixigo.com")
-            val status = conn.responseCode
-            val body = try {
-                conn.inputStream.bufferedReader().use { it.readText() }
-            } catch (e: IOException) {
-                conn.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+        val candidates = mutableListOf<String>()
+        if (endpoint != null) candidates.add(endpoint!!)
+        candidates.add("https://www.ixigo.com/api/v3/trains/running-status?trainNo=$train")
+        candidates.add("https://www.ixigo.com/api/trains/running-status?trainNo=$train")
+        candidates.add("https://www.ixigo.com/trains/train-running-status?trainNo=$train")
+
+        val headerSets = listOf(
+            mapOf("User-Agent" to "com.ixigo.train/9.0.8", "Accept" to "application/json", "X-Requested-With" to "XMLHttpRequest", "Referer" to "https://www.ixigo.com/trains/train-running-status"),
+            mapOf("User-Agent" to "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36", "Accept" to "application/json, */*", "X-Requested-With" to "XMLHttpRequest"),
+        )
+
+        for (urlStr in candidates) {
+            for (headers in headerSets) {
+                try {
+                    val conn = openConnection(URL(urlStr))
+                    conn.requestMethod = "GET"
+                    conn.connectTimeout = 8000
+                    conn.readTimeout = 10000
+                    headers.forEach { (k,v) -> conn.setRequestProperty(k,v) }
+                    val status = conn.responseCode
+                    val body = try {
+                        conn.inputStream.bufferedReader().use { it.readText() }
+                    } catch (e: IOException) {
+                        conn.errorStream?.bufferedReader()?.use { it.readText() } ?: ""
+                    }
+                    if (status in 200..299 && body.isNotBlank()) {
+                        val parsed = IxigoParser.parse(body, clock(), viaCache = false)
+                        if (parsed != null) return Result.Live(parsed)
+                    }
+                } catch (e: IOException) {
+                }
             }
-            if (status !in 200..299 || body.isBlank()) {
-                return Result.Failed(SourceFailure.HTTP, "HTTP $status")
-            }
-            val parsed = IxigoParser.parse(body, clock(), viaCache = false)
-            if (parsed == null) {
-                diagnostics?.sourceFailure(mapOf("op" to "ixigo_status", "failure" to "SHAPE_UNKNOWN"))
-                return Result.Failed(SourceFailure.SHAPE_UNKNOWN, "shape unknown; needs captured JSON")
-            }
-            return Result.Live(parsed)
-        } catch (e: IOException) {
-            val f = if (e is java.net.SocketTimeoutException) SourceFailure.TIMEOUT else SourceFailure.OFFLINE
-            return Result.Failed(f, e.message ?: "io")
         }
+        return Result.Failed(SourceFailure.SHAPE_UNKNOWN, "all candidates failed or shape unknown; needs device-captured endpoint")
     }
 }
