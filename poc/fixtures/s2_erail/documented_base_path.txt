@@ -1,6 +1,6 @@
 # source=s2_erail name=documented_base_path
-# captured=2026-10-11T23:16:36Z url=https://erail.in/rail/getTrains.aspx
-# status=200 elapsed_s=0.098
+# captured=2026-10-15T09:41:13Z url=https://erail.in/rail/getTrains.aspx
+# status=200 elapsed_s=0.965
 # redaction: first 38 bytes of body; signature below, no further values
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 0, ";": 0, "|": 0, "~": 5}, "fields_per_line_head": [6], "fields_per_line_histogram": {"6": 1}, "first_line_len": 38, "kind": "text", "line_count": 1, "max_line_len": 38, "nonempty_lines": 1, "sha256_head": "387896bd87b8a44c"}
 ~~~~~Please try again after some time.

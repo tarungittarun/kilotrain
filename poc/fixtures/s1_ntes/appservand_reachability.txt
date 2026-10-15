@@ -1,5 +1,6 @@
 # source=s1_ntes name=appservand_reachability
-# captured=2026-10-11T23:16:36Z url=https://enquiry.indianrail.gov.in/crisns/AppServAnd
-# status=200 elapsed_s=0.531
-# redaction: first 0 bytes of body; signature below, no further values
-# signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 0, ";": 0, "|": 0, "~": 0}, "fields_per_line_head": [], "fields_per_line_histogram": {}, "first_line_len": 0, "kind": "text", "line_count": 0, "max_line_len": 0, "nonempty_lines": 0, "sha256_head": "e3b0c44298fc1c14"}
+# captured=2026-10-15T09:41:13Z url=https://enquiry.indianrail.gov.in/crisns/AppServAnd
+# status=522 elapsed_s=19.673
+# redaction: first 16 bytes of body; signature below, no further values
+# signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 0, ";": 0, "|": 0, "~": 0}, "fields_per_line_head": [1], "fields_per_line_histogram": {"1": 1}, "first_line_len": 15, "kind": "text", "line_count": 1, "max_line_len": 15, "nonempty_lines": 1, "sha256_head": "c8b9f348c8635d7f"}
+error code: 522

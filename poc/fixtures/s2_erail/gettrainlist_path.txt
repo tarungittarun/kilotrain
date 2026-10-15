@@ -1,6 +1,6 @@
 # source=s2_erail name=gettrainlist_path
-# captured=2026-10-11T23:16:36Z url=https://erail.in/rail/getTrainList.aspx?TrainNo=56269
-# status=404 elapsed_s=0.027
+# captured=2026-10-15T09:41:13Z url=https://erail.in/rail/getTrainList.aspx?TrainNo=56269
+# status=404 elapsed_s=0.038
 # redaction: first 2048 bytes of body; signature below, no further values
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 1, ",": 44, ";": 0, "|": 0, "~": 0}, "fields_per_line_head": [1, 1, 1, 4, 6, 4, 16, 13, 4, 4], "fields_per_line_histogram": {"1": 5, "4": 4, "6": 1, "13": 1, "16": 1}, "first_line_len": 0, "kind": "text", "line_count": 14, "max_line_len": 579, "nonempty_lines": 12, "sha256_head": "bdda822716e6b193"}
 

@@ -7,12 +7,16 @@
     "|": 0,
     "~": 0
   },
-  "fields_per_line_head": [],
-  "fields_per_line_histogram": {},
-  "first_line_len": 0,
+  "fields_per_line_head": [
+    1
+  ],
+  "fields_per_line_histogram": {
+    "1": 1
+  },
+  "first_line_len": 15,
   "kind": "text",
-  "line_count": 0,
-  "max_line_len": 0,
-  "nonempty_lines": 0,
-  "sha256_head": "e3b0c44298fc1c14"
+  "line_count": 1,
+  "max_line_len": 15,
+  "nonempty_lines": 1,
+  "sha256_head": "c8b9f348c8635d7f"
 }
