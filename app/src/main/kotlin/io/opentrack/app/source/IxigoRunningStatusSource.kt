@@ -2,6 +2,7 @@ package io.opentrack.app.source
 
 import io.opentrack.core.contract.SourceFailure
 import io.opentrack.core.diag.Diagnostics
+import io.opentrack.core.ntes.TtlCache
 import io.opentrack.core.ixigo.IxigoParser
 import io.opentrack.core.ixigo.IxigoRunningStatus
 import java.io.IOException
@@ -14,7 +15,10 @@ class IxigoRunningStatusSource(
     private val enabled: Boolean = true,
     private val diagnostics: Diagnostics? = null,
     private val endpoint: String? = null,
+    private val cacheTtlMs: Long = 60_000L,
 ) {
+    private val cache = TtlCache<String, IxigoRunningStatus> (clock)
+
     sealed interface Result {
         data class Live(val status: IxigoRunningStatus) : Result
         data class Failed(val failure: SourceFailure, val detail: String) : Result
@@ -23,6 +27,7 @@ class IxigoRunningStatusSource(
     fun fetch(trainNumber: String): Result {
         if (!enabled) return Result.Failed(SourceFailure.OFFLINE, "source disabled")
         val train = trainNumber.trim()
+        cache.get(train, cacheTtlMs)?.let { return Result.Live(it.value.copy(viaCache = true)) }
         val candidates = mutableListOf<String>()
         if (endpoint != null) candidates.add(endpoint!!)
         candidates.add("https://www.ixigo.com/api/v3/trains/running-status?trainNo=$train")
@@ -50,7 +55,10 @@ class IxigoRunningStatusSource(
                     }
                     if (status in 200..299 && body.isNotBlank()) {
                         val parsed = IxigoParser.parse(body, clock(), viaCache = false)
-                        if (parsed != null) return Result.Live(parsed)
+                        if (parsed != null) {
+                            cache.put(train, parsed)
+                            return Result.Live(parsed)
+                        }
                     }
                 } catch (e: IOException) {
                 }

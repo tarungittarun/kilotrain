@@ -4,10 +4,10 @@ import io.opentrack.core.confirmtkt.ConfirmTktParser
 import io.opentrack.core.confirmtkt.ConfirmTktRunningStatus
 import io.opentrack.core.contract.SourceFailure
 import io.opentrack.core.diag.Diagnostics
+import io.opentrack.core.ntes.TtlCache
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.net.URLEncoder
 
 class ConfirmTktRunningStatusSource(
     private val openConnection: (URL) -> HttpURLConnection,
@@ -15,7 +15,10 @@ class ConfirmTktRunningStatusSource(
     private val enabled: Boolean = true,
     private val diagnostics: Diagnostics? = null,
     private val endpoint: String? = null,
+    private val cacheTtlMs: Long = 60_000L,
 ) {
+    private val cache = TtlCache<String, ConfirmTktRunningStatus>(clock)
+
     sealed interface Result {
         data class Live(val status: ConfirmTktRunningStatus) : Result
         data class Failed(val failure: SourceFailure, val detail: String) : Result
@@ -24,6 +27,7 @@ class ConfirmTktRunningStatusSource(
     fun fetch(trainNumber: String): Result {
         if (!enabled) return Result.Failed(SourceFailure.OFFLINE, "source disabled (flag)")
         val train = trainNumber.trim()
+        cache.get(train, cacheTtlMs)?.let { return Result.Live(it.value.copy(viaCache = true)) }
         val candidates = mutableListOf<String>()
         if (endpoint != null) candidates.add(endpoint!!)
         candidates.add("https://www.confirmtkt.com/api/v1/trains/running-status?trainNo=$train")
@@ -52,10 +56,12 @@ class ConfirmTktRunningStatusSource(
                     }
                     if (status in 200..299 && body.isNotBlank()) {
                         val parsed = ConfirmTktParser.parse(body, clock(), viaCache = false)
-                        if (parsed != null) return Result.Live(parsed)
+                        if (parsed != null) {
+                            cache.put(train, parsed)
+                            return Result.Live(parsed)
+                        }
                     }
                 } catch (e: IOException) {
-                    // try next
                 }
             }
         }

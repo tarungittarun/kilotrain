@@ -14,7 +14,10 @@ class RailYatriRunningStatusSource(
     private val enabled: Boolean = true,
     private val diagnostics: Diagnostics? = null,
     private val endpoint: String? = null,
+    private val cacheTtlMs: Long = 60_000L,
 ) {
+    private val cache = TtlCache<String, RailYatriRunningStatus> (clock)
+
     sealed interface Result {
         data class Live(val status: RailYatriRunningStatus) : Result
         data class Failed(val failure: SourceFailure, val detail: String) : Result
@@ -23,6 +26,7 @@ class RailYatriRunningStatusSource(
     fun fetch(trainNumber: String): Result {
         if (!enabled) return Result.Failed(SourceFailure.OFFLINE, "source disabled")
         val train = trainNumber.trim()
+        cache.get(train, cacheTtlMs)?.let { return Result.Live(it.value.copy(viaCache = true)) }
         val candidates = mutableListOf<String>()
         if (endpoint != null) candidates.add(endpoint!!)
         candidates.add("https://www.railyatri.in/m/live-train-status?trainNo=$train")
@@ -51,7 +55,10 @@ class RailYatriRunningStatusSource(
                     }
                     if (status in 200..299 && body.isNotBlank()) {
                         val parsed = RailYatriParser.parse(body, clock(), viaCache = false)
-                        if (parsed != null) return Result.Live(parsed)
+                        if (parsed != null) {
+                            cache.put(train, parsed)
+                            return Result.Live(parsed)
+                        }
                     }
                 } catch (e: IOException) {
                     // continue
