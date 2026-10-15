@@ -4,41 +4,42 @@ on:
   workflow_dispatch:
 
 jobs:
-  capture-linux:
-    runs-on: ubuntu-latest
+  capture:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: KVM check
+
+      - name: KVM check (linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
           if [ -e /dev/kvm ]; then echo "kvm=1"; else echo "kvm=0"; fi
-      - name: Try mitmproxy headless capture
-        run: |
-          pip3 install mitmproxy==10.2.3
-          mkdir -p mitmproxy_flows poc/fixtures/cands_confirmtkt_live poc/fixtures/cands_railyatri_live poc/fixtures/cands_ixigo_live
-          timeout 180 mitmdump --quiet --set confdir=/tmp/mc --save-stream-file mitmproxy_flows/flows.mitm 2>&1 | tail -5 || true
-          echo 'done'
 
-  capture-windows:
-    runs-on: windows-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Capture attempt (windows)
-        shell: pwsh
+      - name: Install mitmproxy
         run: |
+          python3 -m pip install --upgrade pip
           pip install mitmproxy==10.2.3
-          New-Item -ItemType Directory -Force -Path mitmproxy_flows,poc/fixtures/cands_confirmtkt_live,poc/fixtures/cands_railyatri_live,poc/fixtures/cands_ixigo_live | Out-Null
-          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/flows.mitm 2>&1 | tail -5; exit 0
 
-  capture-mac:
-    runs-on: macos-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - name: Capture attempt (mac)
+      - name: Prepare dirs
+        shell: bash
         run: |
-          pip3 install mitmproxy==10.2.3
           mkdir -p mitmproxy_flows poc/fixtures/cands_confirmtkt_live poc/fixtures/cands_railyatri_live poc/fixtures/cands_ixigo_live
-          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/flows.mitm 2>&1 | tail -5 || true
-          echo 'done'
+
+      - name: Headless capture (180s)
+        shell: bash
+        run: |
+          timeout 180 mitmdump --quiet --set confdir=/tmp/mc --save-stream-file mitmproxy_flows/flows.mitm 2>&1 | tail -3 || true
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xhr-captures-${{ matrix.os }}-${{ github.run_id }}
+          path: |
+            mitmproxy_flows/
+            poc/fixtures/cands_*_live/
+          if-no-files-found: warn
