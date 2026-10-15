@@ -17,3 +17,8 @@ object SourceLocator {
     @Volatile
     var ntesStatusSource: NtesRunningStatusSource? = null
 }
+    @Volatile
+    var confirmTktStatusSource: ConfirmTktRunningStatusSource? = null
+
+    @Volatile
+    var railYatriStatusSource: RailYatriRunningStatusSource? = null

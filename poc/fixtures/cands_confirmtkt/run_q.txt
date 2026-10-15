@@ -1,6 +1,6 @@
 # source=cands_confirmtkt name=run_q
-# captured=2026-10-15T08:40:13Z url=https://www.confirmtkt.com/train-running-status?trainNo=12345
-# status=200 elapsed_s=0.54 ct=text/html; charset=UTF-8
+# captured=2026-10-15T11:28:27Z url=https://www.confirmtkt.com/train-running-status?trainNo=12345
+# status=200 elapsed_s=0.303 ct=text/html; charset=UTF-8
 # redacted first 4096 bytes; signature only
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 12, ";": 6, "|": 8, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 2, 3, 2, 1, 6, 1, 1, 1], "fields_per_line_histogram": {"1": 50, "2": 6, "3": 3, "6": 1}, "first_line_len": 15, "has_json_like": false, "kind": "html", "line_count": 116, "looks_html": true, "looks_throttle": false, "max_line_len": 215, "nonempty_lines": 95, "sha256_head": "54dbcc3141e9d45a"}
 <!DOCTYPE html>

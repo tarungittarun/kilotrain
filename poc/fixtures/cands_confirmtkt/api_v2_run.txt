@@ -1,6 +1,6 @@
 # source=cands_confirmtkt name=api_v2_run
-# captured=2026-10-15T08:40:13Z url=https://www.confirmtkt.com/api/v2/train/running-status
-# status=404 elapsed_s=0.25 ct=text/html
+# captured=2026-10-15T11:28:27Z url=https://www.confirmtkt.com/api/v2/train/running-status
+# status=404 elapsed_s=0.668 ct=text/html
 # redacted first 1245 bytes; signature only
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 7, ";": 28, "|": 0, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1], "fields_per_line_histogram": {"1": 26, "3": 2, "4": 1}, "first_line_len": 109, "has_json_like": false, "kind": "html", "line_count": 29, "looks_html": true, "looks_throttle": false, "max_line_len": 121, "nonempty_lines": 29, "sha256_head": "dc1d54dab6ec8c00"}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">

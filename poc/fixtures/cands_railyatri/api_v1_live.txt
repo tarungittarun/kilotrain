@@ -1,15 +1,86 @@
 # source=cands_railyatri name=api_v1_live
-# captured=2026-10-15T08:40:13Z url=https://www.railyatri.in/api/v1/train/live-status
-# status=403 elapsed_s=0.047 ct=text/html
-# redacted first 410 bytes; signature only
-# signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 0, ";": 24, "|": 0, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 1, 1, 1, 1, 1], "fields_per_line_histogram": {"1": 9}, "first_line_len": 12, "has_json_like": false, "kind": "html", "line_count": 10, "looks_html": true, "looks_throttle": true, "max_line_len": 145, "nonempty_lines": 9, "sha256_head": "3e025529b0104167"}
-<HTML><HEAD>
-<TITLE>Access Denied</TITLE>
-</HEAD><BODY>
-<H1>Access Denied</H1>
- 
-You don't have permission to access "http&#58;&#47;&#47;www&#46;railyatri&#46;in&#47;api&#47;v1&#47;train&#47;live&#45;status" on this server.<P>
-Reference&#32;&#35;18&#46;20173317&#46;1792053638&#46;239ab1e1
-<P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;20173317&#46;1792053638&#46;239ab1e1</P>
-</BODY>
-</HTML>
+# captured=2026-10-15T11:28:27Z url=https://www.railyatri.in/api/v1/train/live-status
+# status=404 elapsed_s=0.24 ct=text/html; charset=utf-8
+# redacted first 4096 bytes; signature only
+# signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 60, ",": 27, ";": 20, "|": 4, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 1, 1, 3, 2, 1, 1, 1, 1], "fields_per_line_histogram": {"1": 45, "2": 6, "3": 6, "4": 1, "5": 1, "7": 1}, "first_line_len": 15, "has_json_like": false, "kind": "html", "line_count": 81, "looks_html": true, "looks_throttle": false, "max_line_len": 177, "nonempty_lines": 75, "sha256_head": "743ed6b45d6915b7"}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta cache-control="no-transform">
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:image" content="https://images.railyatri.in/assets/favicon-677f1ff22267487114e8d30fd4ea7f7fc6df85ee1fd26454571ab16741d5d77d.ico" />
+        <link rel="shortcut icon" href="https://images.railyatri.in/assets/favicon-677f1ff22267487114e8d30fd4ea7f7fc6df85ee1fd26454571ab16741d5d77d.ico" />
+         <title>Page Not Found - 404</title>
+        <meta name="description" content="" />
+        <meta name="keywords" content="" />
+        <meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="gb94y7SuVmq9a5I91FZsQreY/vlNZVej0enJLaKYPyYl9VPKAhXQEkUdqfGSvNvoYVwlRHS1dE7jY3trU7t7Tw==" />
+        <script>
+      (function(i, s, o, g, r, a, m) {
+        i['GoogleAnalyticsObject'] = r;
+        i[r] = i[r] || function() {
+          (i[r].q = i[r].q || []).push(arguments)
+        }, i[r].l = 1 * new Date();
+        a = s.createElement(o),
+                m = s.getElementsByTagName(o)[0];
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m)
+      })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+           // Creates an adblock detection plugin.
+       ga('provide', 'adblockTracker', function(tracker, opts) {
+         var ad = document.createElement('ins');
+         ad.className = 'AdSense';
+         ad.style.display = 'block';
+         ad.style.position = 'absolute';
+         ad.style.top = '-1px';
+         ad.style.height = '1px';
+         document.body.appendChild(ad);
+         tracker.set('dimension' + opts.dimensionIndex, !ad.clientHeight);
+         document.body.removeChild(ad);
+       });
+
+
+      ga('create', 'UA-54004756-1', 'auto');
+      ga('require', 'adblockTracker', {dimensionIndex: 1});
+      ga('require', 'linkid', 'linkid.js');
+      ga('send', 'pageview');
+      </script>
+    </head>
+    <link rel="stylesheet" media="all" href="https://images.railyatri.in/assets/production_errors-aeaf035f9b630a694649ebf467fcb5fa314a225fefad6cd2647a60f7b401de32.css.gz" />
+    <script src="https://images.railyatri.in/assets/production_errors-b945a957797c834b6d3d034a5004f809b475dc13a94b8afb7f9a6e75785c6bad.js.gz"></script>
+    <body>
+        <link rel="stylesheet" media="all" href="https://images.railyatri.in/assets/production_errors-aeaf035f9b630a694649ebf467fcb5fa314a225fefad6cd2647a60f7b401de32.css.gz" />
+<div class="container error">
+	<div class="row">
+	  <div class="col-sm-6 col-md-6 content_block">
+	  	<a href="https://www.railyatri.in/"><img src="https://images.railyatri.in/ry_images_prod/RailYatri-1719298334.png" alt="Railyatri 1719298334" /></a>
+	  	  <div class="error_content">
+	  	    <h1>404 Error</h1>
+	  	    <p>Oops....look like you are not at <br> the right station!</p>
+						<button type="button"><a href="https://www.railyatri.in/m/live-train-status">Back</a></button> <button type="button"><a href="/">Go Home</a></button>
+	      </div>
+	  </div>
+	  <div class="col-sm-6 col-md-6">
+	  	<img class="img-responsive train-img" src="https://images.railyatri.in/assets/404-b5d5a22d74ccd17df4da634f476f76f76d3dd4fa0324782bc5e20cbbeb6d01e0.jpg" alt="404" />
+	  </div>
+	</div>
+	<div class="row error_page_list">
+		<ul>
+			<li><a class="anchor_divider" href="/live-train-status">Live Train Status</a></li>
+			<li><a class="anchor_divider" href="/pnr-status">PNR Status</a></li>
+			<!-- <li></li> -->
+			<li><a class="anchor_divider" href="/train-ticket">Train Tickets</a></li>
+			<li><a class="anchor_divider" href="/bus-booking">Bus Tickets</a></li>
+
+			
+			
+		</ul>
+		<ul>
+			<li><a class="anchor_divider" href="/seat-availability">Seat Availability</a></li>
+			<li><a class="anchor_divider" href="/time-table">Time Table </a></li>
+			<li><a class="anchor_divider" href="/trains-bet

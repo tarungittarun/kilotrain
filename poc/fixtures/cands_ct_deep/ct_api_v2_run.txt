@@ -1,0 +1,2 @@
+# cands_ct_deep ct_api_v2_run captured=2026-10-15T11:33:45Z url=https://www.confirmtkt.com/api/v2/train-running-status status=404 t=0.291 ct=application/json; charset=utf-8
+{"Message":"No HTTP resource was found that matches the request URI 'http://api.confirmtkt.com/api/v2/train-running-status'."}

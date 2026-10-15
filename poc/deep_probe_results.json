@@ -1,0 +1,223 @@
+{
+  "measured": "2026-10-15T11:33:45Z",
+  "confirmtkt": [
+    {
+      "name": "ct_api_v1_run",
+      "url": "https://www.confirmtkt.com/api/v1/train/running-status",
+      "status": 404,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_api_v1_run.txt"
+    },
+    {
+      "name": "ct_api_v1_run",
+      "url": "https://www.confirmtkt.com/api/v1/train/running-status",
+      "status": 404,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_api_v1_run.txt"
+    },
+    {
+      "name": "ct_api_v2_run",
+      "url": "https://www.confirmtkt.com/api/v2/train-running-status",
+      "status": 404,
+      "ct": "application/json; charset=utf-8",
+      "json": true,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_api_v2_run.txt"
+    },
+    {
+      "name": "ct_api_v2_run",
+      "url": "https://www.confirmtkt.com/api/v2/train-running-status",
+      "status": 404,
+      "ct": "application/json; charset=utf-8",
+      "json": true,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_api_v2_run.txt"
+    },
+    {
+      "name": "ct_api_run",
+      "url": "https://www.confirmtkt.com/api/train/running/status",
+      "status": 404,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_api_run.txt"
+    },
+    {
+      "name": "ct_api_run",
+      "url": "https://www.confirmtkt.com/api/train/running/status",
+      "status": 404,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_api_run.txt"
+    },
+    {
+      "name": "ct_svc_run",
+      "url": "https://www.confirmtkt.com/services/train/runningStatus",
+      "status": 200,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_svc_run.txt"
+    },
+    {
+      "name": "ct_svc_run",
+      "url": "https://www.confirmtkt.com/services/train/runningStatus",
+      "status": 200,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_svc_run.txt"
+    },
+    {
+      "name": "ct_run_q",
+      "url": "https://www.confirmtkt.com/train-running-status?trainNo=12345&date=",
+      "status": 200,
+      "ct": "text/html; charset=UTF-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_run_q.txt"
+    },
+    {
+      "name": "ct_run_q",
+      "url": "https://www.confirmtkt.com/train-running-status?trainNo=12345&date=",
+      "status": 200,
+      "ct": "text/html; charset=UTF-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_run_q.txt"
+    },
+    {
+      "name": "ct_run",
+      "url": "https://www.confirmtkt.com/running-status",
+      "status": 200,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_run.txt"
+    },
+    {
+      "name": "ct_run",
+      "url": "https://www.confirmtkt.com/running-status",
+      "status": 200,
+      "ct": "text/html",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ct_deep/ct_run.txt"
+    }
+  ],
+  "railyatri": [
+    {
+      "name": "ry_m_live",
+      "url": "https://www.railyatri.in/m/live-train-status",
+      "status": 200,
+      "ct": "text/html; charset=utf-8",
+      "json": true,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_m_live.txt"
+    },
+    {
+      "name": "ry_m_live",
+      "url": "https://www.railyatri.in/m/live-train-status",
+      "status": 308,
+      "ct": "",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_m_live.txt"
+    },
+    {
+      "name": "ry_api_v1_live",
+      "url": "https://www.railyatri.in/api/v1/train/live-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_api_v1_live.txt"
+    },
+    {
+      "name": "ry_api_v1_live",
+      "url": "https://www.railyatri.in/api/v1/train/live-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_api_v1_live.txt"
+    },
+    {
+      "name": "ry_mob_v1_run",
+      "url": "https://www.railyatri.in/mobile/v1/train/running-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_mob_v1_run.txt"
+    },
+    {
+      "name": "ry_mob_v1_run",
+      "url": "https://www.railyatri.in/mobile/v1/train/running-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_mob_v1_run.txt"
+    },
+    {
+      "name": "ry_mob_v2_live",
+      "url": "https://www.railyatri.in/mobile/v2/train/live-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_mob_v2_live.txt"
+    },
+    {
+      "name": "ry_mob_v2_live",
+      "url": "https://www.railyatri.in/mobile/v2/train/live-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_mob_v2_live.txt"
+    },
+    {
+      "name": "ry_rest_run",
+      "url": "https://www.railyatri.in/rest/mobile/train/running/status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_rest_run.txt"
+    },
+    {
+      "name": "ry_rest_run",
+      "url": "https://www.railyatri.in/rest/mobile/train/running/status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_rest_run.txt"
+    },
+    {
+      "name": "ry_api_mob_live",
+      "url": "https://www.railyatri.in/api/mobile/train/live-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_api_mob_live.txt"
+    },
+    {
+      "name": "ry_api_mob_live",
+      "url": "https://www.railyatri.in/api/mobile/train/live-status",
+      "status": 404,
+      "ct": "text/html; charset=utf-8",
+      "json": false,
+      "throttle": false,
+      "path": "/workspace/app/poc/fixtures/cands_ry_deep/ry_api_mob_live.txt"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # source=cands_wimt name=home
-# captured=2026-10-15T08:40:13Z url=https://whereismytrain.org.in
-# status=200 elapsed_s=0.519 ct=text/html; charset=UTF-8
+# captured=2026-10-15T11:28:27Z url=https://whereismytrain.org.in
+# status=200 elapsed_s=0.27 ct=text/html; charset=UTF-8
 # redacted first 4096 bytes; signature only
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 75, ";": 0, "|": 6, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 2, 3, 5, 61, 1, 1, 1, 2], "fields_per_line_histogram": {"1": 30, "2": 3, "3": 3, "5": 3, "61": 1}, "first_line_len": 15, "has_json_like": false, "kind": "html", "line_count": 46, "looks_html": true, "looks_throttle": false, "max_line_len": 1355, "nonempty_lines": 40, "sha256_head": "0cd41516e4b8f0b3"}
 <!DOCTYPE html>

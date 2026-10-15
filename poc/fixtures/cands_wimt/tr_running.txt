@@ -1,6 +1,6 @@
 # source=cands_wimt name=tr_running
-# captured=2026-10-15T08:40:13Z url=https://whereismytrain.org.in/train-running-status
-# status=404 elapsed_s=0.317 ct=text/html
+# captured=2026-10-15T11:28:27Z url=https://whereismytrain.org.in/train-running-status
+# status=404 elapsed_s=0.034 ct=text/html
 # redacted first 4096 bytes; signature only
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 45, ";": 51, "|": 4, "~": 9}, "fields_per_line_head": [1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2], "fields_per_line_histogram": {"1": 40, "2": 11, "3": 4, "5": 1, "7": 1, "10": 3}, "first_line_len": 15, "has_json_like": false, "kind": "html", "line_count": 110, "looks_html": true, "looks_throttle": false, "max_line_len": 371, "nonempty_lines": 94, "sha256_head": "4f6425058815c603"}
 <!DOCTYPE html>

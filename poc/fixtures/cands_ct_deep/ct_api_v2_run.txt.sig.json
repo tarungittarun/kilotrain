@@ -1,0 +1,21 @@
+{
+  "kind": "json",
+  "lines": 1,
+  "nonempty": 1,
+  "delim": {
+    "~": 0,
+    "|": 0,
+    ",": 0,
+    "\t": 0,
+    ";": 0
+  },
+  "fpl_head": [
+    1
+  ],
+  "fplh": {
+    "1": 1
+  },
+  "has_json": true,
+  "throttle": false,
+  "sha": "ba98e01c4ee0cc26"
+}

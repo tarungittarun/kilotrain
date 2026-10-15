@@ -1,6 +1,6 @@
 # source=cands_confirmtkt name=ajax_run
-# captured=2026-10-15T08:40:13Z url=https://www.confirmtkt.com/error-404.html
-# status=200 elapsed_s=0.571 ct=text/html
+# captured=2026-10-15T11:28:27Z url=https://www.confirmtkt.com/error-404.html
+# status=200 elapsed_s=0.179 ct=text/html
 # redacted first 2035 bytes; signature only
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 7, ";": 32, "|": 0, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "fields_per_line_histogram": {"1": 56, "2": 2, "3": 1, "4": 1}, "first_line_len": 16, "has_json_like": false, "kind": "html", "line_count": 81, "looks_html": true, "looks_throttle": false, "max_line_len": 83, "nonempty_lines": 80, "sha256_head": "549b7f4fac626563"}
 ﻿<!DOCTYPE html>

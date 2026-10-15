@@ -1,6 +1,6 @@
 # source=cands_confirmtkt name=api_running
-# captured=2026-10-15T08:40:13Z url=https://www.confirmtkt.com/api/train-running-status
-# status=404 elapsed_s=0.222 ct=application/json; charset=utf-8
+# captured=2026-10-15T11:28:27Z url=https://www.confirmtkt.com/api/train-running-status
+# status=404 elapsed_s=0.308 ct=application/json; charset=utf-8
 # redacted first 123 bytes; signature only
 # signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 0, ";": 0, "|": 0, "~": 0}, "fields_per_line_head": [1], "fields_per_line_histogram": {"1": 1}, "first_line_len": 123, "has_json_like": true, "kind": "json", "line_count": 1, "looks_html": false, "looks_throttle": false, "max_line_len": 123, "nonempty_lines": 1, "sha256_head": "328c086cb8c44437"}
 {"Message":"No HTTP resource was found that matches the request URI 'http://api.confirmtkt.com/api/train-running-status'."}

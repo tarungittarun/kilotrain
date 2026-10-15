@@ -1,0 +1,117 @@
+# cands_ct_deep ct_run_q captured=2026-10-15T11:33:45Z url=https://www.confirmtkt.com/train-running-status?trainNo=12345&date= status=200 t=0.312 ct=text/html; charset=UTF-8
+<!DOCTYPE html>
+<html ⚡ lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="index, follow" />
+
+    <title>Train Running Status | Where is My Train | Live Train Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Check LIVE train running status and spot your train on mobile with great accuracy. Track your train with real-time delay updates and expected arrival & departure time.">
+  <meta name="keywords" content="Spot your train, live train status,train running status,train live status,train current running status live, live train running status">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="manifest" href="manifest.json">
+
+  <link rel="canonical" href="https://www.confirmtkt.com/train-running-status">
+  <link rel='alternate' href="android-app://com.confirmtkt.lite/http/confirmtkt.com/train-running-status" />
+
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+
+  <link rel="preload" as="image" href="https://www.confirmtkt.com/img/brand/horizontal.png" />
+  <link rel="preload" as="image" href="https://images.ixigo.com/image/upload/confirmtkt/f0360c21c97918daee5fa9c23cbea3f2-dfpkr.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Train Running Status | Where is My Train | Live Train Status" />
+  <meta property="og:description" content="Check LIVE train running status and spot your train on mobile with great accuracy. Track your train with real-time delay updates and expected arrival & departure time." />
+  <meta property="og:url" content="https://www.confirmtkt.com/train-running-status" />
+  <meta property="og:image" content="https://www.confirmtkt.com/favicon.ico" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@confirmtkt" />
+  <meta name="twitter:title" content="Train Running Status | Where is My Train | Live Train Status" />
+  <meta name="twitter:description" content="Check LIVE train running status and spot your train on mobile with great accuracy. Track your train with real-time delay updates and expected arrival & departure time." />
+  <meta name="twitter:image" content="https://www.confirmtkt.com/favicon.ico" />
+
+
+  <link rel="preload" href="https://cdn.confirmtkt.com/fonts/ixisans/ixi_regular.woff2" as="font" type="font/woff2"
+    crossorigin />
+  <link rel="preload" href="https://cdn.confirmtkt.com/fonts/ixisans/ixi_medium.woff2" as="font" type="font/woff2"
+    crossorigin />
+
+  <style amp-boilerplate>
+  body {
+    -webkit-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -moz-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    -ms-animation: -amp-start 8s steps(1, end) 0s 1 normal both;
+    animation: -amp-start 8s steps(1, end) 0s 1 normal both
+  }
+
+  @-webkit-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+
+    to {
+      visibility: visible
+    }
+  }
+
+  @-moz-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+
+    to {
+      visibility: visible
+    }
+  }
+
+  @-ms-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+
+    to {
+      visibility: visible
+    }
+  }
+
+  @-o-keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+
+    to {
+      visibility: visible
+    }
+  }
+
+  @keyframes -amp-start {
+    from {
+      visibility: hidden
+    }
+
+    to {
+      visibility: visible
+    }
+  }
+  </style> <noscript>
+    <style amp-boilerplate>
+    body {
+      -webkit-animation: none;
+      -moz-animation: none;
+      -ms-animation: none;
+      animation: none
+    }
+    </style>
+  </noscript>
+
+  <style amp-custom>
+  /*!
+ * Bootstrap v3.3.7 (http://getbootstrap.com)
+ * Copyright 2011-2016 Twitter, Inc.
+ * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+ */
+  /*! normalize.css v3.0.3 | MIT License | github
