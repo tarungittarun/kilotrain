@@ -1,0 +1,182 @@
+name: xhr-capture-fast
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ry-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install --no-cache-dir mitmproxy==10.2.3
+      - run: mkdir -p mitmproxy_flows && timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ry.linux.mitm &
+      - run: sleep 5 && curl -s -L -A "Mozilla/5.0" https://www.railyatri.in/live-train-status/16228 >/dev/null 2>&1 || true && sleep 120 && pkill mitmdump 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ry-linux-${{ github.run_id }}
+          path: mitmproxy_flows/ry.linux.mitm
+
+  ct-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install --no-cache-dir mitmproxy==10.2.3
+      - run: mkdir -p mitmproxy_flows && timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ct.linux.mitm &
+      - run: sleep 5 && curl -s -L -A "Mozilla/5.0" https://www.confirmtkt.com/train-running-status?trainNo=16228 >/dev/null 2>&1 || true && sleep 120 && pkill mitmdump 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ct-linux-${{ github.run_id }}
+          path: mitmproxy_flows/ct.linux.mitm
+
+  ix-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install --no-cache-dir mitmproxy==10.2.3
+      - run: mkdir -p mitmproxy_flows && timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ix.linux.mitm &
+      - run: sleep 5 && curl -s -L -A "Mozilla/5.0" https://www.ixigo.com/trains/train-running-status?trainNo=16228 >/dev/null 2>&1 || true && sleep 120 && pkill mitmdump 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ix-linux-${{ github.run_id }}
+          path: mitmproxy_flows/ix.linux.mitm
+
+  ry-windows:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --no-cache-dir mitmproxy==10.2.3
+      - shell: bash
+        run: |
+          mkdir -p mitmproxy_flows
+          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ry.windows.mitm &
+          MPID=$!
+          sleep 5
+          curl -s -L -A "Mozilla/5.0" https://www.railyatri.in/live-train-status/16228 >/dev/null 2>&1 || true
+          sleep 120
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ry-windows-${ github.run_id }
+          path: mitmproxy_flows/ry.windows.mitm
+
+  ct-windows:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --no-cache-dir mitmproxy==10.2.3
+      - shell: bash
+        run: |
+          mkdir -p mitmproxy_flows
+          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ct.windows.mitm &
+          MPID=$!
+          sleep 5
+          curl -s -L -A "Mozilla/5.0" https://www.confirmtkt.com/train-running-status?trainNo=16228 >/dev/null 2>&1 || true
+          sleep 120
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ct-windows-${ github.run_id }
+          path: mitmproxy_flows/ct.windows.mitm
+
+  ix-windows:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install --no-cache-dir mitmproxy==10.2.3
+      - shell: bash
+        run: |
+          mkdir -p mitmproxy_flows
+          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ix.windows.mitm &
+          MPID=$!
+          sleep 5
+          curl -s -L -A "Mozilla/5.0" https://www.ixigo.com/trains/train-running-status?trainNo=16228 >/dev/null 2>&1 || true
+          sleep 120
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ix-windows-${ github.run_id }
+          path: mitmproxy_flows/ix.windows.mitm
+
+  ry-macos:
+    runs-on: macos-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install --no-cache-dir mitmproxy==10.2.3
+      - shell: bash
+        run: |
+          mkdir -p mitmproxy_flows
+          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ry.macos.mitm &
+          MPID=$!
+          sleep 5
+          curl -s -L -A "Mozilla/5.0" https://www.railyatri.in/live-train-status/16228 >/dev/null 2>&1 || true
+          sleep 120
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ry-macos-${ github.run_id }
+          path: mitmproxy_flows/ry.macos.mitm
+
+  ct-macos:
+    runs-on: macos-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install --no-cache-dir mitmproxy==10.2.3
+      - shell: bash
+        run: |
+          mkdir -p mitmproxy_flows
+          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ct.macos.mitm &
+          MPID=$!
+          sleep 5
+          curl -s -L -A "Mozilla/5.0" https://www.confirmtkt.com/train-running-status?trainNo=16228 >/dev/null 2>&1 || true
+          sleep 120
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ct-macos-${ github.run_id }
+          path: mitmproxy_flows/ct.macos.mitm
+
+  ix-macos:
+    runs-on: macos-latest
+    timeout-minutes: 5
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip3 install --no-cache-dir mitmproxy==10.2.3
+      - shell: bash
+        run: |
+          mkdir -p mitmproxy_flows
+          timeout 180 mitmdump --quiet --save-stream-file mitmproxy_flows/ix.macos.mitm &
+          MPID=$!
+          sleep 5
+          curl -s -L -A "Mozilla/5.0" https://www.ixigo.com/trains/train-running-status?trainNo=16228 >/dev/null 2>&1 || true
+          sleep 120
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ix-macos-${ github.run_id }
+          path: mitmproxy_flows/ix.macos.mitm

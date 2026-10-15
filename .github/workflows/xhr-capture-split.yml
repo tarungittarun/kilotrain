@@ -1,0 +1,118 @@
+name: xhr-capture-split
+
+on:
+  workflow_dispatch:
+
+jobs:
+  capture-ry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: mitm + quick capture
+        run: |
+          pip3 install mitmproxy==10.2.3
+          mkdir -p mitmproxy_flows poc/fixtures/cands_railyatri_live
+          timeout 300 mitmdump --quiet --save-stream-file mitmproxy_flows/flows_ry.mitm &
+          MPID=$!
+          sleep 5
+          curl -s --connect-timeout 3 -L -A "Mozilla/5.0" https://www.railyatri.in/live-train-status/16228 >/dev/null 2>&1 || true
+          sleep 60
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xhr-ry-${{ github.run_id }}
+          path: mitmproxy_flows/flows_ry.mitm
+          if-no-files-found: warn
+
+  capture-ct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip3 install mitmproxy==10.2.3
+          mkdir -p mitmproxy_flows poc/fixtures/cands_confirmtkt_live
+          timeout 300 mitmdump --quiet --save-stream-file mitmproxy_flows/flows_ct.mitm &
+          MPID=$!
+          sleep 5
+          curl -s --connect-timeout 3 -L -A "Mozilla/5.0" https://www.confirmtkt.com/train-running-status?trainNo=16228 >/dev/null 2>&1 || true
+          sleep 60
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xhr-ct-${{ github.run_id }}
+          path: mitmproxy_flows/flows_ct.mitm
+          if-no-files-found: warn
+
+  capture-ix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip3 install mitmproxy==10.2.3
+          mkdir -p mitmproxy_flows poc/fixtures/cands_ixigo_live
+          timeout 300 mitmdump --quiet --save-stream-file mitmproxy_flows/flows_ix.mitm &
+          MPID=$!
+          sleep 5
+          curl -s --connect-timeout 3 -L -A "Mozilla/5.0" https://www.ixigo.com/trains/train-running-status?trainNo=16228 >/dev/null 2>&1 || true
+          sleep 60
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xhr-ix-${{ github.run_id }}
+          path: mitmproxy_flows/flows_ix.mitm
+          if-no-files-found: warn
+
+  capture-ry-win:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: capture
+        shell: bash
+        run: |
+          pip install mitmproxy==10.2.3
+          mkdir -p mitmproxy_flows poc/fixtures/cands_railyatri_live
+          timeout 300 mitmdump --quiet --save-stream-file mitmproxy_flows/flows_ry_win.mitm &
+          MPID=$!
+          sleep 5
+          curl -s --connect-timeout 3 -L -A "Mozilla/5.0" https://www.railyatri.in/live-train-status/16228 >/dev/null 2>&1 || true
+          sleep 60
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xhr-ry-win-${{ github.run_id }}
+          path: mitmproxy_flows/flows_ry_win.mitm
+          if-no-files-found: warn
+
+  capture-ry-mac:
+    runs-on: macos-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          pip3 install mitmproxy==10.2.3
+          mkdir -p mitmproxy_flows poc/fixtures/cands_railyatri_live
+          timeout 300 mitmdump --quiet --save-stream-file mitmproxy_flows/flows_ry_mac.mitm &
+          MPID=$!
+          sleep 5
+          curl -s --connect-timeout 3 -L -A "Mozilla/5.0" https://www.railyatri.in/live-train-status/16228 >/dev/null 2>&1 || true
+          sleep 60
+          kill $MPID 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xhr-ry-mac-${{ github.run_id }}
+          path: mitmproxy_flows/flows_ry_mac.mitm
+          if-no-files-found: warn
