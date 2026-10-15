@@ -54,12 +54,13 @@ object NtesRunningStatusParser {
             val schDep = time(s.optString("STD"))
             var actArr = actualTime(s.optString("ETA"))
             var actDep = actualTime(s.optString("ETD"))
-            // NTES echoes the schedule into ETA/ETD when no actual has been reported, and stamps
-            // the ORIGIN as "Source". Claiming those as actuals would be fabrication (3.4), so an
-            // echo is treated as "not reported" and renders as an em dash (3.3).
-            // Be more lenient if this is marked as current station
-            if (s.optString("CURR").trim().equals("Y", ignoreCase = true)) {
-                // For current station, be more permissive - don't drop echoes
+            // NTES echoes the schedule into ETA/ETD when no actual has been reported.
+            // Be more lenient in certain cases
+            val hasDelay = (s.optString("DARR").toIntOrNull() ?: 0) != 0 ||
+                          (s.optString("DDEP").toIntOrNull() ?: 0) != 0
+            val isCurrent = s.optString("CURR").trim().equals("Y", ignoreCase = true)
+            if (isCurrent || hasDelay) {
+                // Don't drop echoes if it's current or has reported delay
             } else {
                 if (actArr != null && actArr == schArr) actArr = null
                 if (actDep != null && actDep == schDep) actDep = null
