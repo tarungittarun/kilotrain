@@ -1,0 +1,15 @@
+# source=cands_railyatri name=m_live
+# captured=2026-10-15T08:40:13Z url=https://www.railyatri.in/m/live-train-status
+# status=403 elapsed_s=0.028 ct=text/html
+# redacted first 397 bytes; signature only
+# signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 0, ";": 23, "|": 0, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 1, 1, 1, 1, 1], "fields_per_line_histogram": {"1": 9}, "first_line_len": 12, "has_json_like": false, "kind": "html", "line_count": 10, "looks_html": true, "looks_throttle": true, "max_line_len": 136, "nonempty_lines": 9, "sha256_head": "44c7fe2e61413a96"}
+<HTML><HEAD>
+<TITLE>Access Denied</TITLE>
+</HEAD><BODY>
+<H1>Access Denied</H1>
+ 
+You don't have permission to access "http&#58;&#47;&#47;www&#46;railyatri&#46;in&#47;m&#47;live&#45;train&#45;status" on this server.<P>
+Reference&#32;&#35;18&#46;c173317&#46;1792053637&#46;b3b9af3
+<P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;c173317&#46;1792053637&#46;b3b9af3</P>
+</BODY>
+</HTML>

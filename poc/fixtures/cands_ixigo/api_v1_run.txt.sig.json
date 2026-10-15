@@ -1,0 +1,25 @@
+{
+  "csr_feed_stamp_seen": false,
+  "delimiter_counts": {
+    "\t": 0,
+    ",": 3,
+    ";": 0,
+    "|": 0,
+    "~": 0
+  },
+  "fields_per_line_head": [
+    4
+  ],
+  "fields_per_line_histogram": {
+    "4": 1
+  },
+  "first_line_len": 4096,
+  "has_json_like": false,
+  "kind": "html",
+  "line_count": 1,
+  "looks_html": true,
+  "looks_throttle": false,
+  "max_line_len": 4096,
+  "nonempty_lines": 1,
+  "sha256_head": "087d8427769ab8a0"
+}

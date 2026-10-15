@@ -1,0 +1,2877 @@
+{
+  "measured_at": "2026-10-15T08:40:13Z",
+  "sources": [
+    {
+      "source": "WIMT (whereismytrain.org.in)",
+      "attempts": [
+        {
+          "url": "https://whereismytrain.org.in",
+          "name": "home",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.631,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 46,
+            "nonempty_lines": 40,
+            "first_line_len": 15,
+            "max_line_len": 1355,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 6,
+              ",": 75,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              5,
+              61,
+              1,
+              1,
+              1,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 30,
+              "2": 3,
+              "3": 3,
+              "5": 3,
+              "61": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "0cd41516e4b8f0b3"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/home.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in",
+          "name": "home",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.519,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 46,
+            "nonempty_lines": 40,
+            "first_line_len": 15,
+            "max_line_len": 1355,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 6,
+              ",": 75,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              5,
+              61,
+              1,
+              1,
+              1,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 30,
+              "2": 3,
+              "3": 3,
+              "5": 3,
+              "61": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "0cd41516e4b8f0b3"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/home.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/",
+          "name": "home_slash",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.391,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 46,
+            "nonempty_lines": 40,
+            "first_line_len": 15,
+            "max_line_len": 1355,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 6,
+              ",": 75,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              5,
+              61,
+              1,
+              1,
+              1,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 30,
+              "2": 3,
+              "3": 3,
+              "5": 3,
+              "61": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "0cd41516e4b8f0b3"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/home_slash.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/",
+          "name": "home_slash",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.376,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 46,
+            "nonempty_lines": 40,
+            "first_line_len": 15,
+            "max_line_len": 1355,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 6,
+              ",": 75,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              5,
+              61,
+              1,
+              1,
+              1,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 30,
+              "2": 3,
+              "3": 3,
+              "5": 3,
+              "61": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "0cd41516e4b8f0b3"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/home_slash.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/train-running-status",
+          "name": "tr_running",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.317,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/tr_running.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/train-running-status",
+          "name": "tr_running",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.317,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/tr_running.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/live-train-status",
+          "name": "live_tr",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.304,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/live_tr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/live-train-status",
+          "name": "live_tr",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.108,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/live_tr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/trainStatus",
+          "name": "api_trainstatus",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.331,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_trainstatus.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/trainStatus",
+          "name": "api_trainstatus",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.309,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_trainstatus.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/liveTrainStatus",
+          "name": "api_livetr",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.327,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_livetr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/liveTrainStatus",
+          "name": "api_livetr",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.325,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_livetr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/getTrainStatus",
+          "name": "api_gettr",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.307,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_gettr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/getTrainStatus",
+          "name": "api_gettr",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.337,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_gettr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/v1/train/status",
+          "name": "api_v1_tr",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.298,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_v1_tr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/v1/train/status",
+          "name": "api_v1_tr",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.325,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_v1_tr.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/v1/live-status",
+          "name": "api_v1_live",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.329,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_v1_live.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/v1/live-status",
+          "name": "api_v1_live",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.115,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_v1_live.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/v1/train-running-status",
+          "name": "api_v1_running",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.31,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_v1_running.txt"
+        },
+        {
+          "url": "https://whereismytrain.org.in/api/v1/train-running-status",
+          "name": "api_v1_running",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.299,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 110,
+            "nonempty_lines": 94,
+            "first_line_len": 15,
+            "max_line_len": 371,
+            "delimiter_counts": {
+              "~": 9,
+              "|": 4,
+              ",": 45,
+              "\t": 0,
+              ";": 51
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              2,
+              2,
+              2,
+              2,
+              2
+            ],
+            "fields_per_line_histogram": {
+              "1": 40,
+              "2": 11,
+              "10": 3,
+              "7": 1,
+              "3": 4,
+              "5": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "4f6425058815c603"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_wimt/api_v1_running.txt"
+        }
+      ],
+      "measured": "2026-10-15T08:40:13Z",
+      "verdict": "blocked-by-shape",
+      "reason": "Mostly HTML; no obvious stable public JSON endpoint from web probes."
+    },
+    {
+      "source": "ConfirmTkt (confirmtkt.com)",
+      "attempts": [
+        {
+          "url": "https://www.confirmtkt.com/train-running-status",
+          "name": "running",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.265,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 116,
+            "nonempty_lines": 95,
+            "first_line_len": 15,
+            "max_line_len": 215,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 8,
+              ",": 12,
+              "\t": 0,
+              ";": 6
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              2,
+              1,
+              6,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 50,
+              "2": 6,
+              "3": 3,
+              "6": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "54dbcc3141e9d45a"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/running.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/train-running-status",
+          "name": "running",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.174,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 116,
+            "nonempty_lines": 95,
+            "first_line_len": 15,
+            "max_line_len": 215,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 8,
+              ",": 12,
+              "\t": 0,
+              ";": 6
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              2,
+              1,
+              6,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 50,
+              "2": 6,
+              "3": 3,
+              "6": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "54dbcc3141e9d45a"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/running.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/api/train-running-status",
+          "name": "api_running",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.248,
+          "error": null,
+          "ct": "application/json; charset=utf-8",
+          "sig": {
+            "kind": "json",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 123,
+            "max_line_len": 123,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": true,
+            "looks_throttle": false,
+            "looks_html": false,
+            "sha256_head": "328c086cb8c44437"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/api_running.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/api/train-running-status",
+          "name": "api_running",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.222,
+          "error": null,
+          "ct": "application/json; charset=utf-8",
+          "sig": {
+            "kind": "json",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 123,
+            "max_line_len": 123,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": true,
+            "looks_throttle": false,
+            "looks_html": false,
+            "sha256_head": "328c086cb8c44437"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/api_running.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/api/v1/train/running",
+          "name": "api_v1_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.325,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 29,
+            "nonempty_lines": 29,
+            "first_line_len": 109,
+            "max_line_len": 121,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 28
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              4,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 26,
+              "4": 1,
+              "3": 2
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "dc1d54dab6ec8c00"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/api_v1_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/api/v1/train/running",
+          "name": "api_v1_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.297,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 29,
+            "nonempty_lines": 29,
+            "first_line_len": 109,
+            "max_line_len": 121,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 28
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              4,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 26,
+              "4": 1,
+              "3": 2
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "dc1d54dab6ec8c00"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/api_v1_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/api/v2/train/running-status",
+          "name": "api_v2_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.288,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 29,
+            "nonempty_lines": 29,
+            "first_line_len": 109,
+            "max_line_len": 121,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 28
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              4,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 26,
+              "4": 1,
+              "3": 2
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "dc1d54dab6ec8c00"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/api_v2_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/api/v2/train/running-status",
+          "name": "api_v2_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.25,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 29,
+            "nonempty_lines": 29,
+            "first_line_len": 109,
+            "max_line_len": 121,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 28
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              4,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 26,
+              "4": 1,
+              "3": 2
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "dc1d54dab6ec8c00"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/api_v2_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/ajax/trainRunningStatus",
+          "name": "ajax_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.554,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 81,
+            "nonempty_lines": 80,
+            "first_line_len": 16,
+            "max_line_len": 83,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 32
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 56,
+              "2": 2,
+              "4": 1,
+              "3": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "549b7f4fac626563"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/ajax_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/ajax/trainRunningStatus",
+          "name": "ajax_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.571,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 81,
+            "nonempty_lines": 80,
+            "first_line_len": 16,
+            "max_line_len": 83,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 32
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 56,
+              "2": 2,
+              "4": 1,
+              "3": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "549b7f4fac626563"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/ajax_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/services/trains/runningStatus",
+          "name": "svc_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.45,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 81,
+            "nonempty_lines": 80,
+            "first_line_len": 16,
+            "max_line_len": 83,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 32
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 56,
+              "2": 2,
+              "4": 1,
+              "3": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "549b7f4fac626563"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/svc_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/services/trains/runningStatus",
+          "name": "svc_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.566,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 81,
+            "nonempty_lines": 80,
+            "first_line_len": 16,
+            "max_line_len": 83,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 7,
+              "\t": 0,
+              ";": 32
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 56,
+              "2": 2,
+              "4": 1,
+              "3": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "549b7f4fac626563"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/svc_run.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/train-running-status?trainNo=12345",
+          "name": "run_q",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.173,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 116,
+            "nonempty_lines": 95,
+            "first_line_len": 15,
+            "max_line_len": 215,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 8,
+              ",": 12,
+              "\t": 0,
+              ";": 6
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              2,
+              1,
+              6,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 50,
+              "2": 6,
+              "3": 3,
+              "6": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "54dbcc3141e9d45a"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/run_q.txt"
+        },
+        {
+          "url": "https://www.confirmtkt.com/train-running-status?trainNo=12345",
+          "name": "run_q",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.54,
+          "error": null,
+          "ct": "text/html; charset=UTF-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 116,
+            "nonempty_lines": 95,
+            "first_line_len": 15,
+            "max_line_len": 215,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 8,
+              ",": 12,
+              "\t": 0,
+              ";": 6
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              2,
+              3,
+              2,
+              1,
+              6,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 50,
+              "2": 6,
+              "3": 3,
+              "6": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "54dbcc3141e9d45a"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_confirmtkt/run_q.txt"
+        }
+      ],
+      "measured": "2026-10-15T08:40:13Z",
+      "verdict": "blocked-by-shape",
+      "reason": "HTML/JS; likely internal XHR calls post-load."
+    },
+    {
+      "source": "ixigo (ixigo.com)",
+      "attempts": [
+        {
+          "url": "https://www.ixigo.com/trains/train-running-status",
+          "name": "tr_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 1.134,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 1,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              2
+            ],
+            "fields_per_line_histogram": {
+              "2": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "9b720c5815c74bf3"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/tr_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/trains/train-running-status",
+          "name": "tr_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 200,
+          "elapsed_s": 0.46,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 1,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              2
+            ],
+            "fields_per_line_histogram": {
+              "2": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "7e4449e5797f631f"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/tr_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/trains/train-running-status",
+          "name": "api_tr_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.402,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "b358a557dc9373d2"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_tr_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/trains/train-running-status",
+          "name": "api_tr_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.896,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "087d8427769ab8a0"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_tr_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/v1/trains/running-status",
+          "name": "api_v1_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.421,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "b358a557dc9373d2"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_v1_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/v1/trains/running-status",
+          "name": "api_v1_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.664,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "087d8427769ab8a0"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_v1_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/v3/trains/running-status",
+          "name": "api_v3_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.432,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "b358a557dc9373d2"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_v3_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/v3/trains/running-status",
+          "name": "api_v3_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.427,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "087d8427769ab8a0"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_v3_run.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/train-api/v3/trains/running-status",
+          "name": "tapi_v3",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.635,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "b358a557dc9373d2"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/tapi_v3.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/train-api/v3/trains/running-status",
+          "name": "tapi_v3",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.662,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "087d8427769ab8a0"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/tapi_v3.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/rt/train/running",
+          "name": "api_rt",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.403,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "b358a557dc9373d2"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_rt.txt"
+        },
+        {
+          "url": "https://www.ixigo.com/api/rt/train/running",
+          "name": "api_rt",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 404,
+          "elapsed_s": 0.418,
+          "error": null,
+          "ct": "text/html; charset=utf-8",
+          "sig": {
+            "kind": "html",
+            "line_count": 1,
+            "nonempty_lines": 1,
+            "first_line_len": 4096,
+            "max_line_len": 4096,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 3,
+              "\t": 0,
+              ";": 0
+            },
+            "fields_per_line_head": [
+              4
+            ],
+            "fields_per_line_histogram": {
+              "4": 1
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": false,
+            "looks_html": true,
+            "sha256_head": "087d8427769ab8a0"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_ixigo/api_rt.txt"
+        }
+      ],
+      "measured": "2026-10-15T08:40:13Z",
+      "verdict": "blocked-by-shape",
+      "reason": "HTML dominant; XHRs likely loaded dynamically."
+    },
+    {
+      "source": "RailYatri (railyatri.in)",
+      "attempts": [
+        {
+          "url": "https://www.railyatri.in/m/live-train-status",
+          "name": "m_live",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.08,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 136,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "bb64bdbc0f21db48"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/m_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/m/live-train-status",
+          "name": "m_live",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.028,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 136,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "44c7fe2e61413a96"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/m_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/m/live-train-status",
+          "name": "base_m_live",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.059,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 136,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "8a90af4c415ce581"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/base_m_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/m/live-train-status",
+          "name": "base_m_live",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.037,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 136,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "535becbf5821df45"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/base_m_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/api/live-train-status",
+          "name": "api_live",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.039,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 138,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "822e04b250dafd10"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/api_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/api/live-train-status",
+          "name": "api_live",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.041,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 138,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "b2d8d346436ed07d"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/api_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/api/v1/train/live-status",
+          "name": "api_v1_live",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.063,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 145,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 24
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "c86d31e4a1bf7509"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/api_v1_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/api/v1/train/live-status",
+          "name": "api_v1_live",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.047,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 145,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 24
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "3e025529b0104167"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/api_v1_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/mobile/v1/train/running-status",
+          "name": "mob_v1_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.041,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 151,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 24
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "d433b3e493d33057"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/mob_v1_run.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/mobile/v1/train/running-status",
+          "name": "mob_v1_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.059,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 151,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 24
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "082e12e98d0d7790"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/mob_v1_run.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/mobile/v2/train/liveStatus",
+          "name": "mob_v2_live",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.032,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 143,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "a592e769b7cffdf6"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/mob_v2_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/mobile/v2/train/liveStatus",
+          "name": "mob_v2_live",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.261,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 143,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "17fadc4fd6e25bf5"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/mob_v2_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/rest/mobile/train/live/status",
+          "name": "rest_mob_live",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.03,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 150,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 24
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "5ea880ce279d5c27"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/rest_mob_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/rest/mobile/train/live/status",
+          "name": "rest_mob_live",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.029,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 150,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 24
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "25d8ca837e149211"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/rest_mob_live.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/api/mtb/train/runningStatus",
+          "name": "api_mtb_run",
+          "ua": "Dalvik/2.1.0 (Linux; Android 1",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.036,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 144,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "65448cc6297e1d99"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/api_mtb_run.txt"
+        },
+        {
+          "url": "https://www.railyatri.in/api/mtb/train/runningStatus",
+          "name": "api_mtb_run",
+          "ua": "Mozilla/5.0 (Linux; Android 13",
+          "ok": true,
+          "status": 403,
+          "elapsed_s": 0.064,
+          "error": null,
+          "ct": "text/html",
+          "sig": {
+            "kind": "html",
+            "line_count": 10,
+            "nonempty_lines": 9,
+            "first_line_len": 12,
+            "max_line_len": 144,
+            "delimiter_counts": {
+              "~": 0,
+              "|": 0,
+              ",": 0,
+              "\t": 0,
+              ";": 23
+            },
+            "fields_per_line_head": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "fields_per_line_histogram": {
+              "1": 9
+            },
+            "csr_feed_stamp_seen": false,
+            "has_json_like": false,
+            "looks_throttle": true,
+            "looks_html": true,
+            "sha256_head": "1bac97fb41272797"
+          },
+          "fixture": "/workspace/app/poc/fixtures/cands_railyatri/api_mtb_run.txt"
+        }
+      ],
+      "measured": "2026-10-15T08:40:13Z",
+      "verdict": "blocked-by-network",
+      "reason": "No obvious stable JSON from web probes."
+    }
+  ]
+}

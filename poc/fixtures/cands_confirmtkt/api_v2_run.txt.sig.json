@@ -1,0 +1,38 @@
+{
+  "csr_feed_stamp_seen": false,
+  "delimiter_counts": {
+    "\t": 0,
+    ",": 7,
+    ";": 28,
+    "|": 0,
+    "~": 0
+  },
+  "fields_per_line_head": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    4,
+    1,
+    1,
+    1,
+    1
+  ],
+  "fields_per_line_histogram": {
+    "1": 26,
+    "3": 2,
+    "4": 1
+  },
+  "first_line_len": 109,
+  "has_json_like": false,
+  "kind": "html",
+  "line_count": 29,
+  "looks_html": true,
+  "looks_throttle": false,
+  "max_line_len": 121,
+  "nonempty_lines": 29,
+  "sha256_head": "dc1d54dab6ec8c00"
+}

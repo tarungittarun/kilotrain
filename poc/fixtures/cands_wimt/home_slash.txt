@@ -1,0 +1,51 @@
+# source=cands_wimt name=home_slash
+# captured=2026-10-15T08:40:13Z url=https://whereismytrain.org.in/
+# status=200 elapsed_s=0.376 ct=text/html; charset=UTF-8
+# redacted first 4096 bytes; signature only
+# signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 75, ";": 0, "|": 6, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 2, 3, 5, 61, 1, 1, 1, 2], "fields_per_line_histogram": {"1": 30, "2": 3, "3": 3, "5": 3, "61": 1}, "first_line_len": 15, "has_json_like": false, "kind": "html", "line_count": 46, "looks_html": true, "looks_throttle": false, "max_line_len": 1355, "nonempty_lines": 40, "sha256_head": "0cd41516e4b8f0b3"}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Where Is My Train | Live Train Status | Train Running Status - Indian Railways</title>
+  <meta name="description" content="Find trains between any two stations across India. Get real-time train schedules, live running status, seat availability, and route information. Search 12,000+ trains by station codes or names instantly.">
+  <meta name="keywords" content="where is my train, train search India, where is my train website, where is my train web, where is my train online, where is my train live, where is my train no login, where is my train google, my train, where is my train login free, where is my train for pc, where is my train pc, where is my train website pc, where is my train desktop, train online, where is my train login in india, train status, live train, live status, indian railway, train running, indian railway finance corporation, indian railway uts, indian railways, indian railway pnr status, ntes live status, check train running status, super fast train running status, ntes running status, track the train india, ntes irctc, indian train running status, your train, spot your train, spotyourtrain, spot your train live, indian railways train search, train schedule, live train status, train running status, railway enquiry, train between stations, train timing, railway time table, train route finder, IRCTC train search, train booking information, railway information system, PNR number, PNR status check, train availability, station to station trains, express train search, superfast train timing, local train schedule, train fare enquiry, live train running status, irctc train running status, train coach position, platform number, train delay status">
+  <meta name="author" content="Where Is My Train Team">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="canonical" href="https://whereismytrain.org.in">
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow">
+
+  <!-- Monetag and AdSense Tags -->
+  <meta name="monetag" content="2d368a590c95da523e9f50c232b7df9e">
+  <meta name="google-site-verification" content="your-google-verification-code">
+  <meta name="netpub_547bebfc5250a2675d8efdf7a4cee922"
+    content="547bebfc5250a2675d8efdf7a4cee922_ad99e987e9c9f1e44782c50e12e82474">
+
+  <!-- OpenGraph Metadata -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://whereismytrain.org.in">
+  <meta property="og:title" content="Where Is My Train | Live Train Status | Train Running Status - Indian Railways">
+  <meta property="og:description" content="Find trains between any two stations across India. Get real-time train schedules, live running status, seat availability, and route information. Search 12,000+ trains by station codes or names instantly.">
+  <meta property="og:site_name" content="Where Is My Train">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:image" content="https://whereismytrain.org.in/image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Metadata -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@whereismytrain">
+  <meta name="twitter:creator" content="@whereismytrain">
+  <meta name="twitter:title" content="Where Is My Train | Live Train Status | Train Running Status - Indian Railways">
+  <meta name="twitter:description" content="Find trains between any two stations across India. Get real-time train schedules, live running status, seat availability, and route information. Search 12,000+ trains by station codes or names instantly.">
+  <meta name="twitter:image" content="https://whereismytrain.org.in/image.png">
+
+
+  <!-- Icons -->
+  <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png">
+  <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png">
+  <link rel="icon" href="/favicontrain.ico">
+  <link rel="app

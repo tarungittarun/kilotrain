@@ -1,0 +1,86 @@
+# source=cands_confirmtkt name=ajax_run
+# captured=2026-10-15T08:40:13Z url=https://www.confirmtkt.com/error-404.html
+# status=200 elapsed_s=0.571 ct=text/html
+# redacted first 2035 bytes; signature only
+# signature={"csr_feed_stamp_seen": false, "delimiter_counts": {"\t": 0, ",": 7, ";": 32, "|": 0, "~": 0}, "fields_per_line_head": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], "fields_per_line_histogram": {"1": 56, "2": 2, "3": 1, "4": 1}, "first_line_len": 16, "has_json_like": false, "kind": "html", "line_count": 81, "looks_html": true, "looks_throttle": false, "max_line_len": 83, "nonempty_lines": 80, "sha256_head": "549b7f4fac626563"}
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ConfirmTkt-404</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Courgette"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <style type="text/css">
+      body {
+        font-family: "Courgette", cursive;
+        background: #f3f3e1;
+        background-image: url("https://confirmtkt.azureedge.net/images/train.jpg");
+      }
+      .wrap {
+        margin: 0 auto;
+        width: 1000px;
+      }
+      .logo {
+        margin-top: 50px;
+      }
+      .logo h1 {
+        font-size: 200px;
+        color: #fff;
+        text-align: center;
+        margin-bottom: 1px;
+        text-shadow: 1px 1px 6px #fff;
+      }
+      .logo p {
+        color: #8f8e8c;
+        font-size: 20px;
+        margin-top: 1px;
+        text-align: center;
+      }
+      .logo p span {
+        color: lightgreen;
+      }
+      .sub a {
+        color: white;
+        background: rgba(59, 97, 109, 0.36);
+        text-decoration: none;
+        padding: 7px 120px;
+        font-size: 16px;
+        font-family: arial, serif;
+        font-weight: bold;
+        -webkit-border-radius: 3em;
+        -moz-border-radius: 0.1em;
+        -border-radius: 0.1em;
+      }
+      .footer {
+        color: #8f8e8c;
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+      }
+      .footer a {
+        color: rgb(228, 146, 162);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="logo">
+        <a class="navbar-brand" href="/"
+          ><img
+            style="height: 30px"
+            src="./img/horizontal.png"
+            alt="Confirmtkt"
+        /></a>
+        <h1>404</h1>
+        <p>Oops! The Page you requested was not found</p>
+        <div class="sub">
+          <p><a href="https://www.confirmtkt.com">Take me home</a></p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
