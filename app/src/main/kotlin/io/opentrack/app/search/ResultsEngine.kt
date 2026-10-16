@@ -1,12 +1,15 @@
 package io.opentrack.app.search
 
 import io.opentrack.app.asset.OfflineAsset
+import io.opentrack.app.source.ConfirmTktRunningStatusSource
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.ErailRouteSource
+import io.opentrack.app.source.IxigoRunningStatusSource
 import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult
 import io.opentrack.app.source.PairLookupResult
+import io.opentrack.app.source.RailYatriRunningStatusSource
 import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.core.diag.Diagnostics
 import io.opentrack.core.ntes.NtesRunningStatus
@@ -44,6 +47,9 @@ class ResultsEngine(
     private val erailPairSource: ErailPairSource? = null,
     private val erailRouteSource: ErailRouteSource? = null,
     private val ntesStatusSource: NtesRunningStatusSource? = null,
+    private val railYatriStatusSource: RailYatriRunningStatusSource? = null,
+    private val ixigoStatusSource: IxigoRunningStatusSource? = null,
+    private val confirmTktStatusSource: ConfirmTktRunningStatusSource? = null,
     private val diagnostics: Diagnostics? = null,
 ) {
     data class Outcome(
@@ -346,6 +352,33 @@ class ResultsEngine(
                     }
                 }
             },
+            railYatriStatusSource?.let {
+                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("RailYatri") {
+                    when (val r = it.fetch(train)) {
+                        is io.opentrack.app.source.RailYatriRunningStatusSource.Result.Live ->
+                            statusFromRailYatri(r.status, train, "RailYatri")
+                        is io.opentrack.app.source.RailYatriRunningStatusSource.Result.Failed -> null
+                    }
+                }
+            },
+            ixigoStatusSource?.let {
+                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("Ixigo") {
+                    when (val r = it.fetch(train)) {
+                        is io.opentrack.app.source.IxigoRunningStatusSource.Result.Live ->
+                            statusFromIxigo(r.status, train, "Ixigo")
+                        is io.opentrack.app.source.IxigoRunningStatusSource.Result.Failed -> null
+                    }
+                }
+            },
+            confirmTktStatusSource?.let {
+                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("ConfirmTkt") {
+                    when (val r = it.fetch(train)) {
+                        is io.opentrack.app.source.ConfirmTktRunningStatusSource.Result.Live ->
+                            statusFromConfirmTkt(r.status, train, "ConfirmTkt")
+                        is io.opentrack.app.source.ConfirmTktRunningStatusSource.Result.Failed -> null
+                    }
+                }
+            },
             io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("offline asset (labelled)") {
                 val hit = asset.trains.firstOrNull { it.number == train }
                 if (hit != null) StatusOutcome.Live(
@@ -424,6 +457,114 @@ class ResultsEngine(
                 )
             },
             status.delayDeparture,
+        ),
+        viaCache = status.viaCache,
+        fetchedAtMillis = status.fetchedAtMillis,
+        sourceLabel = label,
+        attempts = emptyList(),
+    )
+
+    private fun statusFromRailYatri(
+        status: io.opentrack.core.railyatri.RailYatriRunningStatus,
+        train: String,
+        label: String,
+    ): StatusOutcome.Live = StatusOutcome.Live(
+        trainNo = status.trainNo ?: train,
+        currentStatus = status.currentStatus ?: "no position published right now",
+        stops = withPositionAndExpectations(
+            status.stops.map { stop ->
+                StopStatus(
+                    code = stop.stationCode ?: "—",
+                    name = stop.stationName ?: "",
+                    scheduledArrival = stop.scheduledArrival,
+                    scheduledDeparture = stop.scheduledDeparture,
+                    actualArrival = stop.actualArrival,
+                    actualDeparture = stop.actualDeparture,
+                    arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                    departureDelayMinutes = stop.departureDelayMinutes,
+                    isCurrentStation = stop.isCurrentStation,
+                    isTrainHere = false,
+                    expectedDeparture = null,
+                    distanceKm = stop.distanceKm,
+                    haltMinutes = stop.haltMinutes,
+                    isDepartedHere = stop.isPassed,
+                    isNextStation = false,
+                    kmToNext = null,
+                )
+            },
+            null,
+        ),
+        viaCache = status.viaCache,
+        fetchedAtMillis = status.fetchedAtMillis,
+        sourceLabel = label,
+        attempts = emptyList(),
+    )
+
+    private fun statusFromIxigo(
+        status: io.opentrack.core.ixigo.IxigoRunningStatus,
+        train: String,
+        label: String,
+    ): StatusOutcome.Live = StatusOutcome.Live(
+        trainNo = status.trainNo ?: train,
+        currentStatus = status.currentStatus ?: "no position published right now",
+        stops = withPositionAndExpectations(
+            status.stops.map { stop ->
+                StopStatus(
+                    code = stop.stationCode ?: "—",
+                    name = stop.stationName ?: "",
+                    scheduledArrival = stop.scheduledArrival,
+                    scheduledDeparture = stop.scheduledDeparture,
+                    actualArrival = stop.actualArrival,
+                    actualDeparture = stop.actualDeparture,
+                    arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                    departureDelayMinutes = stop.departureDelayMinutes,
+                    isCurrentStation = stop.isCurrentStation,
+                    isTrainHere = false,
+                    expectedDeparture = null,
+                    distanceKm = stop.distanceKm,
+                    haltMinutes = stop.haltMinutes,
+                    isDepartedHere = false,
+                    isNextStation = false,
+                    kmToNext = null,
+                )
+            },
+            null,
+        ),
+        viaCache = status.viaCache,
+        fetchedAtMillis = status.fetchedAtMillis,
+        sourceLabel = label,
+        attempts = emptyList(),
+    )
+
+    private fun statusFromConfirmTkt(
+        status: io.opentrack.core.confirmtkt.ConfirmTktRunningStatus,
+        train: String,
+        label: String,
+    ): StatusOutcome.Live = StatusOutcome.Live(
+        trainNo = status.trainNo ?: train,
+        currentStatus = status.currentStatus ?: "no position published right now",
+        stops = withPositionAndExpectations(
+            status.stops.map { stop ->
+                StopStatus(
+                    code = stop.stationCode ?: "—",
+                    name = stop.stationName ?: "",
+                    scheduledArrival = stop.scheduledArrival,
+                    scheduledDeparture = stop.scheduledDeparture,
+                    actualArrival = stop.actualArrival,
+                    actualDeparture = stop.actualDeparture,
+                    arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                    departureDelayMinutes = stop.departureDelayMinutes,
+                    isCurrentStation = stop.isCurrentStation,
+                    isTrainHere = false,
+                    expectedDeparture = null,
+                    distanceKm = stop.distanceKm,
+                    haltMinutes = stop.haltMinutes,
+                    isDepartedHere = false,
+                    isNextStation = false,
+                    kmToNext = null,
+                )
+            },
+            null,
         ),
         viaCache = status.viaCache,
         fetchedAtMillis = status.fetchedAtMillis,

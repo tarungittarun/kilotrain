@@ -244,7 +244,7 @@ private fun DetailView(
         if (status != null) {
             val provenance = Provenance(
                 if (status.viaCache) ProvenanceKind.CACHED else ProvenanceKind.LIVE,
-                "NTES", status.fetchedAtMillis,
+                status.sourceLabel, status.fetchedAtMillis,
             )
             Text(
                 text = StateCopy.sourceBadge(status.sourceLabel, provenance.label(System.currentTimeMillis())),
@@ -252,7 +252,7 @@ private fun DetailView(
                 modifier = Modifier.padding(top = 8.dp),
             )
 
-            // Last reported: the last stop NTES reported an actual for
+            // Last reported: the last stop the winning source reported an actual for
             val departed = status.stops.firstOrNull { it.isDepartedHere }
             if (departed != null) {
                 Text(
@@ -260,6 +260,17 @@ private fun DetailView(
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp),
                 )
+            }
+
+            // Source selection: user picks which source answers first
+            Row(modifier = Modifier.padding(top = 8.dp)) {
+                Text("source:", style = MaterialTheme.typography.labelSmall, modifier = Modifier.width(32.dp))
+                sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                sourceButton("RailYatri", "railyatri", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                sourceButton("Ixigo", "ixigo", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                sourceButton("ConfirmTkt", "confirmtkt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                sourceButton("erail", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
             }
         }
         ui.note?.let { note ->
@@ -289,18 +300,10 @@ private fun DetailView(
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                             Row {
-                                TextButton(onClick = { ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                    Text("refresh")
-                                }
-                                TextButton(onClick = { viewModel.setPreferredSource("ntes"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                    Text("NTES")
-                                }
-                                TextButton(onClick = { viewModel.setPreferredSource("erail"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                    Text("Schedule")
-                                }
-                                TextButton(onClick = { viewModel.setPreferredSource(null); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                    Text("Auto")
-                                }
+                                sourceButton("refresh", null, ui.preferredSource, viewModel, ui.selectedTrainNumber, isRefresh = true)
+                                sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                                sourceButton("Schedule", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                                sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
                             }
                         }
                     }
@@ -403,6 +406,32 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
                 TextButton(onClick = { store.clear() }) { Text("clear") }
             }
         }
+    }
+}
+
+/** Source chip: picks which source answers first, then refreshes the detail view. */
+@Composable
+private fun sourceButton(
+    label: String,
+    source: String?,
+    currentPreferred: String?,
+    viewModel: ResultsViewModel,
+    trainNumber: String?,
+    isRefresh: Boolean = false,
+) {
+    val selected = currentPreferred == source || (isRefresh && source == null)
+    TextButton(
+        onClick = {
+            if (!isRefresh) viewModel.setPreferredSource(source)
+            trainNumber?.let(viewModel::showLiveStatus)
+        },
+        modifier = Modifier.padding(horizontal = 4.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

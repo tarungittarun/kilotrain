@@ -3,11 +3,13 @@ package io.opentrack.app.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.opentrack.app.asset.OfflineAsset
+import io.opentrack.app.source.ConfirmTktRunningStatusSource
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.IxigoRunningStatusSource
 import io.opentrack.app.source.NtesRunningStatusSource
-import io.opentrack.app.source.HttpErailTransport
+import io.opentrack.app.source.RailYatriRunningStatusSource
 import io.opentrack.app.source.SourceLocator
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
@@ -128,6 +130,9 @@ class ResultsViewModel(
                     erailSource = trainSource,
                     ntesStatusSource = source,
                     erailRouteSource = routeSource,
+                    railYatriStatusSource = SourceLocator.railYatriStatusSource,
+                    ixigoStatusSource = SourceLocator.ixigoStatusSource,
+                    confirmTktStatusSource = SourceLocator.confirmTktStatusSource,
                     diagnostics = diagnostics,
                 ).liveStatus(number, _state.value.preferredSource)
             } ?: return@launch
