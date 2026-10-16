@@ -543,11 +543,11 @@ internal fun withPositionAndExpectations(
     }
 }
 
-/** HH:mm + minutes, wrapping past midnight (10.3). */
-internal fun shiftMinutes(hhmm: String, minutes: Int): String {
+/** HH:mm + minutes, wrapping past midnight (10.3). null when the time can't be parsed. */
+internal fun shiftMinutes(hhmm: String, minutes: Int): String? {
     val parts = hhmm.split(":")
-    val h = parts.getOrNull(0)?.toIntOrNull() ?: return hhmm
-    val m = parts.getOrNull(1)?.toIntOrNull() ?: return hhmm
+    val h = parts.getOrNull(0)?.toIntOrNull() ?: return null
+    val m = parts.getOrNull(1)?.toIntOrNull() ?: return null
     val total = (h * 60 + m + minutes).mod(24 * 60)
     return "%02d:%02d".format(total / 60, total % 60)
 }

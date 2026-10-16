@@ -251,6 +251,16 @@ private fun DetailView(
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = 8.dp),
             )
+
+            // Last reported: the last stop NTES reported an actual for
+            val departed = status.stops.firstOrNull { it.isDepartedHere }
+            if (departed != null) {
+                Text(
+                    text = "Last reported: ${departed.code} ${departed.name} · ${departed.actualDeparture ?: departed.actualArrival ?: "—"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
         ui.note?.let { note ->
             Text(text = note, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
@@ -279,20 +289,9 @@ private fun DetailView(
                                 modifier = Modifier.padding(top = 4.dp),
                             )
                             Row {
-                            Row {
                                 TextButton(onClick = { ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
                                     Text("refresh")
                                 }
-                                TextButton(onClick = { viewModel.setPreferredSource("ntes"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                    Text("NTES")
-                                }
-                                TextButton(onClick = { viewModel.setPreferredSource("erail"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                    Text("Schedule")
-                                }
-                                TextButton(onClick = { viewModel.setPreferredSource(null); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
-                                    Text("Auto")
-                                }
-                            }
                                 TextButton(onClick = { viewModel.setPreferredSource("ntes"); ui.selectedTrainNumber?.let(viewModel::showLiveStatus) }) {
                                     Text("NTES")
                                 }
@@ -316,12 +315,32 @@ private fun DetailView(
                     )
                 }
             }
-                items(ui.stops) { stop ->
+            // per-stop rows: actual vs scheduled, delay, platform, position markers
+            status?.stops?.let { stops ->
+                items(stops) { stop ->
                     Text(
-                        text = StateCopy.routeStop(stop.code, stop.name, stop.arrival),
+                        text = StateCopy.stopStatus(
+                            code = stop.code,
+                            name = stop.name,
+                            scheduledArrival = stop.scheduledArrival,
+                            scheduledDeparture = stop.scheduledDeparture,
+                            actualArrival = stop.actualArrival,
+                            actualDeparture = stop.actualDeparture,
+                            arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                            departureDelayMinutes = stop.departureDelayMinutes,
+                            isCurrentStation = stop.isCurrentStation,
+                            isTrainHere = stop.isTrainHere,
+                            expectedDeparture = stop.expectedDeparture,
+                            distanceKm = stop.distanceKm,
+                            haltMinutes = stop.haltMinutes,
+                            isDepartedHere = stop.isDepartedHere,
+                            isNextStation = stop.isNextStation,
+                            kmToNext = stop.kmToNext,
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+            }
         }
     }
 }
