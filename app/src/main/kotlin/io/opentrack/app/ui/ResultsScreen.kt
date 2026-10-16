@@ -322,7 +322,6 @@ private fun DetailView(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
-            }
         }
     }
 }
