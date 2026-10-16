@@ -1,6 +1,7 @@
 package io.opentrack.core.railyatri
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -31,7 +32,7 @@ class RailYatriParserTest {
         assertEquals("23:10", stops[0].actualDeparture)
         assertEquals(10, stops[0].arrivalDelayMinutes)
         assertTrue(stops[0].isCurrentStation)
-        assertTrue(stops[0].isPassed)
+        assertFalse(stops[0].isPassed)
         assertEquals("SMET", parsed.currentStationName)
     }
 
