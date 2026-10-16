@@ -54,7 +54,11 @@ object NtesRunningStatusParser {
             val schDep = time(s.optString("STD"))
             var actArr = actualTime(s.optString("ETA"))
             var actDep = actualTime(s.optString("ETD"))
-            // Don't drop echoes - show what NTES reports for better real-world behavior
+            // NTES echoes the schedule into ETA/ETD when no actual has been reported. An echo is
+            // not an actual: drop it so it renders as an em dash, never a synthesized time
+            // (3.3/3.4; never a zero delay for an unreported stop).
+            if (actArr != null && actArr == schArr) actArr = null
+            if (actDep != null && actDep == schDep) actDep = null
             NtesStopStatus(
                 stationCode = s.optString("SC").trim().takeIf { it.isNotBlank() },
                 stationName = s.optString("SN").trim().takeIf { it.isNotBlank() },
