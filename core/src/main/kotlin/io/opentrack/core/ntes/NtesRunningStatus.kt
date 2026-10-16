@@ -52,8 +52,14 @@ object NtesRunningStatusParser {
             val s = raw as? JsonValue.JsonObject ?: return@mapNotNull null
             val schArr = time(s.optString("STA"))
             val schDep = time(s.optString("STD"))
+            // NTES may publish actuals under ETA/ETD (documented) or ACTA/ACTD / RA/RD (other
+            // public clients). Try each in order; an unstated actual stays null (3.3).
             var actArr = actualTime(s.optString("ETA"))
+                ?: actualTime(s.optString("ACTA"))
+                ?: actualTime(s.optString("RA"))
             var actDep = actualTime(s.optString("ETD"))
+                ?: actualTime(s.optString("ACTD"))
+                ?: actualTime(s.optString("RD"))
             // NTES echoes the schedule into ETA/ETD when no actual has been reported. An echo is
             // not an actual: drop it so it renders as an em dash, never a synthesized time
             // (3.3/3.4; never a zero delay for an unreported stop).

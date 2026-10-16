@@ -252,11 +252,18 @@ private fun DetailView(
                 modifier = Modifier.padding(top = 8.dp),
             )
 
-            // Last reported: the last stop the winning source reported an actual for
+            // Last reported: the last stop the winning source reported an actual for,
+            // or the current station NTES names
             val departed = status.stops.firstOrNull { it.isDepartedHere }
             if (departed != null) {
                 Text(
                     text = "Last reported: ${departed.code} ${departed.name} · ${departed.actualDeparture ?: departed.actualArrival ?: "—"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            } else if (status.currentStationName != null) {
+                Text(
+                    text = "Position: ${status.currentStationName} (per NTES)",
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp),
                 )
@@ -285,6 +292,13 @@ private fun DetailView(
                     val next = status.stops.firstOrNull { it.isNextStation }
                     Card(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
                         Column(modifier = Modifier.padding(12.dp)) {
+                            if (status.currentStationName != null) {
+                                Text(
+                                    text = "At ${status.currentStationName}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    modifier = Modifier.padding(bottom = 4.dp),
+                                )
+                            }
                             Text(
                                 text = StateCopy.positionSummary(
                                     departedStation = departed?.let { "${it.code} ${it.name}" },

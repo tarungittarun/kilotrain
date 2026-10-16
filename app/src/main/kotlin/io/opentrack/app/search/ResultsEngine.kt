@@ -266,6 +266,7 @@ class ResultsEngine(
                             is RouteLookupResult.Live -> StatusOutcome.Live(
                                 trainNo = train,
                                 currentStatus = "showing the published schedule - no live source answered first",
+                                currentStationName = null,
                                 stops = r.stops.map { stop ->
                                     StopStatus(
                                         code = stop.stationCode,
@@ -345,6 +346,7 @@ class ResultsEngine(
                                 viaCache = false,
                                 fetchedAtMillis = p.feedStampMillis,
                                 sourceLabel = "erail.in train times",
+                                currentStationName = null,
                                 attempts = emptyList(),
                             )
                         }
@@ -397,6 +399,7 @@ class ResultsEngine(
                     viaCache = false,
                     fetchedAtMillis = 0,
                     sourceLabel = "offline asset (unverified)",
+                    currentStationName = null,
                     attempts = emptyList(),
                 ) else null
             },
@@ -435,6 +438,7 @@ class ResultsEngine(
     ): StatusOutcome.Live = StatusOutcome.Live(
         trainNo = status.trainNo ?: train,
         currentStatus = status.currentStatus ?: "no position published right now",
+        currentStationName = status.currentStationName,
         stops = withPositionAndExpectations(
             status.stops.map { stop ->
                 StopStatus(
@@ -471,6 +475,7 @@ class ResultsEngine(
     ): StatusOutcome.Live = StatusOutcome.Live(
         trainNo = status.trainNo ?: train,
         currentStatus = status.currentStatus ?: "no position published right now",
+        currentStationName = status.currentStationName,
         stops = withPositionAndExpectations(
             status.stops.map { stop ->
                 StopStatus(
@@ -507,6 +512,7 @@ class ResultsEngine(
     ): StatusOutcome.Live = StatusOutcome.Live(
         trainNo = status.trainNo ?: train,
         currentStatus = status.currentStatus ?: "no position published right now",
+        currentStationName = status.currentStationName,
         stops = withPositionAndExpectations(
             status.stops.map { stop ->
                 StopStatus(
@@ -543,6 +549,7 @@ class ResultsEngine(
     ): StatusOutcome.Live = StatusOutcome.Live(
         trainNo = status.trainNo ?: train,
         currentStatus = status.currentStatus ?: "no position published right now",
+        currentStationName = status.currentStationName,
         stops = withPositionAndExpectations(
             status.stops.map { stop ->
                 StopStatus(
@@ -603,6 +610,7 @@ class ResultsEngine(
         data class Live(
             val trainNo: String,
             val currentStatus: String,
+            val currentStationName: String?,
             val stops: List<StopStatus>,
             val viaCache: Boolean,
             val fetchedAtMillis: Long,
