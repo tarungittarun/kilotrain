@@ -316,29 +316,34 @@ private fun DetailView(
                 }
             }
             // per-stop rows: actual vs scheduled, delay, platform, position markers
+            // Column (not LazyColumn items) so every stop is composed for test visibility
             if (status != null) {
-                items(status.stops) { stop ->
-                    Text(
-                        text = StateCopy.stopStatus(
-                            code = stop.code,
-                            name = stop.name,
-                            scheduledArrival = stop.scheduledArrival,
-                            scheduledDeparture = stop.scheduledDeparture,
-                            actualArrival = stop.actualArrival,
-                            actualDeparture = stop.actualDeparture,
-                            arrivalDelayMinutes = stop.arrivalDelayMinutes,
-                            departureDelayMinutes = stop.departureDelayMinutes,
-                            isCurrentStation = stop.isCurrentStation,
-                            isTrainHere = stop.isTrainHere,
-                            expectedDeparture = stop.expectedDeparture,
-                            distanceKm = stop.distanceKm,
-                            haltMinutes = stop.haltMinutes,
-                            isDepartedHere = stop.isDepartedHere,
-                            isNextStation = stop.isNextStation,
-                            kmToNext = stop.kmToNext,
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                item {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        status.stops.forEach { stop ->
+                            Text(
+                                text = StateCopy.stopStatus(
+                                    code = stop.code,
+                                    name = stop.name,
+                                    scheduledArrival = stop.scheduledArrival,
+                                    scheduledDeparture = stop.scheduledDeparture,
+                                    actualArrival = stop.actualArrival,
+                                    actualDeparture = stop.actualDeparture,
+                                    arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                                    departureDelayMinutes = stop.departureDelayMinutes,
+                                    isCurrentStation = stop.isCurrentStation,
+                                    isTrainHere = stop.isTrainHere,
+                                    expectedDeparture = stop.expectedDeparture,
+                                    distanceKm = stop.distanceKm,
+                                    haltMinutes = stop.haltMinutes,
+                                    isDepartedHere = stop.isDepartedHere,
+                                    isNextStation = stop.isNextStation,
+                                    kmToNext = stop.kmToNext,
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
                 }
             }
         }
