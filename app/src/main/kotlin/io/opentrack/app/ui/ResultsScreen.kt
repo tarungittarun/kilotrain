@@ -318,7 +318,7 @@ private fun DetailView(
             }
                 items(ui.stops) { stop ->
                     Text(
-                        text = StateCopy.routeStop(stop.code, stop.name, stop.scheduledArrival),
+                        text = StateCopy.routeStop(stop.code, stop.name, stop.arrival),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
