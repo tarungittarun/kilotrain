@@ -7,6 +7,7 @@ import io.opentrack.app.source.ConfirmTktRunningStatusSource
 import io.opentrack.app.source.ErailPairSource
 import io.opentrack.app.source.ErailRouteSource
 import io.opentrack.app.source.ErailTrainSource
+import io.opentrack.app.source.HttpErailTransport
 import io.opentrack.app.source.IxigoRunningStatusSource
 import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.source.RailYatriRunningStatusSource
