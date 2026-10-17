@@ -242,6 +242,7 @@ class ResultsEngine(
             wimt = wimtStatusSource,
             railyatri = railYatriStatusSource,
             erailTrain = erailSource,
+            erailRoute = erailRouteSource,
             diagnostics = diagnostics,
         )
         diagnostics?.numberSearch(
