@@ -302,7 +302,7 @@ class ResultsEngine(
                     when (val r = it.fetch(train)) {
                         is io.opentrack.app.source.TrainLookup.Live -> {
                             val p = r.payload
-                            StatusOutcome.Live(
+                            if (p.number != train) null else StatusOutcome.Live(
                                 trainNo = p.number,
                                 currentStatus = "endpoint times - " + p.name,
                                 stops = listOf(
