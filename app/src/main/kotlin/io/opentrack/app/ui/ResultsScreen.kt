@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -298,57 +297,53 @@ private fun DetailView(
             Text(text = note, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
         }
 
-        LazyColumn(modifier = Modifier.padding(top = 8.dp).testTag("results_list")) {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
             if (status != null) {
                 // the position card: one glance answer
-                item {
-                    val departed = status.stops.firstOrNull { it.isDepartedHere }
-                    val next = status.stops.firstOrNull { it.isNextStation }
-                    Card(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
-                        Column(modifier = Modifier.padding(12.dp)) {
-                            if (status.currentStationName != null) {
-                                Text(
-                                    text = "At ${status.currentStationName}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    modifier = Modifier.padding(bottom = 4.dp),
-                                )
-                            }
+                val departed = status.stops.firstOrNull { it.isDepartedHere }
+                val next = status.stops.firstOrNull { it.isNextStation }
+                Card(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        if (status.currentStationName != null) {
                             Text(
-                                text = StateCopy.positionSummary(
-                                    departedStation = departed?.let { "${it.code} ${it.name}" },
-                                    nextStation = next?.let { "${it.code} ${it.name}" },
-                                    expectedNext = next?.expectedDeparture,
-                                    delayMinutes = next?.arrivalDelayMinutes,
-                                ),
-                                style = MaterialTheme.typography.bodyLarge,
+                                text = "At ${status.currentStationName}",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 4.dp),
                             )
-                            Text(
-                                text = "as of ${status.currentStatus}",
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(top = 4.dp),
-                            )
-                            Row {
-                                sourceButton("refresh", null, ui.preferredSource, viewModel, ui.selectedTrainNumber, isRefresh = true)
-                                sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                                sourceButton("Schedule", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                                sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                            }
+                        }
+                        Text(
+                            text = StateCopy.positionSummary(
+                                departedStation = departed?.let { "${it.code} ${it.name}" },
+                                nextStation = next?.let { "${it.code} ${it.name}" },
+                                expectedNext = next?.expectedDeparture,
+                                delayMinutes = next?.arrivalDelayMinutes,
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            text = "as of ${status.currentStatus}",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp),
+                        )
+                        Row {
+                            sourceButton("refresh", null, ui.preferredSource, viewModel, ui.selectedTrainNumber, isRefresh = true)
+                            sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                            sourceButton("Schedule", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                            sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
                         }
                     }
                 }
             }
             if (ui.stops.isEmpty() && ui.stopsNote != null) {
-                item {
-                    Text(
-                        text = ui.stopsNote,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp),
-                    )
-                }
+                Text(
+                    text = ui.stopsNote,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                )
             }
             // per-stop rows: actual vs scheduled, delay, platform, position markers
             if (status != null) {
-                items(status.stops) { stop ->
+                status.stops.forEach { stop ->
                     Text(
                         text = StateCopy.stopStatus(
                             code = stop.code,
