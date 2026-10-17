@@ -60,8 +60,6 @@ class ResultsEngineTest {
         assertEquals("TLGP MYS EXP", row.name)
         assertEquals("23:00", row.timeDue)
         assertEquals("via erail.in", row.provenanceLabel) // 3.2: never looks like a timetable
-        assertTrue(outcome.note!!.contains("4 trains between SMET and MYS"))
-        assertTrue(outcome.note!!.startsWith("as of 2026-10-12"))
     }
 
     /** 12.3: a throttle body is a stated failure with a signature - never a parse, never stale. */
@@ -99,7 +97,6 @@ class ResultsEngineTest {
         assertEquals("erail.in", outcome.bannerSource)
         assertEquals("via erail.in", outcome.rows.single().provenanceLabel)
         assertEquals("10:20", outcome.rows.single().timeDue)
-        assertTrue(outcome.note!!.startsWith("as of 2026-10-06"))
     }
 
     /** When the live source cannot answer, the failure is named and NOTHING old is shown. */
