@@ -375,7 +375,11 @@ object MergeSources {
         stops: List<MergedStop>,
         nowMillis: Long,
     ): PositionInfo? {
-        val lastReported = stops.indexOfLast { it.actualDepartureTm != null || it.actualArrivalTm != null }
+        // Find last stop with any actual time (Unix timestamp from WIMT, or HH:mm from NTES)
+        val lastReported = stops.indexOfLast {
+            it.actualDepartureTm != null || it.actualArrivalTm != null ||
+                it.actualDeparture != null || it.actualArrival != null
+        }
         if (lastReported < 0) return null
 
         val departed = stops[lastReported]
@@ -386,14 +390,19 @@ object MergeSources {
         val betweenStations = if (interpolated) "${departed.code} → ${next.code}" else null
         val kmFromPrevious = if (interpolated) next?.kmToNext else null
 
+        // Compute minutes ago from Unix timestamp (WIMT) or HH:mm string (NTES/RailYatri)
         val lastActualTm = departed.actualDepartureTm ?: departed.actualArrivalTm
         val minutesAgo = lastActualTm?.let { tm ->
             ((nowMillis - tm) / 60_000).toInt()
+        } ?: departed.actualDeparture?.let { hhmm ->
+            computeMinutesAgo(hhmm, nowMillis)
+        } ?: departed.actualArrival?.let { hhmm ->
+            computeMinutesAgo(hhmm, nowMillis)
         }
 
         val confidence = when {
-            lastActualTm != null && minutesAgo != null && minutesAgo < 15 -> "high"
-            lastActualTm != null && minutesAgo != null && minutesAgo < 45 -> "medium"
+            minutesAgo != null && minutesAgo < 15 -> "high"
+            minutesAgo != null && minutesAgo < 45 -> "medium"
             else -> "low"
         }
 
@@ -405,6 +414,17 @@ object MergeSources {
             confidence = confidence,
             lastReportedStop = departed.code,
         )
+    }
+
+    private fun computeMinutesAgo(hhmm: String, nowMillis: Long): Int? {
+        val parts = hhmm.split(":")
+        val h = parts.getOrNull(0)?.toIntOrNull() ?: return null
+        val m = parts.getOrNull(1)?.toIntOrNull() ?: return null
+        val stopMinutes = h * 60 + m
+        val nowMinutes = (nowMillis / 60_000).toInt() % (24 * 60)
+        var diff = nowMinutes - stopMinutes
+        if (diff < 0) diff += 24 * 60
+        return if (diff < 0) 0 else diff
     }
 
     private fun buildContributions(
