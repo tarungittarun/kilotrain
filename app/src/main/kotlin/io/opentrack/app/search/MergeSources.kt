@@ -116,6 +116,12 @@ object MergeSources {
 
         // ---- 5. source contributions ------------------------------------------------
         val contributions = buildContributions(ntesParsed, wimtParsed, railyatriParsed, erailTrainParsed, erailRouteStops, clock)
+        // All sources that were attempted (for ALL_SOURCES_FAILED message)
+        val attemptedSources = mutableListOf<String>()
+        if (ntes != null) attemptedSources.add("NTES")
+        if (wimt != null) attemptedSources.add("WIMT")
+        if (railyatri != null) attemptedSources.add("RailYatri")
+        if (erailRouteStops != null || erailTrain != null) attemptedSources.add("erail.in")
 
         // ---- 6. winner label --------------------------------------------------------
         val winner = when {
@@ -135,7 +141,7 @@ object MergeSources {
         if (winner == "no source answered") {
             diagnostics?.sourceFailure(
                 mapOf("op" to "live_status", "failure" to "ALL_SOURCES_FAILED",
-                    "detail" to (contributions.map { it.source }).joinToString(" | "))
+                    "detail" to attemptedSources.joinToString(" | "))
             )
         }
 
@@ -151,6 +157,7 @@ object MergeSources {
             fetchedAtMillis = clock.nowMillis(),
             sourceLabel = winner,
             sourceContributions = contributions,
+            attemptedSources = attemptedSources,
             responseTimeMillis = responseTime,
         )
     }
@@ -494,5 +501,6 @@ data class MergedResult(
     val fetchedAtMillis: Long,
     val sourceLabel: String,
     val sourceContributions: List<SourceContribution>,
+    val attemptedSources: List<String>,
     val responseTimeMillis: Long,
 )

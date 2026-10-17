@@ -250,7 +250,7 @@ class ResultsEngine(
                 mapOf("contributions" to merged.sourceContributions.joinToString(", ") { it.source })
         )
         return@runBlocking if (merged.sourceLabel == "no source answered") {
-            StatusOutcome.Unavailable("no source answered first. Tried: ${merged.sourceContributions.joinToString(", ") { it.source }}")
+            StatusOutcome.Unavailable("no source answered first. Tried: ${merged.attemptedSources.joinToString(", ")}")
         } else {
             StatusOutcome.Live(
                 trainNo = merged.trainNo,
