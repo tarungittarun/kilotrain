@@ -393,8 +393,8 @@ object MergeSources {
         }
 
         val confidence = when {
-            lastActual != null && minutesAgo != null && minutesAgo < 15 -> "high"
-            lastActual != null && minutesAgo != null && minutesAgo < 45 -> "medium"
+            lastActualTm != null && minutesAgo != null && minutesAgo < 15 -> "high"
+            lastActualTm != null && minutesAgo != null && minutesAgo < 45 -> "medium"
             else -> "low"
         }
 
@@ -478,6 +478,8 @@ data class MergedStop(
     val isNextStation: Boolean,
     val kmToNext: String?,
     val expectedDeparture: String?,
+    val actualArrivalTm: Long?,
+    val actualDepartureTm: Long?,
 )
 
 /** Position interpolation result. */
