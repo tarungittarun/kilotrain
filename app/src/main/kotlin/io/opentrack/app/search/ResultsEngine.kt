@@ -366,6 +366,8 @@ class ResultsEngine(
                     isDepartedHere = stop.isPassed,
                     isNextStation = false,
                     kmToNext = null,
+                    actualArrivalTm = null,
+                    actualDepartureTm = null,
                 )
             },
             null,
