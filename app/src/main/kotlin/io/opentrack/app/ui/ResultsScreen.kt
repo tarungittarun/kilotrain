@@ -252,6 +252,20 @@ private fun DetailView(
                 modifier = Modifier.padding(top = 8.dp),
             )
 
+            // Data freshness + response time - highlighted prominently (3.1: never claim freshness
+            // the source didn't publish; show the feed's own stamp + fetch elapsed)
+            val now = System.currentTimeMillis()
+            val feedAgeMs = if (status.fetchedAtMillis > 0) now - status.fetchedAtMillis else -1L
+            val ageLabel = if (feedAgeMs >= 0) {
+                val mins = feedAgeMs / 60_000
+                if (mins < 1) "just now" else "${mins} min${if (mins > 1) "s" else ""} ago"
+            } else "stamp unavailable"
+            Text(
+                text = "data as of ${ageLabel} · fetched in ${status.responseTimeMillis}ms",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+
             // Last reported: the last stop the winning source reported an actual for,
             // or the current station NTES names
             val departed = status.stops.firstOrNull { it.isDepartedHere }
@@ -413,6 +427,11 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
                 )
             }
             Row(modifier = Modifier.padding(top = 4.dp)) {
+                TextButton(onClick = {
+                    store.saveToLocal(context)?.let { uri ->
+                        android.widget.Toast.makeText(context, "saved to $uri", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }) { Text("save to local") }
                 TextButton(onClick = {
                     store.saveAndShare(context)?.let { context.startActivity(Intent.createChooser(it, "Share diagnostics file")) }
                 }) { Text("save + share file") }

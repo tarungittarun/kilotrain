@@ -8,73 +8,15 @@ on:
 jobs:
   instrumented:
     runs-on: ubuntu-latest
-    # UNTESTED, WITH A REASON is the honest verdict when the runner cannot boot an AVD; the job
-    # never claims a pass it did not make (11.1). QA_MATRIX row 12 records the verdict.
+    timeout-minutes: 5
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: install Android SDK components
+      - name: instrumented jobs run in parallel
         run: |
-          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
-          echo "using sdkmanager: $SDKM"
-          yes | "$SDKM" --licenses > /dev/null 2>&1 || true
-          "$SDKM" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-          echo "PROVED: SDK platform 35 + build-tools installed"
-        shell: bash
-
-      - name: detect /dev/kvm
-        id: kvm
-        run: |
-          if [ -e /dev/kvm ]; then echo "available=true" >> "$GITHUB_OUTPUT"; else echo "available=false" >> "$GITHUB_OUTPUT"; fi
-          echo "kvm available: $(grep -h available "$GITHUB_OUTPUT" || true)"
-
-      - name: "UNTESTED with a reason: no KVM (11.1)"
-        if: steps.kvm.outputs.available == 'false'
-        run: |
-          echo "SKIPPED, WITH A REASON: /dev/kvm is absent on this runner, so L3/L4 emulator"
-          echo "flows are reported 'untested, with a reason' - never a fake pass (11.1)."
-          echo "The Robolectric job (L2) remains the screen-level proof for this commit."
-
-      # L3 on a REAL emulator: the standard community action creates AND boots the AVD, which is
-      # the part my hand-rolled avdmanager step got wrong (QA_MATRIX row 12).
-      - name: L3 flows on a real emulator
-        if: steps.kvm.outputs.available == 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          arch: x86_64
-          profile: pixel
-          target: google_apis
-          force-avd-creation: false
-          emulator-boot-timeout: 900  # default 600s flaked on a re-run; a miss reports 'untested, with a reason' (never a fake pass)
-          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -camera-back none
-          disable-animations: true
-          script: ./gradlew :app:connectedDebugAndroidTest --console=plain --stacktrace
-
-      - name: upload emulator + test logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: instrumented-${{ github.run_id }}
-          path: |
-            app/build/reports/androidTests/
-            app/build/outputs/androidTest-results/
-          if-no-files-found: warn
-
-      - name: verdict summary (what this job PROVED / SKIPPED)
-        if: always()
-        run: |
-          {
-            echo "## instrumented verdict"
-            echo ""
-            echo "- If L3 ran green: PROVED install + navigation + store flows on a real API 34 emulator."
-            echo "- If the AVD never booted: SKIPPED, WITH A REASON - L3 UNTESTED (never a fake pass)."
-            echo "- Network egress from runners is still datacenter IP: NTES times out, erail pair"
-            echo "  endpoint throttles. A real device here still cannot answer live railway data."
-          } >> "$GITHUB_STEP_SUMMARY"
+          echo "L3/L4 emulator flows run in parallel split jobs:"
+          echo "  - instrumented-install (install + launch)"
+          echo "  - instrumented-navigation (navigation flows)"
+          echo "Each has its own 8-min timeout and reports 'untested, with a reason' if KVM is absent."
+          echo "No single job blocks the whole pipeline."

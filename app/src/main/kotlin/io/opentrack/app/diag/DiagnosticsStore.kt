@@ -68,14 +68,20 @@ class DiagnosticsStore(
      * Saves the log into Downloads and returns a share intent for THAT file, so it can be attached
      * in a chat or opened from a file manager (a content URI from another app is often refused).
      */
-    fun saveAndShare(context: Context): Intent? {
-        val uri = DiagnosticsSaver.saveToDownloads(context, logFile) ?: run {
+    /** Saves the log into Downloads and returns the target URI. No share sheet - just saves. */
+    fun saveToLocal(context: Context): String? {
+        return DiagnosticsSaver.saveToDownloads(context, logFile) ?: run {
             diagnostics.sourceFailure(mapOf("op" to "export", "failure" to "SAVE_FAILED",
                 "detail" to "the downloads folder refused the copy"))
-            return null
+            null
+        }.also { uri ->
+            diagnostics.export(mapOf("mode" to "saved_file", "bytes" to logFile.length().toString(),
+                "target" to uri.toString()))
         }
-        diagnostics.export(mapOf("mode" to "saved_file", "bytes" to logFile.length().toString(),
-            "target" to uri.toString()))
+    }
+
+    fun saveAndShare(context: Context): Intent? {
+        val uri = saveToLocal(context) ?: return null
         return Intent(Intent.ACTION_SEND).apply {
             type = "application/x-ndjson"
             putExtra(Intent.EXTRA_STREAM, uri)

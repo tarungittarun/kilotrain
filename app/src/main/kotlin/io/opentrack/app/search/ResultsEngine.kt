@@ -408,7 +408,9 @@ class ResultsEngine(
             mapOf("train_no" to train, "source" to "live_status_ladder") +
                 mapOf("rungs" to rungs.joinToString(", ") { it.name })
         )
+        val raceStarted = System.currentTimeMillis()
         val outcome = aggregator.race(rungs)
+        val responseTimeMillis = System.currentTimeMillis() - raceStarted
         val winner = outcome.value
         if (winner != null) {
             diagnostics?.numberSearch(
@@ -419,6 +421,7 @@ class ResultsEngine(
                 winnerLive.copy(
                     attempts = if (outcome.attempts.isEmpty()) listOf("answered first by ${outcome.winner}")
                     else outcome.attempts,
+                    responseTimeMillis = responseTimeMillis,
                 )
             } else winner
         }
@@ -616,6 +619,7 @@ class ResultsEngine(
             val fetchedAtMillis: Long,
             val sourceLabel: String,
             val attempts: List<String>,
+            val responseTimeMillis: Long = 0,
         ) : StatusOutcome
         data class Unavailable(val reason: String) : StatusOutcome
     }

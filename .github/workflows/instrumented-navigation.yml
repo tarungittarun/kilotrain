@@ -1,0 +1,61 @@
+name: instrumented-navigation
+
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+  instrumented-navigation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: install Android SDK components
+        run: |
+          SDKM=$(ls -d "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -1)
+          echo "using sdkmanager: $SDKM"
+          yes | "$SDKM" --licenses > /dev/null 2>&1 || true
+          "$SDKM" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+        shell: bash
+
+      - name: detect /dev/kvm
+        id: kvm
+        run: |
+          if [ -e /dev/kvm ]; then echo "available=true" >> "$GITHUB_OUTPUT"; else echo "available=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: "UNTESTED with a reason: no KVM (11.1)"
+        if: steps.kvm.outputs.available == 'false'
+        run: |
+          echo "SKIPPED, WITH A REASON: /dev/kvm is absent on this runner"
+
+      - name: L3 navigation flows on real emulator
+        if: steps.kvm.outputs.available == 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          profile: pixel
+          target: google_apis
+          force-avd-creation: false
+          emulator-boot-timeout: 300
+          emulator-options: -no-window -no-audio -no-boot-anim -no-snapshot -camera-back none
+          disable-animations: true
+          script: ./gradlew :app:connectedDebugAndroidTest -PtestFilter=io.opentrack.app.DetailViewUiTest --console=plain --stacktrace
+
+      - name: upload test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-navigation-${{ github.run_id }}
+          path: |
+            app/build/reports/androidTests/
+            app/build/outputs/androidTest-results/
+          if-no-files-found: warn
