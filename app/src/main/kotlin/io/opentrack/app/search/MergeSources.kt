@@ -134,20 +134,21 @@ object MergeSources {
             ?: emptyList()
 
         return ordered.map { (code, name) ->
+            val c = code ?: "\u2014"
             MergedStop(
-                code = code ?: "\u2014",
+                code = c,
                 name = name ?: "",
-                scheduledArrival = pickSchedule(ntes, wimt, railyatri, erail, code, "arrival"),
-                scheduledDeparture = pickSchedule(ntes, wimt, railyatri, erail, code, "departure"),
-                actualArrival = pickActual(ntes, wimt, railyatri, code, "arrival"),
-                actualDeparture = pickActual(ntes, wimt, railyatri, code, "departure"),
-                arrivalDelayMinutes = pickDelay(ntes, wimt, railyatri, code, "arrival"),
-                departureDelayMinutes = pickDelay(ntes, wimt, railyatri, code, "departure"),
+                scheduledArrival = pickSchedule(ntes, wimt, railyatri, erail, c, "arrival"),
+                scheduledDeparture = pickSchedule(ntes, wimt, railyatri, erail, c, "departure"),
+                actualArrival = pickActual(ntes, wimt, railyatri, c, "arrival"),
+                actualDeparture = pickActual(ntes, wimt, railyatri, c, "departure"),
+                arrivalDelayMinutes = pickDelay(ntes, wimt, railyatri, c, "arrival"),
+                departureDelayMinutes = pickDelay(ntes, wimt, railyatri, c, "departure"),
                 positionInterpolated = false,
-                confidence = pickConfidence(ntes, wimt, railyatri, code),
-                sourceProvenance = pickSource(ntes, wimt, railyatri, code),
-                distanceKm = pickDistance(ntes, wimt, railyatri, code),
-                haltMinutes = pickHalt(ntes, wimt, railyatri, code),
+                confidence = pickConfidence(ntes, wimt, railyatri, c),
+                sourceProvenance = pickSource(ntes, wimt, railyatri, c),
+                distanceKm = pickDistance(ntes, wimt, railyatri, c),
+                haltMinutes = pickHalt(ntes, wimt, railyatri, c),
                 isCurrentStation = false,
                 isDepartedHere = false,
                 isNextStation = false,

@@ -292,34 +292,7 @@ class ResultsEngine(
             },
             sourceContributions = merged.sourceContributions,
         )
-                        }
-                    }
-                } else null
-                        }
-                    }
-                } else null
-                        }
-                        is io.opentrack.app.source.TrainLookup.Failed -> null
-                    }
-                }
-                    }
-                }
-                    }
-                }
-                    }
-                }
-                    }
-                }
-        }
-        diagnostics?.sourceFailure(
-            mapOf("op" to "live_status", "failure" to "ALL_SOURCES_FAILED",
-                "detail" to (outcome.attempts + rungs.map { it.name }).joinToString(" | "))
-        )
-        val tried = rungs.joinToString(", ") { it.name } +
-            if (outcome.attempts.isEmpty()) "" else " | details: " + outcome.attempts.joinToString("; ")
-        StatusOutcome.Unavailable("no source answered first. Tried: $tried")
     }
-
     private fun statusFromNtes(
         status: NtesRunningStatus,
         train: String,
