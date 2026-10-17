@@ -249,50 +249,54 @@ class ResultsEngine(
             mapOf("train_no" to trainNumber, "source" to "live_status_merged") +
                 mapOf("contributions" to merged.sourceContributions.joinToString(", ") { it.source })
         )
-        return@runBlocking StatusOutcome.Live(
-            trainNo = merged.trainNo,
-            currentStatus = merged.currentStatus,
-            currentStationName = merged.currentStationName,
-            stops = merged.stops.map { s ->
-                StopStatus(
-                    code = s.code,
-                    name = s.name,
-                    scheduledArrival = s.scheduledArrival,
-                    scheduledDeparture = s.scheduledDeparture,
-                    actualArrival = s.actualArrival,
-                    actualDeparture = s.actualDeparture,
-                    arrivalDelayMinutes = s.arrivalDelayMinutes,
-                    departureDelayMinutes = s.departureDelayMinutes,
-                    isCurrentStation = s.isCurrentStation,
-                    isTrainHere = false,
-                    expectedDeparture = s.expectedDeparture,
-                    distanceKm = s.distanceKm,
-                    haltMinutes = s.haltMinutes,
-                    isDepartedHere = s.isDepartedHere,
-                    isNextStation = s.isNextStation,
-                    kmToNext = s.kmToNext,
-                    positionInterpolated = s.positionInterpolated,
-                    confidence = s.confidence,
-                    sourceProvenance = s.sourceProvenance,
-                )
-            },
-            viaCache = merged.viaCache,
-            fetchedAtMillis = merged.fetchedAtMillis,
-            sourceLabel = merged.sourceLabel,
-            attempts = merged.sourceContributions.map { it.source },
-            responseTimeMillis = merged.responseTimeMillis,
-            positionInfo = merged.positionInfo?.let { pi ->
-                PositionInfo(
-                    interpolated = pi.interpolated,
-                    betweenStations = pi.betweenStations,
-                    kmFromPrevious = pi.kmFromPrevious,
-                    minutesAgo = pi.minutesAgo,
-                    confidence = pi.confidence,
-                    lastReportedStop = pi.lastReportedStop,
-                )
-            },
-            sourceContributions = merged.sourceContributions,
-        )
+        return@runBlocking if (merged.sourceLabel == "no source answered") {
+            StatusOutcome.Unavailable("no source answered first. Tried: ${merged.sourceContributions.joinToString(", ") { it.source }}")
+        } else {
+            StatusOutcome.Live(
+                trainNo = merged.trainNo,
+                currentStatus = merged.currentStatus,
+                currentStationName = merged.currentStationName,
+                stops = merged.stops.map { s ->
+                    StopStatus(
+                        code = s.code,
+                        name = s.name,
+                        scheduledArrival = s.scheduledArrival,
+                        scheduledDeparture = s.scheduledDeparture,
+                        actualArrival = s.actualArrival,
+                        actualDeparture = s.actualDeparture,
+                        arrivalDelayMinutes = s.arrivalDelayMinutes,
+                        departureDelayMinutes = s.departureDelayMinutes,
+                        isCurrentStation = s.isCurrentStation,
+                        isTrainHere = false,
+                        expectedDeparture = s.expectedDeparture,
+                        distanceKm = s.distanceKm,
+                        haltMinutes = s.haltMinutes,
+                        isDepartedHere = s.isDepartedHere,
+                        isNextStation = s.isNextStation,
+                        kmToNext = s.kmToNext,
+                        positionInterpolated = s.positionInterpolated,
+                        confidence = s.confidence,
+                        sourceProvenance = s.sourceProvenance,
+                    )
+                },
+                viaCache = merged.viaCache,
+                fetchedAtMillis = merged.fetchedAtMillis,
+                sourceLabel = merged.sourceLabel,
+                attempts = merged.sourceContributions.map { it.source },
+                responseTimeMillis = merged.responseTimeMillis,
+                positionInfo = merged.positionInfo?.let { pi ->
+                    PositionInfo(
+                        interpolated = pi.interpolated,
+                        betweenStations = pi.betweenStations,
+                        kmFromPrevious = pi.kmFromPrevious,
+                        minutesAgo = pi.minutesAgo,
+                        confidence = pi.confidence,
+                        lastReportedStop = pi.lastReportedStop,
+                    )
+                },
+                sourceContributions = merged.sourceContributions,
+            )
+        }
     }
     private fun statusFromNtes(
         status: NtesRunningStatus,
