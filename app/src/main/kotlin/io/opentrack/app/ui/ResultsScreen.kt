@@ -251,7 +251,7 @@ private fun DetailView(
                 Column(modifier = Modifier.padding(12.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = StateCopy.sourceBadge(status.sourceLabel, provenanceLabel(ageLabel)),
+                            text = StateCopy.sourceBadge(status.sourceLabel, provenanceLabel(status.sourceLabel, ageLabel)),
                             style = MaterialTheme.typography.labelLarge,
                             modifier = Modifier.weight(1f),
                         )
@@ -300,9 +300,9 @@ private fun DetailView(
                                 text = if (position.minutesAgo != null) "${position.minutesAgo} min ago" else "—",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = when (position.confidence) {
-                                    "high" -> MaterialTheme.colorScheme.primary
-                                    "medium" -> MaterialTheme.colorScheme.secondary
-                                    else -> MaterialTheme.colorScheme.onSurfaceVariant,
+                                    "high" -> MaterialTheme.colorScheme.primary,
+                                    "medium" -> MaterialTheme.colorScheme.secondary,
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
                                 },
                             )
                         }
@@ -349,7 +349,7 @@ private fun DetailView(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // station code + name
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = "${stop.code} ${stop.name}",
                                 style = MaterialTheme.typography.bodyMedium,
@@ -363,7 +363,7 @@ private fun DetailView(
                             Text(
                                 text = timing + (stop.arrivalDelayMinutes?.let { " · ${it} min late" } ?: ""),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = if (stop.arrivalDelayMinutes != null && stop.arrivalDelayMinutes! > 0)
+                                color = if ((stop.arrivalDelayMinutes ?: 0) > 0)
                                     MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             Text(
