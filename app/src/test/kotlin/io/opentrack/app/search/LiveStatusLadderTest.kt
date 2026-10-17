@@ -89,7 +89,7 @@ class LiveStatusLadderTest {
     fun whenNtesAnswersTheLadderShowsPerStopActuals() {
         val engine = ResultsEngine(
             asset, store, clock, null, null, routeSource(), ntesSource(ntesAnswer),
-            null, null, null, diagnostics,
+            null, null, null, null, diagnostics,
         )
         val outcome = engine.liveStatus("16228")
         assertTrue("GOT: $outcome", outcome is ResultsEngine.StatusOutcome.Live)
@@ -105,7 +105,7 @@ class LiveStatusLadderTest {
     fun whenNtesFailsTheScheduleRungAnswersAndSaysSo() {
         val engine = ResultsEngine(
             asset, store, clock, null, null, routeSource(), ntesSource("~~~~~nope"),
-            null, null, null, diagnostics,
+            null, null, null, null, diagnostics,
         )
         val probe = routeSource().fetch("16228")
         println("PROBE route rung -> $probe")
@@ -129,7 +129,7 @@ class LiveStatusLadderTest {
                 ErailTrainSource({ io.opentrack.app.source.TransportReply(200, trainCapture) }),
             ),
             ntesSource("", 500),
-            null, null, null, diagnostics,
+            null, null, null, null, diagnostics,
         )
         val outcome = engine.liveStatus("16228")
         assertTrue(outcome is ResultsEngine.StatusOutcome.Unavailable)
