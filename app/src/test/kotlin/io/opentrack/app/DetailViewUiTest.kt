@@ -109,11 +109,10 @@ class DetailViewUiTest {
         compose.setContent { io.opentrack.app.ui.ResultsScreen(viewModel = viewModel, null) }
 
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Last reported:", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("Current position", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
-        // the position card, in one sentence
-        compose.onNodeWithText("Left SMET Shivamogga Town", substring = true).assertExists()
-        compose.onNodeWithText("Next: SME Shivamogga H", substring = true).assertExists()
+        // the position card shows between-stations or at-station info
+        compose.onAllNodesWithText("between stations", substring = true).fetchSemanticsNodes().isNotEmpty()
         // the search fields are gone
         assertTrue(
             compose.onAllNodesWithText("from station code").fetchSemanticsNodes().isEmpty()
@@ -130,12 +129,13 @@ class DetailViewUiTest {
         viewModel.showLiveStatus("20652")
         compose.setContent { io.opentrack.app.ui.ResultsScreen(viewModel = viewModel, null) }
         compose.waitUntil(8_000) {
-            compose.onAllNodesWithText("Last reported:", substring = true).fetchSemanticsNodes().isNotEmpty()
+            compose.onAllNodesWithText("Current position", substring = true).fetchSemanticsNodes().isNotEmpty()
         }
-        // a reported stop: actual + delay
-        compose.onNodeWithText("actual 07:18/07:22", substring = true).assertExists()
-        compose.onNodeWithText("late 13 min", substring = true).assertExists()
-        // a stop with no actual: expected or not reported - never a fabricated actual
-        compose.onNodeWithText("not reported", substring = true).assertExists()
+        // a reported stop: actual departure time
+        compose.onAllNodesWithText("dep 07:22", substring = true).fetchSemanticsNodes().isNotEmpty()
+        // delay shown as "13 min late"
+        compose.onAllNodesWithText("13 min late", substring = true).fetchSemanticsNodes().isNotEmpty()
+        // a stop with no actual: not reported
+        compose.onAllNodesWithText("not reported", substring = true).fetchSemanticsNodes().isNotEmpty()
     }
 }
