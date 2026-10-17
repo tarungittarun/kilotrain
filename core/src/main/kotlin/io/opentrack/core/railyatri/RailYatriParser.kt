@@ -36,7 +36,7 @@ object RailYatriParser {
         val currentStationName = json.optString("currentStation").ifBlank { json.optString("source_stn_name") }.ifBlank { json.optString("current") }.ifBlank { null }
         val lastUpdate = json.optString("lastUpdate").ifBlank { json.optString("updatedAt") }.ifBlank { json.optString("notification_date") }.ifBlank { null }
         val nextStationName = json.optString("nextStation").ifBlank { json.optString("next_station_name") }.ifBlank { null }
-        val platform = json.optString("platform").ifBlank { json.optString("platform_number")?.toString() }.ifBlank { null }
+        val platform = json.optString("platform").ifBlank { json.optString("platform_number") }.ifBlank { null }
         val position = json.optString("position").ifBlank { json.optString("location") }.ifBlank { null }
         return RailYatriRunningStatus(
             trainNo = trainNo,
