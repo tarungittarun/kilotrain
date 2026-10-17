@@ -388,8 +388,7 @@ object MergeSources {
 
         val lastActualTm = departed.actualDepartureTm ?: departed.actualArrivalTm
         val minutesAgo = lastActualTm?.let { tm ->
-            val diff = (nowMillis - tm) / 60_000
-            if (diff < 0) 0 else diff
+            ((nowMillis - tm) / 60_000).toInt()
         }
 
         val confidence = when {

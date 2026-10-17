@@ -327,6 +327,8 @@ class ResultsEngine(
                     isDepartedHere = false,
                     isNextStation = false,
                     kmToNext = null,
+                    actualArrivalTm = null,
+                    actualDepartureTm = null,
                 )
             },
             status.delayDeparture,
@@ -401,6 +403,8 @@ class ResultsEngine(
                     isDepartedHere = false,
                     isNextStation = false,
                     kmToNext = null,
+                    actualArrivalTm = null,
+                    actualDepartureTm = null,
                 )
             },
             null,
@@ -438,6 +442,8 @@ class ResultsEngine(
                     isDepartedHere = false,
                     isNextStation = false,
                     kmToNext = null,
+                    actualArrivalTm = null,
+                    actualDepartureTm = null,
                 )
             },
             null,
@@ -475,6 +481,8 @@ class ResultsEngine(
                     isDepartedHere = false,
                     isNextStation = false,
                     kmToNext = null,
+                    actualArrivalTm = null,
+                    actualDepartureTm = null,
                 )
             },
             null,
