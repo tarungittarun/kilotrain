@@ -9,7 +9,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "io.opentrack.livetrain.debug"
+        applicationId = "io.opentrack.trainlive.debug"
         minSdk = 24
         targetSdk = 35
         versionCode = versionCodeFrom("2.2.0")
