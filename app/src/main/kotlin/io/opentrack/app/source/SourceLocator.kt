@@ -24,4 +24,6 @@ object SourceLocator {
     var railYatriStatusSource: RailYatriRunningStatusSource? = null
     @Volatile
     var ixigoStatusSource: IxigoRunningStatusSource? = null
+    @Volatile
+    var wimtStatusSource: WIMTRunningStatusSource? = null
 }

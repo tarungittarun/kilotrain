@@ -296,6 +296,7 @@ private fun DetailView(
                 sourceButton("Ixigo", "ixigo", ui.preferredSource, viewModel, ui.selectedTrainNumber)
                 sourceButton("ConfirmTkt", "confirmtkt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
                 sourceButton("erail", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                sourceButton("WIMT", "wimt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
             }
         }
         ui.note?.let { note ->
@@ -333,8 +334,9 @@ private fun DetailView(
                         Row {
                             sourceButton("refresh", null, ui.preferredSource, viewModel, ui.selectedTrainNumber, isRefresh = true)
                             sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                            sourceButton("Schedule", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                            sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                                sourceButton("Schedule", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                                sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                                sourceButton("WIMT", "wimt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
                         }
                     }
                 }

@@ -11,6 +11,7 @@ import io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult
 import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RailYatriRunningStatusSource
 import io.opentrack.app.source.RouteLookupResult
+import io.opentrack.app.source.WIMTRunningStatusSource
 import io.opentrack.core.diag.Diagnostics
 import io.opentrack.core.ntes.NtesRunningStatus
 import kotlinx.coroutines.runBlocking
@@ -50,6 +51,7 @@ class ResultsEngine(
     private val railYatriStatusSource: RailYatriRunningStatusSource? = null,
     private val ixigoStatusSource: IxigoRunningStatusSource? = null,
     private val confirmTktStatusSource: ConfirmTktRunningStatusSource? = null,
+    private val wimtStatusSource: WIMTRunningStatusSource? = null,
     private val diagnostics: Diagnostics? = null,
 ) {
     data class Outcome(
@@ -380,6 +382,15 @@ class ResultsEngine(
                     }
                 }
             },
+            wimtStatusSource?.let {
+                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("WIMT (whereismytrain)") {
+                    when (val r = it.fetch(train, null, null, null)) {
+                        is io.opentrack.app.source.WIMTRunningStatusSource.Result.Live ->
+                            statusFromWIMT(r.status, train, "WIMT live running status")
+                        is io.opentrack.app.source.WIMTRunningStatusSource.Result.Failed -> null
+                    }
+                }
+            },
             io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("offline asset (labelled)") {
                 val hit = asset.trains.firstOrNull { it.number == train }
                 if (hit != null) StatusOutcome.Live(
@@ -546,6 +557,43 @@ class ResultsEngine(
 
     private fun statusFromConfirmTkt(
         status: io.opentrack.core.confirmtkt.ConfirmTktRunningStatus,
+        train: String,
+        label: String,
+    ): StatusOutcome.Live = StatusOutcome.Live(
+        trainNo = status.trainNo ?: train,
+        currentStatus = status.currentStatus ?: "no position published right now",
+        currentStationName = status.currentStationName,
+        stops = withPositionAndExpectations(
+            status.stops.map { stop ->
+                StopStatus(
+                    code = stop.stationCode ?: "—",
+                    name = stop.stationName ?: "",
+                    scheduledArrival = stop.scheduledArrival,
+                    scheduledDeparture = stop.scheduledDeparture,
+                    actualArrival = stop.actualArrival,
+                    actualDeparture = stop.actualDeparture,
+                    arrivalDelayMinutes = stop.arrivalDelayMinutes,
+                    departureDelayMinutes = stop.departureDelayMinutes,
+                    isCurrentStation = stop.isCurrentStation,
+                    isTrainHere = false,
+                    expectedDeparture = null,
+                    distanceKm = stop.distanceKm,
+                    haltMinutes = stop.haltMinutes,
+                    isDepartedHere = false,
+                    isNextStation = false,
+                    kmToNext = null,
+                )
+            },
+            null,
+        ),
+        viaCache = status.viaCache,
+        fetchedAtMillis = status.fetchedAtMillis,
+        sourceLabel = label,
+        attempts = emptyList(),
+    )
+
+    private fun statusFromWIMT(
+        status: io.opentrack.core.wimt.WIMTRunningStatus,
         train: String,
         label: String,
     ): StatusOutcome.Live = StatusOutcome.Live(

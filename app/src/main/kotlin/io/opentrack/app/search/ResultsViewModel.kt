@@ -12,6 +12,7 @@ import io.opentrack.app.source.IxigoRunningStatusSource
 import io.opentrack.app.source.NtesRunningStatusSource
 import io.opentrack.app.source.RailYatriRunningStatusSource
 import io.opentrack.app.source.SourceLocator
+import io.opentrack.app.source.WIMTRunningStatusSource
 import io.opentrack.app.store.OpenTrackStore
 import io.opentrack.core.contract.Clock
 import io.opentrack.core.diag.Diagnostics
@@ -30,6 +31,7 @@ class ResultsViewModel(
     private val erailRouteSource: ErailRouteSource? = null,
     private val ntesStatusSource: NtesRunningStatusSource? = null,
     private val diagnostics: Diagnostics? = null,
+    private val wimtStatusSource: WIMTRunningStatusSource? = null,
 ) : ViewModel() {
 
     data class UiState(
@@ -137,6 +139,8 @@ class ResultsViewModel(
                         ?: IxigoRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }, diagnostics = diagnostics),
                     confirmTktStatusSource = SourceLocator.confirmTktStatusSource
                         ?: ConfirmTktRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }, diagnostics = diagnostics),
+                    wimtStatusSource = SourceLocator.wimtStatusSource
+                        ?: WIMTRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }, diagnostics = diagnostics),
                     diagnostics = diagnostics,
                 ).liveStatus(number, _state.value.preferredSource)
             } ?: return@launch

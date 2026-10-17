@@ -6,6 +6,8 @@ import io.opentrack.core.ntes.JsonValue
 object RailYatriParser {
     fun parse(body: String, nowMillis: Long, viaCache: Boolean = false): RailYatriRunningStatus? {
         val json = JsonReader.parse(body.trim().removePrefix("﻿")) as? JsonValue.JsonObject ?: return null
+        // livestatus.railyatri.in may return train-level info without a stops array.
+        // Parse what we have: current station, next station, platform, status.
         val stops = mutableListOf<RailYatriStop>()
         (json.getArray("stops") ?: json.getArray("route") ?: json.getArray("stations"))?.let { arr ->
             arr.items.forEach { raw ->
@@ -29,15 +31,21 @@ object RailYatriParser {
                 )
             }
         }
-        if (stops.isEmpty()) return null
+        val trainNo = json.optString("trainNumber").ifBlank { json.optString("trainNo") }.ifBlank { null }
+        val currentStatus = json.optString("status").ifBlank { json.optString("title") }.ifBlank { json.optString("new_message") }.ifBlank { null }
+        val currentStationName = json.optString("currentStation").ifBlank { json.optString("source_stn_name") }.ifBlank { json.optString("current") }.ifBlank { null }
+        val lastUpdate = json.optString("lastUpdate").ifBlank { json.optString("updatedAt") }.ifBlank { json.optString("notification_date") }.ifBlank { null }
+        val nextStationName = json.optString("nextStation").ifBlank { json.optString("next_station_name") }.ifBlank { null }
+        val platform = json.optString("platform").ifBlank { json.optString("platform_number")?.toString() }.ifBlank { null }
+        val position = json.optString("position").ifBlank { json.optString("location") }.ifBlank { null }
         return RailYatriRunningStatus(
-            trainNo = json.optString("trainNo").ifBlank { json.optString("trainNumber") }.ifBlank { null },
-            currentStatus = json.optString("status").ifBlank { null },
-            currentStationName = json.optString("currentStation").ifBlank { json.optString("current") }.ifBlank { null },
-            lastUpdate = json.optString("lastUpdate").ifBlank { json.optString("updatedAt") }.ifBlank { json.optString("lastUpdatedTime") }.ifBlank { null },
-            nextStationName = json.optString("nextStation").ifBlank { null },
-            platform = json.optString("platform").ifBlank { null },
-            position = json.optString("position").ifBlank { json.optString("location") }.ifBlank { null },
+            trainNo = trainNo,
+            currentStatus = currentStatus,
+            currentStationName = currentStationName,
+            lastUpdate = lastUpdate,
+            nextStationName = nextStationName,
+            platform = platform,
+            position = position,
             stops = stops,
             fetchedAtMillis = nowMillis,
             viaCache = false,
