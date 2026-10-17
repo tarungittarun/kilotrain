@@ -2,12 +2,18 @@ package io.opentrack.app.search
 
 import io.opentrack.app.source.ErailTrainSource
 import io.opentrack.app.source.NtesRunningStatusSource
+import io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult
 import io.opentrack.app.source.RailYatriRunningStatusSource
+import io.opentrack.app.source.RailYatriRunningStatusSource.Result as RailYatriResult
+import io.opentrack.app.source.TrainLookup
 import io.opentrack.app.source.WIMTRunningStatusSource
+import io.opentrack.app.source.WIMTRunningStatusSource.Result as WIMTResult
 import io.opentrack.core.contract.SourceFailure
 import io.opentrack.core.contract.Clock
+import io.opentrack.core.diag.Diagnostics
 import io.opentrack.core.ntes.NtesRunningStatus
 import io.opentrack.core.ntes.NtesStopStatus
+import io.opentrack.core.parse.ErailTrainPayload
 import io.opentrack.core.wimt.WIMTRunningStatus
 import io.opentrack.core.wimt.WIMTStop
 import io.opentrack.core.railyatri.RailYatriRunningStatus
@@ -19,7 +25,7 @@ import java.util.*
  *
  * Fetches NTES, WIMT, RailYatri and erail in parallel, then merges per-stop data:
  *   * Actual times: NTES > WIMT > RailYatri (each source's actuals override gaps)
- *   * Schedule: erail.in > NTES > WIMT > RailYatri (erail has the cleanest timetable)
+ *   * Schedule: NTES > WIMT > RailYatri > erail (erail only has identity, not per-stop schedule)
  *   * Position: last reported stop from any source; interpolated to the next stop
  *   * Freshness: tracked per source; the merged view shows how old the youngest actual is
  *
@@ -49,44 +55,36 @@ object MergeSources {
             try {
                 it.fetch(trainNumber, io.opentrack.app.source.NtesRunningStatusSource.Form.PLAIN_JSON)
             } catch (e: Exception) {
-                io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult.Failed(
-                    SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown"
-                )
+                NtesStatusResult.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
         val wimtResult = wimt?.let {
             try {
                 it.fetch(trainNumber, fromStation, toStation, null)
             } catch (e: Exception) {
-                io.opentrack.app.source.WIMTRunningStatusSource.Result.Failed(
-                    SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown"
-                )
+                WIMTResult.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
         val railyatriResult = railyatri?.let {
             try {
                 it.fetch(trainNumber)
             } catch (e: Exception) {
-                io.opentrack.app.source.RailYatriRunningStatusSource.Result.Failed(
-                    SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown"
-                )
+                RailYatriResult.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
         val erailResult = erailTrain?.let {
             try {
                 it.fetch(trainNumber)
             } catch (e: Exception) {
-                io.opentrack.app.source.TrainLookup.Failed(
-                    SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown"
-                )
+                TrainLookup.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
 
         // ---- 2. parse each source ---------------------------------------------------
-        val ntesParsed = if (ntesResult is io.opentrack.app.source.NtesRunningStatusSource.NtesStatusResult.Live) ntesResult.status else null
-        val wimtParsed = if (wimtResult is io.opentrack.app.source.WIMTRunningStatusSource.Result.Live) wimtResult.status else null
-        val railyatriParsed = if (railyatriResult is io.opentrack.app.source.RailYatriRunningStatusSource.Result.Live) railyatriResult.status else null
-        val erailParsed = if (erailResult is io.opentrack.app.source.TrainLookup.Live) erailResult.payload else null
+        val ntesParsed = if (ntesResult is NtesStatusResult.Live) ntesResult.status else null
+        val wimtParsed = if (wimtResult is WIMTResult.Live) wimtResult.status else null
+        val railyatriParsed = if (railyatriResult is RailYatriResult.Live) railyatriResult.status else null
+        val erailParsed = if (erailResult is TrainLookup.Live) erailResult.payload else null
 
         // ---- 3. build per-stop merged list ------------------------------------------
         val stops = buildMergedStops(ntesParsed, wimtParsed, railyatriParsed, erailParsed)
@@ -127,9 +125,9 @@ object MergeSources {
         ntes: NtesRunningStatus?,
         wimt: WIMTRunningStatus?,
         railyatri: RailYatriRunningStatus?,
-        erail: io.opentrack.core.parse.ErailTrainPayload?,
+        erail: ErailTrainPayload?,
     ): List<MergedStop> {
-        // collect all station codes in order from the most complete schedule source
+        // collect all station codes in order from NTES (most complete per-stop data)
         val ordered = ntes?.stops?.map { it.stationCode to it.stationName }
             ?: wimt?.stops?.map { it.stationCode to it.stationName }
             ?: railyatri?.stops?.map { it.stationCode to it.stationName }
@@ -161,27 +159,29 @@ object MergeSources {
 
     private fun pickSchedule(
         ntes: NtesRunningStatus?, wimt: WIMTRunningStatus?, railyatri: RailYatriRunningStatus?,
-        erail: io.opentrack.core.parse.ErailTrainPayload?, code: String, field: String,
+        erail: ErailTrainPayload?, code: String, field: String,
     ): String? {
         // NTES first
         val n = ntes?.stops?.firstOrNull { it.stationCode == code }
         when (field) {
             "arrival" -> if (n?.scheduledArrival != null) return n.scheduledArrival
             "departure" -> if (n?.scheduledDeparture != null) return n.scheduledDeparture
+            else -> return null
         }
         // then WIMT
         val w = wimt?.stops?.firstOrNull { it.stationCode == code }
         when (field) {
             "arrival" -> if (w?.scheduledArrival != null) return w.scheduledArrival
             "departure" -> if (w?.scheduledDeparture != null) return w.scheduledDeparture
+            else -> return null
         }
         // then RailYatri
         val r = railyatri?.stops?.firstOrNull { it.stationCode == code }
-        when (field) {
-            "arrival" -> return r?.scheduledArrival
-            "departure" -> return r?.scheduledDeparture
+        return when (field) {
+            "arrival" -> r?.scheduledArrival
+            "departure" -> r?.scheduledDeparture
+            else -> null
         }
-        return null
     }
 
     private fun pickActual(
@@ -197,6 +197,7 @@ object MergeSources {
             "departure" -> {
                 if (n?.actualDeparture != null) return n.actualDeparture
             }
+            else -> return null
         }
         // then WIMT
         val w = wimt?.stops?.firstOrNull { it.stationCode == code }
@@ -207,6 +208,7 @@ object MergeSources {
             "departure" -> {
                 if (w?.actualDeparture != null) return w.actualDeparture
             }
+            else -> return null
         }
         // then RailYatri
         val r = railyatri?.stops?.firstOrNull { it.stationCode == code }
@@ -229,6 +231,7 @@ object MergeSources {
             "departure" -> {
                 if (n?.departureDelayMinutes != null) return n.departureDelayMinutes
             }
+            else -> return null
         }
         val w = wimt?.stops?.firstOrNull { it.stationCode == code }
         when (field) {
@@ -238,6 +241,7 @@ object MergeSources {
             "departure" -> {
                 if (w?.departureDelayMinutes != null) return w.departureDelayMinutes
             }
+            else -> return null
         }
         val r = railyatri?.stops?.firstOrNull { it.stationCode == code }
         return when (field) {
@@ -348,7 +352,7 @@ object MergeSources {
 
     private fun buildContributions(
         ntes: NtesRunningStatus?, wimt: WIMTRunningStatus?,
-        railyatri: RailYatriRunningStatus?, erail: io.opentrack.core.parse.ErailTrainPayload?,
+        railyatri: RailYatriRunningStatus?, erail: ErailTrainPayload?,
         clock: Clock,
     ): List<SourceContribution> {
         val contributions = mutableListOf<SourceContribution>()
