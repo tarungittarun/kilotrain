@@ -127,6 +127,18 @@ object MergeSources {
             else -> "no source answered"
         }
 
+        diagnostics?.numberSearch(
+            mapOf("train_no" to trainNumber, "source" to "live_status_winner") +
+                mapOf("contributions" to contributions.joinToString(", ") { it.source })
+        )
+
+        if (winner == "no source answered") {
+            diagnostics?.sourceFailure(
+                mapOf("op" to "live_status", "failure" to "ALL_SOURCES_FAILED",
+                    "detail" to (contributions.map { it.source }).joinToString(" | "))
+            )
+        }
+
         val responseTime = clock.nowMillis() - started
 
         return MergedResult(
