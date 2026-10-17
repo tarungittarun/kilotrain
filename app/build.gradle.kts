@@ -9,7 +9,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "io.opentrack.app.debug"
+        applicationId = "io.kilotrain.opentrack"
         minSdk = 24
         targetSdk = 35
         versionCode = versionCodeFrom("2.2.0")
@@ -22,7 +22,6 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-            // signing keys live in CI secrets (11.4); absent locally the release type stays unsigned
         }
         debug {
             versionNameSuffix = "-debug"
