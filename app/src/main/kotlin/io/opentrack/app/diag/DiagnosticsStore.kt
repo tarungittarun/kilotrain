@@ -68,8 +68,8 @@ class DiagnosticsStore(
      * Saves the log into Downloads and returns a share intent for THAT file, so it can be attached
      * in a chat or opened from a file manager (a content URI from another app is often refused).
      */
-    /** Saves the log into Downloads and returns the target URI. No share sheet - just saves. */
-    fun saveToLocal(context: Context): String? {
+    /** Saves the log into Downloads and returns the target Uri. No share sheet - just saves. */
+    fun saveToLocal(context: Context): android.net.Uri? {
         return DiagnosticsSaver.saveToDownloads(context, logFile) ?: run {
             diagnostics.sourceFailure(mapOf("op" to "export", "failure" to "SAVE_FAILED",
                 "detail" to "the downloads folder refused the copy"))
