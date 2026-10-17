@@ -12,8 +12,8 @@ object WIMTParser {
                 val s = raw as? JsonValue.JsonObject ?: return@forEach
                 stops.add(
                     WIMTStop(
-                        stationCode = s.optString("stationCode").ifBlank { null },
-                        stationName = null,
+                        stationCode = s.optString("station_code").ifBlank { null },
+                        stationName = s.optString("station_name").ifBlank { null },
                         scheduledArrival = s.optString("sch_arrival_time").ifBlank { null },
                         scheduledDeparture = s.optString("sch_departure_time").ifBlank { null },
                         actualArrival = s.optString("actual_arrival_time").ifBlank { null },
