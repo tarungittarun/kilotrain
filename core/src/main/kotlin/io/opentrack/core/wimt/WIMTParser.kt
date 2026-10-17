@@ -24,8 +24,8 @@ object WIMTParser {
                         isCurrentStation = s.optString("curStn").equals("true", true),
                         distanceKm = s.optString("distance").ifBlank { null },
                         haltMinutes = null,
-                        actualArrivalTm = s.optLong("actual_arrival_tm"),
-                        actualDepartureTm = s.optLong("actual_departure_tm"),
+                        actualArrivalTm = s.optString("actual_arrival_tm").toLongOrNull(),
+                        actualDepartureTm = s.optString("actual_departure_tm").toLongOrNull(),
                     )
                 )
             }
@@ -41,7 +41,7 @@ object WIMTParser {
             destinationStation = json.optString("destination_station").ifBlank { null },
             stops = stops,
             fetchedAtMillis = nowMillis,
-            updatedAtMillis = json.optLong("actual_arrival_tm") ?: json.optLong("actual_departure_tm") ?: nowMillis,
+            updatedAtMillis = json.optString("actual_arrival_tm").toLongOrNull() ?: json.optString("actual_departure_tm").toLongOrNull() ?: nowMillis,
             viaCache = viaCache,
             isCrowdsourced = true,
         )
