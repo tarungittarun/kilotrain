@@ -48,8 +48,8 @@ class RailYatriRunningStatusSource(
                 try {
                     val conn = openConnection(URL(urlStr))
                     conn.requestMethod = "GET"
-                    conn.connectTimeout = 8000
-                    conn.readTimeout = 10000
+                    conn.connectTimeout = 3000
+                    conn.readTimeout = 3000
                     headers.forEach { (k, v) -> conn.setRequestProperty(k, v) }
                     val status = conn.responseCode
                     val body = try {
