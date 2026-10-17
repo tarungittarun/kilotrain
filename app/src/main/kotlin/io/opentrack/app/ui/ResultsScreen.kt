@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,8 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.opentrack.app.BuildConfig
 import io.opentrack.app.diag.DiagnosticsStore
@@ -44,9 +41,7 @@ import io.opentrack.app.search.ResultsEngine
 import io.opentrack.app.search.ResultsViewModel
 
 /**
- * Two views, as the owner asked: the SEARCH view (fields, diagnostics, results) and the DETAIL
- * view (one train's schedule/actual info). Opening a train hides the search; a back button
- * returns to it. All state copy comes from StateCopy only (3.2).
+ * Two views: SEARCH (fields, diagnostics, results) and DETAIL (train schedule/actual info).
  */
 @Composable
 fun ResultsScreen(
@@ -173,7 +168,6 @@ private fun DetailView(
     var showSearchInDetail by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
-        // header: back to search + the train
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = { viewModel.clearSelection() }) { Text("← search") }
             Spacer(modifier = Modifier.width(8.dp))
@@ -235,7 +229,6 @@ private fun DetailView(
 
         val status = ui.status as? ResultsEngine.StatusOutcome.Live
         if (status != null) {
-            // ---- provenance banner (which sources answered, how old) ----
             val now = System.currentTimeMillis()
             val feedAgeMs = if (status.fetchedAtMillis > 0) now - status.fetchedAtMillis else -1L
             val ageLabel = if (feedAgeMs >= 0) {
@@ -265,7 +258,6 @@ private fun DetailView(
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(top = 4.dp),
                     )
-                    // source contributions
                     Row(
                         modifier = Modifier.padding(top = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -280,7 +272,6 @@ private fun DetailView(
                 }
             }
 
-            // ---- position pinpoint card ----
             val position = status.positionInfo
             if (position != null) {
                 Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
@@ -299,11 +290,7 @@ private fun DetailView(
                             Text(
                                 text = if (position.minutesAgo != null) "${position.minutesAgo} min ago" else "—",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = when (position.confidence) {
-                                    "high" -> MaterialTheme.colorScheme.primary,
-                                    "medium" -> MaterialTheme.colorScheme.secondary,
-                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
-                                },
+                                color = positionColor(position.confidence),
                             )
                         }
                         Text(
@@ -329,7 +316,6 @@ private fun DetailView(
                 }
             }
 
-            // ---- timetable: all stations with scheduled vs actual ----
             Text(
                 text = "Timetable & actuals",
                 style = MaterialTheme.typography.titleMedium,
@@ -348,7 +334,6 @@ private fun DetailView(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        // station code + name
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = "${stop.code} ${stop.name}",
@@ -390,29 +375,21 @@ private fun DetailView(
                                 )
                             }
                         }
-                        // time chips
                         Row(
                             modifier = Modifier.padding(horizontal = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            if (stop.actualArrival != null) {
-                                TextButton(
-                                    onClick = {},
-                                    modifier = Modifier.padding(horizontal = 2.dp),
-                                ) { Text("arr ${stop.actualArrival}") }
+                            val timeText = buildString {
+                                if (stop.actualArrival != null) append("arr ${stop.actualArrival}  ")
+                                if (stop.actualDeparture != null) append("dep ${stop.actualDeparture}  ")
+                                if (stop.expectedDeparture != null) append("exp ${stop.expectedDeparture}  ")
                             }
-                            if (stop.actualDeparture != null) {
-                                TextButton(
-                                    onClick = {},
-                                    modifier = Modifier.padding(horizontal = 2.dp),
-                                ) { Text("dep ${stop.actualDeparture}") }
-                            }
-                            if (stop.expectedDeparture != null) {
-                                TextButton(
-                                    onClick = {},
-                                    modifier = Modifier.padding(horizontal = 2.dp),
-                                    enabled = false,
-                                ) { Text("exp ${stop.expectedDeparture}") }
+                            if (timeText.isNotEmpty()) {
+                                Text(
+                                    text = timeText.trimEnd(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
                         }
                     }
@@ -430,6 +407,14 @@ private fun provenanceLabel(sourceLabel: String, ageLabel: String): String {
     return "via $sourceLabel · $ageLabel"
 }
 
+private fun positionColor(confidence: String): androidx.compose.ui.graphics.Color {
+    return when (confidence) {
+        "high" -> MaterialTheme.colorScheme.primary
+        "medium" -> MaterialTheme.colorScheme.secondary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+}
+
 @Composable
 private fun LoaderRow(loading: Boolean) {
     if (!loading) return
@@ -443,7 +428,6 @@ private fun LoaderRow(loading: Boolean) {
     }
 }
 
-/** 3.6: opt-in diagnostics - OFF collects nothing; shares are file or clipboard (owner's ask). */
 @Composable
 internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
     if (store == null) return
@@ -491,7 +475,6 @@ internal fun DiagnosticsBar(store: io.opentrack.app.diag.DiagnosticsStore?) {
     }
 }
 
-/** Source chip: picks which source answers first, then refreshes the detail view. */
 @Composable
 private fun sourceButton(
     label: String,
@@ -528,5 +511,4 @@ internal fun screenStateOf(name: ResultsEngine.UiStateName): ScreenState = when 
     ResultsEngine.UiStateName.PROTOCOL_CHANGED -> ScreenState.PROTOCOL_CHANGED
 }
 
-/** The empty-asset screen is not an answer: an em dash, never an implied "none" (3.3). */
 internal val EM_DASH = "—"
