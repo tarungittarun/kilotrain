@@ -198,6 +198,8 @@ object MergeSources {
                 isNextStation = false,
                 kmToNext = null,
                 expectedDeparture = null,
+                actualArrivalTm = pickActualTm(ntes, wimt, railyatri, c, "arrival"),
+                actualDepartureTm = pickActualTm(ntes, wimt, railyatri, c, "departure"),
             )
         }
     }
@@ -266,6 +268,18 @@ object MergeSources {
             "arrival" -> r?.actualArrival
             "departure" -> r?.actualDeparture
             else -> null
+        }
+    }
+
+    private fun pickActualTm(
+        ntes: NtesRunningStatus?, wimt: WIMTRunningStatus?, railyatri: RailYatriRunningStatus?,
+        code: String, field: String,
+    ): Long? {
+        val w = wimt?.stops?.firstOrNull { it.stationCode == code }
+        when (field) {
+            "arrival" -> return w?.actualArrivalTm
+            "departure" -> return w?.actualDepartureTm
+            else -> return null
         }
     }
 
@@ -361,7 +375,7 @@ object MergeSources {
         stops: List<MergedStop>,
         nowMillis: Long,
     ): PositionInfo? {
-        val lastReported = stops.indexOfLast { it.actualDeparture != null || it.actualArrival != null }
+        val lastReported = stops.indexOfLast { it.actualDepartureTm != null || it.actualArrivalTm != null }
         if (lastReported < 0) return null
 
         val departed = stops[lastReported]
@@ -372,16 +386,10 @@ object MergeSources {
         val betweenStations = if (interpolated) "${departed.code} → ${next.code}" else null
         val kmFromPrevious = if (interpolated) next?.kmToNext else null
 
-        val lastActual = departed.actualDeparture ?: departed.actualArrival
-        val minutesAgo = lastActual?.let { hhmm ->
-            val parts = hhmm.split(":")
-            val h = parts.getOrNull(0)?.toIntOrNull() ?: 0
-            val m = parts.getOrNull(1)?.toIntOrNull() ?: 0
-            val stopMinutes = h * 60 + m
-            val nowMinutes = (nowMillis / 60_000).toInt() % (24 * 60)
-            var diff = nowMinutes - stopMinutes
-            if (diff < 0) diff += 24 * 60
-            diff
+        val lastActualTm = departed.actualDepartureTm ?: departed.actualArrivalTm
+        val minutesAgo = lastActualTm?.let { tm ->
+            val diff = (nowMillis - tm) / 60_000
+            if (diff < 0) 0 else diff
         }
 
         val confidence = when {

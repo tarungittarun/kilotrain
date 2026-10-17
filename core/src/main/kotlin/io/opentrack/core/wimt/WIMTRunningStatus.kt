@@ -18,6 +18,8 @@ data class WIMTStop(
     val isCurrentStation: Boolean,
     val distanceKm: String?,
     val haltMinutes: String?,
+    val actualArrivalTm: Long?,
+    val actualDepartureTm: Long?,
 )
 
 data class WIMTRunningStatus(
@@ -30,6 +32,7 @@ data class WIMTRunningStatus(
     val destinationStation: String?,
     val stops: List<WIMTStop>,
     val fetchedAtMillis: Long,
+    val updatedAtMillis: Long?,
     val viaCache: Boolean = false,
     val isCrowdsourced: Boolean = true,
 )
