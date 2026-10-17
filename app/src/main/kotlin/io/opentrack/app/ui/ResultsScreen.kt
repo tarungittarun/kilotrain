@@ -42,9 +42,6 @@ import io.opentrack.app.BuildConfig
 import io.opentrack.app.diag.DiagnosticsStore
 import io.opentrack.app.search.ResultsEngine
 import io.opentrack.app.search.ResultsViewModel
-import io.opentrack.core.contract.Provenance
-import io.opentrack.core.contract.ProvenanceKind
-import io.opentrack.core.contract.label
 
 /**
  * Two views, as the owner asked: the SEARCH view (fields, diagnostics, results) and the DETAIL
@@ -175,7 +172,7 @@ private fun DetailView(
 ) {
     var showSearchInDetail by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().padding(12.dp)) {
         // header: back to search + the train
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(onClick = { viewModel.clearSelection() }) { Text("← search") }
@@ -190,10 +187,6 @@ private fun DetailView(
             }
         }
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "OpenTrack India ${BuildConfig.VERSION_NAME} (build ${BuildConfig.VERSION_CODE})",
-            style = MaterialTheme.typography.labelSmall,
-        )
 
         if (showSearchInDetail) {
             val context = LocalContext.current
@@ -242,140 +235,199 @@ private fun DetailView(
 
         val status = ui.status as? ResultsEngine.StatusOutcome.Live
         if (status != null) {
-            val provenance = Provenance(
-                if (status.viaCache) ProvenanceKind.CACHED else ProvenanceKind.LIVE,
-                status.sourceLabel, status.fetchedAtMillis,
-            )
-            Text(
-                text = StateCopy.sourceBadge(status.sourceLabel, provenance.label(System.currentTimeMillis())),
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-
-            // Data freshness + response time - highlighted prominently (3.1: never claim freshness
-            // the source didn't publish; show the feed's own stamp + fetch elapsed)
+            // ---- provenance banner (which sources answered, how old) ----
             val now = System.currentTimeMillis()
             val feedAgeMs = if (status.fetchedAtMillis > 0) now - status.fetchedAtMillis else -1L
             val ageLabel = if (feedAgeMs >= 0) {
                 val mins = feedAgeMs / 60_000
-                if (mins < 1) "just now" else "${mins} min${if (mins > 1) "s" else ""} ago"
+                if (mins < 1) "just now" else "${mins} min ago"
             } else "stamp unavailable"
             val feedStamp = if (status.fetchedAtMillis > 0) {
                 java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
                     .format(java.util.Date(status.fetchedAtMillis))
             } else "no stamp"
-            Text(
-                text = "data as of $feedStamp · fetched in ${status.responseTimeMillis / 1000.0}s",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 4.dp),
-            )
 
-            // Last reported: the last stop the winning source reported an actual for,
-            // or the current station NTES names
-            val departed = status.stops.firstOrNull { it.isDepartedHere }
-            if (departed != null) {
-                Text(
-                    text = "Last reported: ${departed.code} ${departed.name} · ${departed.actualDeparture ?: departed.actualArrival ?: "—"}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
-            } else if (status.currentStationName != null) {
-                Text(
-                    text = "Position: ${status.currentStationName} (per NTES)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
+            Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = StateCopy.sourceBadge(status.sourceLabel, provenanceLabel(ageLabel)),
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.weight(1f),
+                        )
+                        Text(
+                            text = "fetched in ${status.responseTimeMillis / 1000.0}s",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                    Text(
+                        text = "data as of $feedStamp · $ageLabel · position confidence: ${status.positionInfo?.confidence ?: "—"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
+                    // source contributions
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        status.sourceContributions.forEach { c ->
+                            Text(
+                                text = "${c.source} (${c.stopsCovered} stops${if (c.hasActuals) ", actuals" else ""})",
+                                style = MaterialTheme.typography.labelSmall,
+                            )
+                        }
+                    }
+                }
             }
 
-            // Source selection: user picks which source answers first
-            Row(modifier = Modifier.padding(top = 8.dp)) {
-                Text("source:", style = MaterialTheme.typography.labelSmall, modifier = Modifier.width(32.dp))
-                sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                sourceButton("RailYatri", "railyatri", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                sourceButton("Ixigo", "ixigo", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                sourceButton("ConfirmTkt", "confirmtkt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                sourceButton("erail", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                sourceButton("WIMT", "wimt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+            // ---- position pinpoint card ----
+            val position = status.positionInfo
+            if (position != null) {
+                Card(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "Current position",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(bottom = 4.dp),
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = if (position.interpolated) "between stations" else "at station",
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(
+                                text = if (position.minutesAgo != null) "${position.minutesAgo} min ago" else "—",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = when (position.confidence) {
+                                    "high" -> MaterialTheme.colorScheme.primary
+                                    "medium" -> MaterialTheme.colorScheme.secondary
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant,
+                                },
+                            )
+                        }
+                        Text(
+                            text = position.betweenStations ?: "—",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 2.dp),
+                        )
+                        position.kmFromPrevious?.let { km ->
+                            Text(
+                                text = "~$km km from ${position.lastReportedStop ?: "—"}",
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(top = 2.dp),
+                            )
+                        }
+                        Row {
+                            sourceButton("refresh", null, ui.preferredSource, viewModel, ui.selectedTrainNumber, isRefresh = true)
+                            sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                            sourceButton("erail", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                            sourceButton("WIMT", "wimt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                            sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
+                        }
+                    }
+                }
+            }
+
+            // ---- timetable: all stations with scheduled vs actual ----
+            Text(
+                text = "Timetable & actuals",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+            )
+            ui.note?.let { note ->
+                Text(text = note, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                status.stops.forEach { stop ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        // station code + name
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "${stop.code} ${stop.name}",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            val timing = when {
+                                stop.actualDeparture != null -> "dep ${stop.actualDeparture}"
+                                stop.actualArrival != null -> "arr ${stop.actualArrival}"
+                                stop.expectedDeparture != null -> "expected ${stop.expectedDeparture}"
+                                else -> "not reported"
+                            }
+                            Text(
+                                text = timing + (stop.arrivalDelayMinutes?.let { " · ${it} min late" } ?: ""),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (stop.arrivalDelayMinutes != null && stop.arrivalDelayMinutes! > 0)
+                                    MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "sched ${stop.scheduledArrival ?: "—"}/${stop.scheduledDeparture ?: "—"}" +
+                                    (stop.distanceKm?.let { " · ${it} km" } ?: "") +
+                                    (stop.haltMinutes?.let { h -> if (h != "0") " · halt $h min" else "" } ?: "") +
+                                    " · ${stop.sourceProvenance} (${stop.confidence})" +
+                                    (if (stop.positionInterpolated) " · interpolated" else ""),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            val marker = when {
+                                stop.isDepartedHere -> "  ⬅ TRAIN LEFT HERE"
+                                stop.isNextStation && stop.kmToNext != null -> "  ⬅ NEXT · ~${stop.kmToNext} km"
+                                stop.isNextStation -> "  ⬅ NEXT STATION"
+                                stop.isCurrentStation -> "  ⬅ HERE NOW"
+                                else -> ""
+                            }
+                            if (marker.isNotEmpty()) {
+                                Text(
+                                    text = marker,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                        // time chips
+                        Row(
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (stop.actualArrival != null) {
+                                TextButton(
+                                    onClick = {},
+                                    modifier = Modifier.padding(horizontal = 2.dp),
+                                ) { Text("arr ${stop.actualArrival}") }
+                            }
+                            if (stop.actualDeparture != null) {
+                                TextButton(
+                                    onClick = {},
+                                    modifier = Modifier.padding(horizontal = 2.dp),
+                                ) { Text("dep ${stop.actualDeparture}") }
+                            }
+                            if (stop.expectedDeparture != null) {
+                                TextButton(
+                                    onClick = {},
+                                    modifier = Modifier.padding(horizontal = 2.dp),
+                                    enabled = false,
+                                ) { Text("exp ${stop.expectedDeparture}") }
+                            }
+                        }
+                    }
+                    Divider()
+                }
             }
         }
         ui.note?.let { note ->
             Text(text = note, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
         }
-
-        Column(modifier = Modifier.padding(top = 8.dp)) {
-            if (status != null) {
-                // the position card: one glance answer
-                val departed = status.stops.firstOrNull { it.isDepartedHere }
-                val next = status.stops.firstOrNull { it.isNextStation }
-                Card(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        if (status.currentStationName != null) {
-                            Text(
-                                text = "At ${status.currentStationName}",
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(bottom = 4.dp),
-                            )
-                        }
-                        Text(
-                            text = StateCopy.positionSummary(
-                                departedStation = departed?.let { "${it.code} ${it.name}" },
-                                nextStation = next?.let { "${it.code} ${it.name}" },
-                                expectedNext = next?.expectedDeparture,
-                                delayMinutes = next?.arrivalDelayMinutes,
-                            ),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                        Text(
-                            text = "as of ${status.currentStatus}",
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 4.dp),
-                        )
-                        Row {
-                            sourceButton("refresh", null, ui.preferredSource, viewModel, ui.selectedTrainNumber, isRefresh = true)
-                            sourceButton("NTES", "ntes", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                                sourceButton("Schedule", "erail", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                                sourceButton("Auto", null, ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                                sourceButton("WIMT", "wimt", ui.preferredSource, viewModel, ui.selectedTrainNumber)
-                        }
-                    }
-                }
-            }
-            if (ui.stops.isEmpty() && ui.stopsNote != null) {
-                Text(
-                    text = ui.stopsNote,
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(bottom = 8.dp),
-                )
-            }
-            // per-stop rows: actual vs scheduled, delay, platform, position markers
-            if (status != null) {
-                status.stops.forEach { stop ->
-                    Text(
-                        text = StateCopy.stopStatus(
-                            code = stop.code,
-                            name = stop.name,
-                            scheduledArrival = stop.scheduledArrival,
-                            scheduledDeparture = stop.scheduledDeparture,
-                            actualArrival = stop.actualArrival,
-                            actualDeparture = stop.actualDeparture,
-                            arrivalDelayMinutes = stop.arrivalDelayMinutes,
-                            departureDelayMinutes = stop.departureDelayMinutes,
-                            isCurrentStation = stop.isCurrentStation,
-                            isTrainHere = stop.isTrainHere,
-                            expectedDeparture = stop.expectedDeparture,
-                            distanceKm = stop.distanceKm,
-                            haltMinutes = stop.haltMinutes,
-                            isDepartedHere = stop.isDepartedHere,
-                            isNextStation = stop.isNextStation,
-                            kmToNext = stop.kmToNext,
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-            }
-        }
     }
+}
+
+private fun provenanceLabel(sourceLabel: String, ageLabel: String): String {
+    return "via $sourceLabel · $ageLabel"
 }
 
 @Composable

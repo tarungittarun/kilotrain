@@ -12,6 +12,7 @@ import io.opentrack.app.source.PairLookupResult
 import io.opentrack.app.source.RailYatriRunningStatusSource
 import io.opentrack.app.source.RouteLookupResult
 import io.opentrack.app.source.WIMTRunningStatusSource
+import io.opentrack.app.search.MergeSources
 import io.opentrack.core.diag.Diagnostics
 import io.opentrack.core.ntes.NtesRunningStatus
 import kotlinx.coroutines.runBlocking
@@ -232,23 +233,66 @@ class ResultsEngine(
      *   5. the offline asset                                (labelled cold start, no live claim)
      * Every rung's outcome is recorded; the screen names the winner and what the others said.
      */
+    /** Priority 3: merge all 4 live sources into one unified status with position interpolation. */
     fun liveStatus(trainNumber: String, preferredSource: String? = null): StatusOutcome = runBlocking {
-        val train = trainNumber.trim()
-        val ntes = ntesStatusSource
-        val route = erailRouteSource
-        val aggregator = io.opentrack.app.source.FirstWinsAggregator<StatusOutcome>()
-        val rungs = listOfNotNull(
-            ntes?.let {
-                if (preferredSource == null || preferredSource.contains("NTES", ignoreCase = true) || preferredSource.contains("ntes", ignoreCase = true)) {
-                    io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("NTES (mobile JSON)") {
-                        when (val r = it.fetch(train, NtesRunningStatusSource.Form.PLAIN_JSON)) {
-                            is NtesStatusResult.Live ->
-                                statusFromNtes(r.status, train, "NTES live running status")
-                            is NtesStatusResult.Failed -> null
-                        }
-                    }
-                } else null
+        val merged = MergeSources.merge(
+            trainNumber = train,
+            clock = clock,
+            ntes = ntesStatusSource,
+            wimt = wimtStatusSource,
+            railyatri = railYatriStatusSource,
+            erailTrain = erailSource,
+            diagnostics = diagnostics,
+        )
+        diagnostics?.numberSearch(
+            mapOf("train_no" to train, "source" to "live_status_merged") +
+                mapOf("contributions" to merged.sourceContributions.joinToString(", ") { it.source })
+        )
+        return@runBlocking StatusOutcome.Live(
+            trainNo = merged.trainNo,
+            currentStatus = merged.currentStatus,
+            currentStationName = merged.currentStationName,
+            stops = merged.stops.map { s ->
+                StopStatus(
+                    code = s.code,
+                    name = s.name,
+                    scheduledArrival = s.scheduledArrival,
+                    scheduledDeparture = s.scheduledDeparture,
+                    actualArrival = s.actualArrival,
+                    actualDeparture = s.actualDeparture,
+                    arrivalDelayMinutes = s.arrivalDelayMinutes,
+                    departureDelayMinutes = s.departureDelayMinutes,
+                    isCurrentStation = s.isCurrentStation,
+                    isTrainHere = false,
+                    expectedDeparture = s.expectedDeparture,
+                    distanceKm = s.distanceKm,
+                    haltMinutes = s.haltMinutes,
+                    isDepartedHere = s.isDepartedHere,
+                    isNextStation = s.isNextStation,
+                    kmToNext = s.kmToNext,
+                    positionInterpolated = s.positionInterpolated,
+                    confidence = s.confidence,
+                    sourceProvenance = s.sourceProvenance,
+                )
             },
+            viaCache = merged.viaCache,
+            fetchedAtMillis = merged.fetchedAtMillis,
+            sourceLabel = merged.sourceLabel,
+            attempts = merged.sourceContributions.map { it.source },
+            responseTimeMillis = merged.responseTimeMillis,
+            positionInfo = merged.positionInfo?.let { pi ->
+                PositionInfo(
+                    interpolated = pi.interpolated,
+                    betweenStations = pi.betweenStations,
+                    kmFromPrevious = pi.kmFromPrevious,
+                    minutesAgo = pi.minutesAgo,
+                    confidence = pi.confidence,
+                    lastReportedStop = pi.lastReportedStop,
+                )
+            },
+            sourceContributions = merged.sourceContributions,
+        )
+    },
             ntes?.let {
                 if (preferredSource == null || preferredSource.contains("NTES", ignoreCase = true)) {
                     io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("NTES (encrypted)") {
@@ -654,6 +698,12 @@ class ResultsEngine(
         val isNextStation: Boolean,
         /** kilometres to the next stop, from the published distances. */
         val kmToNext: String?,
+        /** merged from multiple sources: was this position interpolated between stations? */
+        val positionInterpolated: Boolean = false,
+        /** merged: confidence in this stop's data (high/medium/low). */
+        val confidence: String = "low",
+        /** merged: which source provided the actual time for this stop. */
+        val sourceProvenance: String = "schedule",
     )
 
     sealed interface StatusOutcome {
@@ -667,6 +717,10 @@ class ResultsEngine(
             val sourceLabel: String,
             val attempts: List<String>,
             val responseTimeMillis: Long = 0,
+            /** merged: interpolated position between stations, minutes since last report. */
+            val positionInfo: PositionInfo? = null,
+            /** merged: per-source contribution summary. */
+            val sourceContributions: List<SourceContribution> = emptyList(),
         ) : StatusOutcome
         data class Unavailable(val reason: String) : StatusOutcome
     }
