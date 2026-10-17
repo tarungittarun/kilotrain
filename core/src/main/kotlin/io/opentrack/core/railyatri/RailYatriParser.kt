@@ -5,7 +5,7 @@ import io.opentrack.core.ntes.JsonValue
 
 object RailYatriParser {
     fun parse(body: String, nowMillis: Long, viaCache: Boolean = false): RailYatriRunningStatus? {
-        if (body.isBlank()) return null
+        if (body.isBlank() || body == "{}") return null
         val json = JsonReader.parse(body.trim().removePrefix("﻿")) as? JsonValue.JsonObject ?: return null
         // livestatus.railyatri.in may return train-level info without a stops array.
         // Parse what we have: current station, next station, platform, status.
