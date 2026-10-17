@@ -260,8 +260,12 @@ private fun DetailView(
                 val mins = feedAgeMs / 60_000
                 if (mins < 1) "just now" else "${mins} min${if (mins > 1) "s" else ""} ago"
             } else "stamp unavailable"
+            val feedStamp = if (status.fetchedAtMillis > 0) {
+                java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+                    .format(java.util.Date(status.fetchedAtMillis))
+            } else "no stamp"
             Text(
-                text = "data as of ${ageLabel} · fetched in ${status.responseTimeMillis}ms",
+                text = "data as of $feedStamp · fetched in ${status.responseTimeMillis / 1000.0}s",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 4.dp),
             )

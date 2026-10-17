@@ -18,12 +18,12 @@ import java.io.File
 object DiagnosticsSaver {
 
     fun saveToDownloads(context: Context, source: File): Uri? {
-        val name = "opentrack-diagnostics-${System.currentTimeMillis()}.jsonl"
+        val name = "opentrack-diagnostics-${System.currentTimeMillis()}.txt"
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val values = ContentValues().apply {
                     put(MediaStore.Downloads.DISPLAY_NAME, name)
-                    put(MediaStore.Downloads.MIME_TYPE, "application/x-ndjson")
+                    put(MediaStore.Downloads.MIME_TYPE, "text/plain")
                     put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
                 }
                 val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)

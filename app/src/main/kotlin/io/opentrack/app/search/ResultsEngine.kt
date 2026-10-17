@@ -90,8 +90,7 @@ class ResultsEngine(
                 state = UiStateName.LIVE,
                 rows = rows,
                 bannerSource = response.trains.firstOrNull()?.source ?: "erail.in",
-                note = "as of ${ErailTrainParser.formatIstOfDay(response.feedStampMillis)} "
-                + "(${response.trains.size} trains between $from and $to, the feed's own stamp)",
+                note = null,
             )
         }
         val failure = live as? PairLookupResult.Failed

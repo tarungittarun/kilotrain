@@ -55,7 +55,7 @@ class DiagnosticsStore(
     fun shareAsFile(context: Context): Intent {
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.diagnostics", logFile)
         val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "application/x-ndjson"
+            type = "text/plain"
             putExtra(Intent.EXTRA_STREAM, uri)
             putExtra(Intent.EXTRA_SUBJECT, "OpenTrack diagnostics")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -83,7 +83,7 @@ class DiagnosticsStore(
     fun saveAndShare(context: Context): Intent? {
         val uri = saveToLocal(context) ?: return null
         return Intent(Intent.ACTION_SEND).apply {
-            type = "application/x-ndjson"
+            type = "text/plain"
             putExtra(Intent.EXTRA_STREAM, uri)
             putExtra(Intent.EXTRA_SUBJECT, "OpenTrack diagnostics")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
