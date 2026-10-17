@@ -348,7 +348,7 @@ private fun DetailView(
             }
             // per-stop rows: actual vs scheduled, delay, platform, position markers
             if (status != null) {
-                items(status.stops, key = { it.code }) { stop ->
+                items(status.stops) { stop ->
                     Text(
                         text = StateCopy.stopStatus(
                             code = stop.code,
