@@ -131,9 +131,12 @@ class ResultsViewModel(
                     erailSource = trainSource,
                     ntesStatusSource = source,
                     erailRouteSource = routeSource,
-                    railYatriStatusSource = SourceLocator.railYatriStatusSource,
-                    ixigoStatusSource = SourceLocator.ixigoStatusSource,
-                    confirmTktStatusSource = SourceLocator.confirmTktStatusSource,
+                    railYatriStatusSource = SourceLocator.railYatriStatusSource
+                        ?: RailYatriRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }, diagnostics = diagnostics),
+                    ixigoStatusSource = SourceLocator.ixigoStatusSource
+                        ?: IxigoRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }, diagnostics = diagnostics),
+                    confirmTktStatusSource = SourceLocator.confirmTktStatusSource
+                        ?: ConfirmTktRunningStatusSource(openConnection = { it.openConnection() as java.net.HttpURLConnection }, diagnostics = diagnostics),
                     diagnostics = diagnostics,
                 ).liveStatus(number, _state.value.preferredSource)
             } ?: return@launch
