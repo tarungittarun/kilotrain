@@ -121,7 +121,7 @@ object MergeSources {
         if (ntes != null) attemptedSources.add("NTES")
         if (wimt != null) attemptedSources.add("WIMT")
         if (railyatri != null) attemptedSources.add("RailYatri")
-        if (erailRouteStops != null || erailTrain != null) attemptedSources.add("erail.in")
+        if (erailTrain != null || erailRoute != null) attemptedSources.add("erail.in")
 
         // ---- 6. winner label --------------------------------------------------------
         val winner = when {
