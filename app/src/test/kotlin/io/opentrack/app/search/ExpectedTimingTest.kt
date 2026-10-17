@@ -54,5 +54,6 @@ class ExpectedTimingTest {
         isCurrentStation = false, isTrainHere = false, expectedDeparture = null,
         distanceKm = distance, haltMinutes = null,
         isDepartedHere = false, isNextStation = false, kmToNext = null,
+        actualArrivalTm = null, actualDepartureTm = null,
     )
 }
