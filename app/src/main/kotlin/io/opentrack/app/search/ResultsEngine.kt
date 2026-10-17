@@ -236,7 +236,7 @@ class ResultsEngine(
     /** Priority 3: merge all 4 live sources into one unified status with position interpolation. */
     fun liveStatus(trainNumber: String, preferredSource: String? = null): StatusOutcome = runBlocking {
         val merged = MergeSources.merge(
-            trainNumber = train,
+            trainNumber = trainNumber,
             clock = clock,
             ntes = ntesStatusSource,
             wimt = wimtStatusSource,
@@ -245,7 +245,7 @@ class ResultsEngine(
             diagnostics = diagnostics,
         )
         diagnostics?.numberSearch(
-            mapOf("train_no" to train, "source" to "live_status_merged") +
+            mapOf("train_no" to trainNumber, "source" to "live_status_merged") +
                 mapOf("contributions" to merged.sourceContributions.joinToString(", ") { it.source })
         )
         return@runBlocking StatusOutcome.Live(
@@ -292,192 +292,24 @@ class ResultsEngine(
             },
             sourceContributions = merged.sourceContributions,
         )
-    },
-            ntes?.let {
-                if (preferredSource == null || preferredSource.contains("NTES", ignoreCase = true)) {
-                    io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("NTES (encrypted)") {
-                        when (val r = it.fetch(train, NtesRunningStatusSource.Form.ENCRYPTED)) {
-                            is NtesStatusResult.Live ->
-                                statusFromNtes(r.status, train, "NTES live running status")
-                            is NtesStatusResult.Failed -> null
                         }
                     }
                 } else null
-            },
-            route?.let {
-                if (preferredSource == null || preferredSource.contains("erail", ignoreCase = true) || preferredSource.contains("schedule", ignoreCase = true)) {
-                    io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("erail.in schedule") {
-                        when (val r = it.fetch(train)) {
-                            is RouteLookupResult.Live -> StatusOutcome.Live(
-                                trainNo = train,
-                                currentStatus = "showing the published schedule - no live source answered first",
-                                currentStationName = null,
-                                stops = r.stops.map { stop ->
-                                    StopStatus(
-                                        code = stop.stationCode,
-                                        name = stop.stationName,
-                                        scheduledArrival = stop.arrival,
-                                        scheduledDeparture = stop.departure,
-                                        actualArrival = null,
-                                        actualDeparture = null,
-                                        arrivalDelayMinutes = null,
-                                        departureDelayMinutes = null,
-                                        isCurrentStation = false,
-                                        isTrainHere = false,
-                                        expectedDeparture = null,
-                                        distanceKm = null,
-                                        haltMinutes = null,
-                                        isDepartedHere = false,
-                                        isNextStation = false,
-                                        kmToNext = null,
-                                    )
-                                },
-                                viaCache = false,
-                                fetchedAtMillis = clock.nowMillis(),
-                                sourceLabel = "erail.in schedule",
-                                attempts = emptyList(),
-                            )
-                            is RouteLookupResult.Failed -> null
                         }
                     }
                 } else null
-            },
-            erailSource?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("erail.in train times") {
-                    when (val r = it.fetch(train)) {
-                        is io.opentrack.app.source.TrainLookup.Live -> {
-                            val p = r.payload
-                            if (p.number != train) null else StatusOutcome.Live(
-                                trainNo = p.number,
-                                currentStatus = "endpoint times - " + p.name,
-                                stops = listOf(
-                                    StopStatus(
-                                        code = p.fromStation,
-                                        name = p.fromStationName,
-                                        scheduledArrival = p.departureMinutesOfDay?.let { m -> formatMinutes(m) },
-                                        scheduledDeparture = null,
-                                        actualArrival = null,
-                                        actualDeparture = null,
-                                        arrivalDelayMinutes = null,
-                                        departureDelayMinutes = null,
-                                        isCurrentStation = true,
-                                        isTrainHere = true,
-                                        expectedDeparture = null,
-                                        distanceKm = null,
-                                        haltMinutes = null,
-                                        isDepartedHere = true,
-                                        isNextStation = false,
-                                        kmToNext = null,
-                                    ),
-                                    StopStatus(
-                                        code = p.toStation,
-                                        name = p.toStationName,
-                                        scheduledArrival = null,
-                                        scheduledDeparture = p.arrivalMinutesOfDay?.let { m -> formatMinutes(m) },
-                                        actualArrival = null,
-                                        actualDeparture = null,
-                                        arrivalDelayMinutes = null,
-                                        departureDelayMinutes = null,
-                                        isCurrentStation = false,
-                                        isTrainHere = false,
-                                        expectedDeparture = null,
-                                        distanceKm = null,
-                                        haltMinutes = null,
-                                        isDepartedHere = false,
-                                        isNextStation = true,
-                                        kmToNext = null,
-                                    ),
-                                ),
-                                viaCache = false,
-                                fetchedAtMillis = p.feedStampMillis,
-                                sourceLabel = "erail.in train times",
-                                currentStationName = null,
-                                attempts = emptyList(),
-                            )
                         }
                         is io.opentrack.app.source.TrainLookup.Failed -> null
                     }
                 }
-            },
-            railYatriStatusSource?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("RailYatri") {
-                    when (val r = it.fetch(train)) {
-                        is io.opentrack.app.source.RailYatriRunningStatusSource.Result.Live ->
-                            statusFromRailYatri(r.status, train, "RailYatri")
-                        is io.opentrack.app.source.RailYatriRunningStatusSource.Result.Failed -> null
                     }
                 }
-            },
-            ixigoStatusSource?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("Ixigo") {
-                    when (val r = it.fetch(train)) {
-                        is io.opentrack.app.source.IxigoRunningStatusSource.Result.Live ->
-                            statusFromIxigo(r.status, train, "Ixigo")
-                        is io.opentrack.app.source.IxigoRunningStatusSource.Result.Failed -> null
                     }
                 }
-            },
-            confirmTktStatusSource?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("ConfirmTkt") {
-                    when (val r = it.fetch(train)) {
-                        is io.opentrack.app.source.ConfirmTktRunningStatusSource.Result.Live ->
-                            statusFromConfirmTkt(r.status, train, "ConfirmTkt")
-                        is io.opentrack.app.source.ConfirmTktRunningStatusSource.Result.Failed -> null
                     }
                 }
-            },
-            wimtStatusSource?.let {
-                io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("WIMT (whereismytrain)") {
-                    when (val r = it.fetch(train, null, null, null)) {
-                        is io.opentrack.app.source.WIMTRunningStatusSource.Result.Live ->
-                            statusFromWIMT(r.status, train, "WIMT live running status")
-                        is io.opentrack.app.source.WIMTRunningStatusSource.Result.Failed -> null
                     }
                 }
-            },
-            io.opentrack.app.source.FirstWinsAggregator.Rung<StatusOutcome>("offline asset (labelled)") {
-                val hit = asset.trains.firstOrNull { it.number == train }
-                if (hit != null) StatusOutcome.Live(
-                    trainNo = hit.number,
-                    currentStatus = "offline fallback - 2016 vintage, unverified",
-                    stops = listOf(
-                        StopStatus(
-                            code = hit.fromStation, name = hit.fromStation, scheduledArrival = hit.departure,
-                            scheduledDeparture = null, actualArrival = null, actualDeparture = null,
-                            arrivalDelayMinutes = null, departureDelayMinutes = null,
-                            isCurrentStation = true, isTrainHere = true, expectedDeparture = null,
-                            distanceKm = null, haltMinutes = null,
-                            isDepartedHere = true, isNextStation = false, kmToNext = null,
-                        ),
-                    ),
-                    viaCache = false,
-                    fetchedAtMillis = 0,
-                    sourceLabel = "offline asset (unverified)",
-                    currentStationName = null,
-                    attempts = emptyList(),
-                ) else null
-            },
-        )
-        diagnostics?.numberSearch(
-            mapOf("train_no" to train, "source" to "live_status_ladder") +
-                mapOf("rungs" to rungs.joinToString(", ") { it.name })
-        )
-        val raceStarted = System.currentTimeMillis()
-        val outcome = aggregator.race(rungs)
-        val responseTimeMillis = System.currentTimeMillis() - raceStarted
-        val winner = outcome.value
-        if (winner != null) {
-            diagnostics?.numberSearch(
-                mapOf("train_no" to train, "source" to "live_status_winner", "winner" to (outcome.winner ?: "?"))
-            )
-            val winnerLive = winner as? StatusOutcome.Live
-            return@runBlocking if (winnerLive != null) {
-                winnerLive.copy(
-                    attempts = if (outcome.attempts.isEmpty()) listOf("answered first by ${outcome.winner}")
-                    else outcome.attempts,
-                    responseTimeMillis = responseTimeMillis,
-                )
-            } else winner
         }
         diagnostics?.sourceFailure(
             mapOf("op" to "live_status", "failure" to "ALL_SOURCES_FAILED",

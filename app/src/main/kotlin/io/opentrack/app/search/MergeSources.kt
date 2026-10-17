@@ -55,28 +55,28 @@ object MergeSources {
             try {
                 it.fetch(trainNumber, io.opentrack.app.source.NtesRunningStatusSource.Form.PLAIN_JSON)
             } catch (e: Exception) {
-                NtesStatusResult.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
+                NtesStatusResult.Failed(SourceFailure.SHAPE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
         val wimtResult = wimt?.let {
             try {
                 it.fetch(trainNumber, fromStation, toStation, null)
             } catch (e: Exception) {
-                WIMTResult.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
+                WIMTResult.Failed(SourceFailure.SHAPE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
         val railyatriResult = railyatri?.let {
             try {
                 it.fetch(trainNumber)
             } catch (e: Exception) {
-                RailYatriResult.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
+                RailYatriResult.Failed(SourceFailure.SHAPE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
         val erailResult = erailTrain?.let {
             try {
                 it.fetch(trainNumber)
             } catch (e: Exception) {
-                TrainLookup.Failed(SourceFailure.SOURCE_UNKNOWN, e.message ?: "unknown")
+                TrainLookup.Failed(SourceFailure.SHAPE_UNKNOWN, e.message ?: "unknown")
             }
         } ?: null
 
@@ -135,7 +135,7 @@ object MergeSources {
 
         return ordered.map { (code, name) ->
             MergedStop(
-                code = code,
+                code = code ?: "\u2014",
                 name = name ?: "",
                 scheduledArrival = pickSchedule(ntes, wimt, railyatri, erail, code, "arrival"),
                 scheduledDeparture = pickSchedule(ntes, wimt, railyatri, erail, code, "departure"),
