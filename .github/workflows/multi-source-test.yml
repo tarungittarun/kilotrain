@@ -1,10 +1,10 @@
-name: Multi-Source Train Data Validation
+name: Multi-Source Train Data Validation CI
 
 on:
   push:
     branches: ["kilo/patient-lantern-jgg"]
   schedule:
-    - cron: "0 * * * *"  # Run every hour
+    - cron: "*/15 * * * *"  # Run every 15 minutes
   workflow_dispatch:
 
 jobs:
@@ -14,67 +14,122 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        run_id: [1, 2, 3, 4, 5, 6]  # 6 runs over 30 minutes (every 5 min)
-    
+        run_id: [1, 2, 3, 4, 5, 6]  # 6 runs over ~30 minutes (every 5 min)
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      
+
       - name: Install dependencies
         run: pip install requests
-      
+
       - name: Run multi-source test (run ${{ matrix.run_id }}/6)
         run: |
           python test_sources/test_multi_source.py
         env:
           RUN_ID: ${{ matrix.run_id }}
-      
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
           name: test-results-run-${{ matrix.run_id }}
           path: test_sources/results/
           retention-days: 7
-      
-      - name: Print summary
-        run: |
-          echo "Test run ${{ matrix.run_id }} completed at $(date)"
-          ls -la test_sources/results/ 2>/dev/null || echo "No results yet"
 
-  summary-report:
-    needs: multi-source-test
+  continuous-monitoring:
     runs-on: ubuntu-latest
-    if: always()
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        run_id: [1, 2, 3, 4, 5, 6]
+
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run monitoring test (run ${{ matrix.run_id }}/6)
+        run: |
+          python test_sources/monitor_30min.py
+        env:
+          RUN_ID: ${{ matrix.run_id }}
+
+      - name: Upload monitoring results
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-results-run-${{ matrix.run_id }}
+          path: test_sources/monitoring_results/
+          retention-days: 7
+
+  source-health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [multi-source-test, continuous-monitoring]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install requests
+
       - name: Download all test results
         uses: actions/download-artifact@v4
         with:
           path: test_results/
-      
-      - name: Generate summary report
+          pattern: test-results-*/*
+          merge-multiple: true
+
+      - name: Generate source health report
         run: |
           echo "=== MULTI-SOURCE TEST SUMMARY ==="
           echo "Date: $(date)"
           echo ""
-          ls -la test_results/ 2>/dev/null || echo "No results downloaded"
-          echo ""
-          echo "Checking each source across all runs..."
-          for result_file in test_results/run-*/test_results_*.json; do
-            if [ -f "$result_file" ]; then
-              echo "Results from: $result_file"
-              python3 -c "
-import json, sys
-with open('$result_file') as f:
-    data = json.load(f)
-for source in ['WIMT', 'RailYatri', 'RailRadar.in', 'RunningStatus.in', 'erail.in']:
-    src = [r for r in data if r.get('source') == source]
-    passed = len([r for r in src if r.get('status_code') == 200])
-    actuals = len([r for r in src if r.get('has_actuals') == True])
-    print(f'  {source}: {passed}/{len(src)} passed, {actuals} with actuals')
+          
+          # Aggregate results from all test runs
+          python3 -c "
+import json, glob, os
+
+sources = ['WIMT', 'RailRadar.in', 'RunningStatus.in', 'erail.in', 'RailYatri']
+summary = {s: {'total': 0, 'passed': 0, 'with_actuals': 0} for s in sources}
+
+for result_file in glob.glob('test_results/run-*/test_results_*.json'):
+    with open(result_file) as f:
+        data = json.load(f)
+    for r in data:
+        src = r.get('source', 'unknown')
+        if src in summary:
+            summary[src]['total'] += 1
+            if r.get('status') == 'PASS':
+                summary[src]['passed'] += 1
+            if r.get('has_actuals'):
+                summary[src]['with_actuals'] += 1
+
+print()
+print('SOURCE HEALTH SUMMARY:')
+print('=' * 60)
+for src in sources:
+    s = summary[src]
+    rate = (s['passed'] / s['total'] * 100) if s['total'] > 0 else 0
+    actuals_rate = (s['with_actuals'] / s['passed'] * 100) if s['passed'] > 0 else 0
+    print(f'{src:20s}: {s[\"passed\"]:3d}/{s[\"total\"]:3d} ({rate:5.1f}%) | actuals: {s[\"with_actuals\"]:3d} ({actuals_rate:5.1f}%)')
+print('=' * 60)
 "
           done
