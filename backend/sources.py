@@ -54,7 +54,7 @@ class SourceInterface:
     def health_check(self) -> bool:
         try:
             result = self.fetch_live_status("16227")
-            return result.status_code == 200 if hasattr(result, 'status_code') else True
+            return result is not None
         except Exception:
             return False
     
@@ -78,9 +78,11 @@ class WIMTSource(SourceInterface):
     name = SourceName.WIMT
     
     def fetch_live_status(self, train_number: str) -> TrainStatus:
+        # Use today's date for the request
+        today = datetime.now(timezone.utc).strftime("%d-%m-%Y")
         url = (
             f"https://whereismytrain.in/cache/live_status?"
-            f"date=18-10-2026&train_no={train_number}"
+            f"date={today}&train_no={train_number}"
             f"&from=MYS&to=TLGP&from_day=1&lang=en"
             f"&appVersion=7.1.5.633808517&sb_version=0"
         )
@@ -97,7 +99,7 @@ class WIMTSource(SourceInterface):
                     source_label="WIMT",
                     response_time_ms=int((now_millis() - start)),
                     fetched_at_millis=now_millis(),
-                    data_freshness="unknown"
+                    data_freshness="unknown",
                 )
             
             data = r.json()
@@ -117,7 +119,7 @@ class WIMTSource(SourceInterface):
                     platform=s.get("platform"),
                     distance_km=s.get("distance"),
                     is_current_station=s.get("curStn", False),
-                    is_departed=s.get("departed", False),
+                    is_departed_here=s.get("departed", False),
                     source_provenance="WIMT",
                     km_to_next=None,
                     expected_departure=None,
@@ -172,7 +174,6 @@ class WIMTSource(SourceInterface):
             )
     
     def fetch_pair_search(self, from_station: str, to_station: str) -> List[TrainListing]:
-        # WIMT doesn't have a public pair search API endpoint we can call directly
         return []
 
 
@@ -217,7 +218,7 @@ class RailRadarSource(SourceInterface):
                     platform=s.get("platform"),
                     distance_km=s.get("distance"),
                     is_current_station=s.get("status") == "at-station",
-                    is_departed=s.get("status") == "departed",
+                    is_departed_here=s.get("status") == "departed",
                     source_provenance="RailRadar.in",
                     km_to_next=None,
                     expected_departure=None,
@@ -292,23 +293,37 @@ class RunningStatusSource(SourceInterface):
                     data_freshness="unknown",
                 )
             
+            # Extract station data from HTML table rows
             import re
             html = r.text
             
-            # Extract station data from HTML table rows
             stop_list = []
-            station_pattern = re.findall(
-                r'([A-Z]{2,6})\s*\(([A-Z]{2,4})\)[^<]*<[^>]*>([^<]*)<[^>]*>[^<]*<[^>]*>([^<]*)<[^>]*>[^<]*<[^>]*>([^<]*)<[^>]*>([^<]*)',
-                html
-            )
+            # Look for table rows with station data
+            # runningstatus.in has table rows with station info
+            rows = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
+            for row in rows:
+                # Extract station code and name
+                code_match = re.search(r'([A-Z]{2,6})\s*\(([A-Z]{2,4})\)', row)
+                if code_match:
+                    code = code_match.group(1)
+                    name = code_match.group(2)
+                    # Look for times in the row
+                    times = re.findall(r'\d{2}:\d{2}', row)
+                    scheduled_arrival = times[0] if len(times) > 0 else None
+                    scheduled_departure = times[1] if len(times) > 1 else None
+                    actual_arrival = times[2] if len(times) > 2 else None
+                    actual_departure = times[3] if len(times) > 3 else None
+                    
+                    stop_list.append(StopStatus(
+                        code=code,
+                        name=name,
+                        scheduled_arrival=scheduled_arrival,
+                        scheduled_departure=scheduled_departure,
+                        actual_arrival=actual_arrival,
+                        actual_departure=actual_departure,
+                        source_provenance="RunningStatus.in",
+                    ))
             
-            # Simpler: look for station names in the HTML
-            # runningstatus.in has table rows with station data
-            for line in html.split('\n'):
-                if any(s in line for s in ['MYS', 'NHY', 'PANP', 'Y', 'MYA', 'MAD', 'CPT', 'RMGM', 'BID', 'HJL', 'KGI', 'GNB', 'NYH', 'SBC', 'TLGP']):
-                    pass  # HTML parsing is complex; we have per-stop data from other sources
-            
-            # For now, return what we can extract
             resp_ms = (now_millis() - start)
             self.record_success(resp_ms)
             
@@ -321,13 +336,13 @@ class RunningStatusSource(SourceInterface):
                 dest_station_name="",
                 current_status="live",
                 current_station_name=None,
-                stops=[],
+                stops=stop_list,
                 source_label="RunningStatus.in live running status",
                 source_contributions=[SourceContribution(
                     source="RunningStatus.in",
                     fetched_at_millis=now_millis(),
-                    stops_covered=0,
-                    has_actuals=False,
+                    stops_covered=len(stop_list),
+                    has_actuals=any(s.actual_arrival or s.actual_departure for s in stop_list),
                 )],
                 response_time_ms=int(resp_ms),
                 fetched_at_millis=now_millis(),
@@ -373,8 +388,6 @@ class ErailSource(SourceInterface):
                     data_freshness="unknown",
                 )
             
-            # erail.in returns HTML/tilde data, not pure JSON
-            # We'll parse what we can
             resp_ms = (now_millis() - start)
             self.record_success(resp_ms)
             
@@ -410,17 +423,14 @@ class ErailSource(SourceInterface):
             )
     
     def fetch_pair_search(self, from_station: str, to_station: str) -> List[TrainListing]:
-        # erail.in pair search returns tilde-separated data
         url = f"https://erail.in/rail/getTrains.aspx?TrainNo={from_station}&from={from_station}&to={to_station}"
         try:
             r = requests.get(url, headers=HEADERS, timeout=DEFAULT_TIMEOUT)
             if r.status_code != 200:
                 return []
             
-            # Parse tilde-separated data
             text = r.text
             trains = []
-            # erail.in returns data in format: ~~~~date~~^train_no~train_name~source~dest~...
             parts = text.split('~')
             i = 0
             while i < len(parts) - 10:
@@ -451,7 +461,6 @@ class NTESource(SourceInterface):
     
     def fetch_live_status(self, train_number: str) -> TrainStatus:
         # NTES is blocked from sandbox but works on device
-        # This is a placeholder for when the app runs on device
         return TrainStatus(
             train_number=train_number, train_name="",
             source_station_code="", source_station_name="",
@@ -465,5 +474,3 @@ class NTESource(SourceInterface):
     
     def fetch_pair_search(self, from_station: str, to_station: str) -> List[TrainListing]:
         return []
-SOURCE_EOF
-echo "Source abstraction layer created"

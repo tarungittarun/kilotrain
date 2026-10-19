@@ -226,7 +226,7 @@ class FirstWinsAggregator:
                 stop_data = all_stops[code]
                 
                 # Priority: NTES > WIMT > RailRadar > RunningStatus (for actuals)
-                priority_order = ["NTES", "WIMT", "RailRadar.in", "RunningStatus.in", "erail.in"]
+                priority_order = ["ntes", "wimt", "railradar.in", "runningstatus.in", "erail.in"]
                 source_priority = {s: i for i, s in enumerate(priority_order)}
                 
                 current_priority = source_priority.get(source_name, 99)
@@ -248,7 +248,7 @@ class FirstWinsAggregator:
                     stop_data["is_departed_here"] = stop.is_departed_here or stop_data["is_departed_here"]
                     stop_data["is_next_station"] = stop.is_next_station or stop_data["is_next_station"]
                     stop_data["source_provenance"] = source_name
-                    stop_data["confidence"] = "high" if source_name in ["NTES", "WIMT"] else "medium"
+                    stop_data["confidence"] = "high" if source_name in ["ntes", "wimt"] else "medium"
                     stop_data["actual_arrival_tm"] = stop.actual_arrival_tm or stop_data["actual_arrival_tm"]
                     stop_data["actual_departure_tm"] = stop.actual_departure_tm or stop_data["actual_departure_tm"]
         
@@ -332,10 +332,17 @@ class FirstWinsAggregator:
     
     def _get_winner_label(self, results: dict) -> str:
         """Get label for winning source"""
-        priority = ["NTES", "WIMT", "RailRadar.in", "RunningStatus.in", "erail.in"]
+        priority = ["ntes", "wimt", "railradar.in", "runningstatus.in", "erail.in"]
+        label_map = {
+            "ntes": "NTES live running status",
+            "wimt": "WIMT live running status",
+            "railradar.in": "RailRadar.in live running status",
+            "runningstatus.in": "RunningStatus.in live running status",
+            "erail.in": "erail.in live running status",
+        }
         for source_name in priority:
             if source_name in results and results[source_name]:
-                return f"{source_name} live running status"
+                return label_map.get(source_name, f"{source_name} live running status")
         return "no source answered"
     
     def search_trains(self, from_station: str, to_station: str) -> List[dict]:
@@ -411,5 +418,3 @@ def get_live_status(train_number: str) -> dict:
 def search_trains(from_station: str, to_station: str) -> list:
     """Search for trains between stations"""
     return aggregator.search_trains(from_station, to_station)
-SOURCE_EOF
-echo "Aggregator created"

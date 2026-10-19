@@ -193,5 +193,3 @@ def train_status_to_dict(ts: TrainStatus) -> dict:
 
 def train_listing_to_dict(tl: TrainListing) -> dict:
     return asdict(tl)
-SOURCE_EOF
-echo "Models fixed with proper imports"
