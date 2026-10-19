@@ -93,7 +93,7 @@ class MergedResult:
 class FirstWinsAggregator:
     """
     First-wins aggregator for multi-source train data.
-    
+
     Strategy:
     1. Fetch from ALL sources concurrently
     2. Merge per-stop: NTES > WIMT > RailRadar > RunningStatus (actuals override gaps)
@@ -101,11 +101,11 @@ class FirstWinsAggregator:
     4. Position: last reported stop from any source, interpolated to next
     5. Freshness: tracked per source; merged view shows youngest actual
     """
-    
+
     def __init__(self):
         self.sources: List[SourceInterface] = []
         self._initialize_sources()
-    
+
     def _initialize_sources(self):
         """Initialize all sources in priority order"""
         self.sources = [
@@ -115,11 +115,11 @@ class FirstWinsAggregator:
             RunningStatusSource(), # Priority 4 - HTML-parsed per-stop
             ErailSource(),    # Priority 5 - schedule only fallback
         ]
-    
+
     def get_healthy_sources(self) -> List[SourceInterface]:
         """Return only healthy sources"""
         return [s for s in self.sources if s.is_healthy]
-    
+
     def merge(
         self,
         train_number: str,
@@ -128,7 +128,7 @@ class FirstWinsAggregator:
     ) -> MergedResult:
         """Fetch from all sources and merge into one unified status"""
         start = now_millis()
-        
+
         # Fetch from all sources concurrently
         results = {}
         for source in self.get_healthy_sources():
@@ -138,7 +138,7 @@ class FirstWinsAggregator:
             except Exception as e:
                 source.record_failure()
                 results[source.name] = None
-        
+
         # Determine winner (first source with data)
         winner = None
         for source in self.get_healthy_sources():
@@ -147,7 +147,7 @@ class FirstWinsAggregator:
                 if r.stops or r.current_status != "no source answered":
                     winner = source.name
                     break
-        
+
         if not winner:
             return MergedResult(
                 train_no=train_number,
@@ -161,21 +161,21 @@ class FirstWinsAggregator:
                 source_contributions=[],
                 response_time_ms=int(now_millis() - start),
             )
-        
+
         # Build merged stops - priority order: NTES > WIMT > RailRadar > RunningStatus > erail
         merged_stops = self._merge_stops(results)
-        
-        # Build position info
+
+        # Build position info based on CURRENT TIME vs schedule
         position = self._compute_position(merged_stops, now_millis())
-        
+
         # Build source contributions
         contributions = self._build_contributions(results, now_millis())
-        
+
         # Determine source label
         source_label = self._get_winner_label(results)
-        
+
         response_time_ms = int(now_millis() - start)
-        
+
         return MergedResult(
             train_no=train_number,
             current_status=results[winner].current_status if results[winner] else "no data",
@@ -188,12 +188,12 @@ class FirstWinsAggregator:
             source_contributions=contributions,
             response_time_ms=response_time_ms,
         )
-    
+
     def _merge_stops(self, results: dict) -> List[MergedStop]:
         """Merge per-stop data from all sources"""
         # Collect all station codes from all sources
         all_stops = {}
-        
+
         for source_name, result in results.items():
             if not result or not result.stops:
                 continue
@@ -222,17 +222,17 @@ class FirstWinsAggregator:
                         "actual_arrival_tm": None,
                         "actual_departure_tm": None,
                     }
-                
+
                 stop_data = all_stops[code]
-                
+
                 # Priority: NTES > WIMT > RailRadar > RunningStatus (for actuals)
                 priority_order = ["ntes", "wimt", "railradar.in", "runningstatus.in", "erail.in"]
                 source_priority = {s: i for i, s in enumerate(priority_order)}
-                
+
                 current_priority = source_priority.get(source_name, 99)
                 existing_provenance = stop_data["source_provenance"]
                 existing_priority = source_priority.get(existing_provenance, 99)
-                
+
                 # Update with higher priority source data
                 if current_priority < existing_priority or existing_provenance == "schedule":
                     stop_data["scheduled_arrival"] = stop.scheduled_arrival or stop_data["scheduled_arrival"]
@@ -251,7 +251,7 @@ class FirstWinsAggregator:
                     stop_data["confidence"] = "high" if source_name in ["ntes", "wimt"] else "medium"
                     stop_data["actual_arrival_tm"] = stop.actual_arrival_tm or stop_data["actual_arrival_tm"]
                     stop_data["actual_departure_tm"] = stop.actual_departure_tm or stop_data["actual_departure_tm"]
-        
+
         # Convert to MergedStop list
         merged = []
         for code, data in all_stops.items():
@@ -277,37 +277,103 @@ class FirstWinsAggregator:
                 actual_arrival_tm=data["actual_arrival_tm"],
                 actual_departure_tm=data["actual_departure_tm"],
             ))
-        
+
         return merged
-    
+
     def _compute_position(self, stops: List[MergedStop], now_millis_val: int) -> Optional[PositionInfo]:
-        """Compute current position from stopped data"""
-        # Find last stop with actual time
-        last_reported = -1
-        for i, stop in enumerate(stops):
-            if stop.actual_arrival or stop.actual_departure:
-                last_reported = i
-        
-        if last_reported < 0:
+        """
+        Compute current position based on CURRENT TIME vs scheduled times.
+
+        Logic:
+        1. Find the last stop where scheduled_departure <= current_time (train has departed)
+        2. Find the next stop where scheduled_arrival > current_time (train hasn't arrived yet)
+        3. If train is between stations, interpolate position
+        4. If train hasn't started yet, show "not started yet"
+        5. If train has reached destination, show "reached destination"
+        """
+        if not stops:
             return None
-        
-        departed = stops[last_reported]
-        next_idx = last_reported + 1 if last_reported + 1 < len(stops) else None
-        next_stop = stops[next_idx] if next_idx else None
-        
-        interpolated = next_stop is not None
-        between_stations = f"{departed.code} → {next_stop.code}" if interpolated else None
-        km_from_previous = next_stop.distance_km if interpolated and next_stop.distance_km else None
-        
+
+        now_minutes = (now_millis_val / 60000) % (24 * 60)
+
+        # Find last stop where scheduled_departure <= now (train has left)
+        last_departed = -1
+        for i, stop in enumerate(stops):
+            if stop.scheduled_departure:
+                try:
+                    dep_parts = stop.scheduled_departure.split(":")
+                    dep_minutes = int(dep_parts[0]) * 60 + int(dep_parts[1])
+                    if dep_minutes <= now_minutes:
+                        last_departed = i
+                except (ValueError, AttributeError):
+                    pass
+
+        # Find next stop where scheduled_arrival > now (train hasn't arrived yet)
+        next_idx = None
+        for i, stop in enumerate(stops):
+            if stop.scheduled_arrival:
+                try:
+                    arr_parts = stop.scheduled_arrival.split(":")
+                    arr_minutes = int(arr_parts[0]) * 60 + int(arr_parts[1])
+                    if arr_minutes > now_minutes:
+                        next_idx = i
+                        break
+                except (ValueError, AttributeError):
+                    pass
+
+        # Determine position state
+        if last_departed == -1 and next_idx is None:
+            # All stops are in the future - train hasn't started yet
+            first_stop = stops[0]
+            return PositionInfo(
+                interpolated=False,
+                between_stations=None,
+                km_from_previous=None,
+                minutes_ago=None,
+                confidence="high",
+                last_reported_stop=first_stop.code,
+            )
+
+        if last_departed == len(stops) - 1:
+            # Train has reached destination
+            last_stop = stops[-1]
+            return PositionInfo(
+                interpolated=False,
+                between_stations=None,
+                km_from_previous=None,
+                minutes_ago=None,
+                confidence="high",
+                last_reported_stop=last_stop.code,
+            )
+
+        departed = stops[last_departed]
+        next_stop = stops[next_idx]
+
+        interpolated = True
+        between_stations = f"{departed.code} → {next_stop.code}"
+        km_from_previous = next_stop.distance_km if next_stop.distance_km else None
+
+        # Calculate minutes since last reported stop
         last_actual_tm = departed.actual_departure_tm or departed.actual_arrival_tm
         minutes_ago = None
         if last_actual_tm:
             diff = (now_millis_val - last_actual_tm) / 60000
             minutes_ago = max(0, int(diff))
-        
+        elif departed.scheduled_departure:
+            # Fall back to scheduled time if no actual time
+            try:
+                dep_parts = departed.scheduled_departure.split(":")
+                dep_minutes = int(dep_parts[0]) * 60 + int(dep_parts[1])
+                diff = now_minutes - dep_minutes
+                if diff < 0:
+                    diff += 24 * 60
+                minutes_ago = max(0, diff)
+            except (ValueError, AttributeError):
+                pass
+
         confidence = "high" if minutes_ago is not None and minutes_ago < 15 else \
                     "medium" if minutes_ago is not None and minutes_ago < 45 else "low"
-        
+
         return PositionInfo(
             interpolated=interpolated,
             between_stations=between_stations,
@@ -316,7 +382,7 @@ class FirstWinsAggregator:
             confidence=confidence,
             last_reported_stop=departed.code,
         )
-    
+
     def _build_contributions(self, results: dict, now_millis_val: int) -> List[SourceContribution]:
         """Build per-source contribution summary"""
         contributions = []
@@ -329,7 +395,7 @@ class FirstWinsAggregator:
                     has_actuals=any(s.actual_arrival or s.actual_departure for s in result.stops),
                 ))
         return contributions
-    
+
     def _get_winner_label(self, results: dict) -> str:
         """Get label for winning source"""
         priority = ["ntes", "wimt", "railradar.in", "runningstatus.in", "erail.in"]
@@ -344,7 +410,7 @@ class FirstWinsAggregator:
             if source_name in results and results[source_name]:
                 return label_map.get(source_name, f"{source_name} live running status")
         return "no source answered"
-    
+
     def search_trains(self, from_station: str, to_station: str) -> List[dict]:
         """Search for trains between stations using erail.in"""
         erail = ErailSource()
