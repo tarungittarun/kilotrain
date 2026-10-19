@@ -368,7 +368,9 @@ class FirstWinsAggregator:
         last_actual_tm = departed.actual_departure_tm or departed.actual_arrival_tm
         minutes_ago = None
         if last_actual_tm:
-            diff = (now_millis_val - last_actual_tm) / 60000
+            # WIMT returns actual_arrival_tm/departure_tm in seconds since epoch
+            # now_millis_val is in milliseconds
+            diff = (now_millis_val - last_actual_tm * 1000) / 60000
             minutes_ago = max(0, int(diff))
         elif departed.scheduled_departure:
             # Fall back to scheduled time if no actual time
@@ -417,9 +419,9 @@ class FirstWinsAggregator:
             "runningstatus.in": "RunningStatus.in live running status",
             "erail.in": "erail.in live running status",
         }
-        for source_name in priority:
-            if source_name in results and results[source_name]:
-                return label_map.get(source_name, f"{source_name} live running status")
+        for source_name in results:
+            if results[source_name] and results[source_name].current_status not in ("device_only", "source_unavailable", "error"):
+                return results[source_name].source_label
         return "no source answered"
 
     def search_trains(self, from_station: str, to_station: str) -> List[dict]:

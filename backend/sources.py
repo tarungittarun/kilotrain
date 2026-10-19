@@ -109,7 +109,7 @@ class WIMTSource(SourceInterface):
             for s in stops:
                 stop_list.append(StopStatus(
                     code=s.get("station_code", ""),
-                    name=s.get("station_name", ""),
+                    name=s.get("station_name", "") or s.get("station_code", ""),
                     scheduled_arrival=s.get("sch_arrival_time"),
                     scheduled_departure=s.get("sch_departure_time"),
                     actual_arrival=s.get("actual_arrival_time"),
