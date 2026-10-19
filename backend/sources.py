@@ -10,7 +10,7 @@ All sources return normalized data via the models module.
 """
 
 from typing import List, Optional, Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 import json
 import re
@@ -294,35 +294,36 @@ class RunningStatusSource(SourceInterface):
                 )
             
             # Extract station data from HTML table rows
-            import re
             html = r.text
             
             stop_list = []
             # Look for table rows with station data
-            # runningstatus.in has table rows with station info
+            # Format: "STATION NAME (CODE) ... Scheduled Arr/Dep ... Actual Arr/Dep ..."
             rows = re.findall(r'<tr[^>]*>(.*?)</tr>', html, re.DOTALL)
             for row in rows:
                 # Extract station code and name
-                code_match = re.search(r'([A-Z]{2,6})\s*\(([A-Z]{2,4})\)', row)
-                if code_match:
-                    code = code_match.group(1)
-                    name = code_match.group(2)
-                    # Look for times in the row
-                    times = re.findall(r'\d{2}:\d{2}', row)
-                    scheduled_arrival = times[0] if len(times) > 0 else None
-                    scheduled_departure = times[1] if len(times) > 1 else None
-                    actual_arrival = times[2] if len(times) > 2 else None
-                    actual_departure = times[3] if len(times) > 3 else None
-                    
-                    stop_list.append(StopStatus(
-                        code=code,
-                        name=name,
-                        scheduled_arrival=scheduled_arrival,
-                        scheduled_departure=scheduled_departure,
-                        actual_arrival=actual_arrival,
-                        actual_departure=actual_departure,
-                        source_provenance="RunningStatus.in",
-                    ))
+                station_match = re.search(r'([A-Z][A-Za-z\s]+?)\s*\(([A-Z]{2,4})\)', row)
+                if station_match:
+                    code = station_match.group(2).strip()
+                    name = station_match.group(1).strip()
+                    # Validate code is 2-4 uppercase letters
+                    if re.match(r'^[A-Z]{2,4}$', code):
+                        # Look for times in the row
+                        times = re.findall(r'\d{2}:\d{2}', row)
+                        scheduled_arrival = times[0] if len(times) > 0 else None
+                        scheduled_departure = times[1] if len(times) > 1 else None
+                        actual_arrival = times[2] if len(times) > 2 else None
+                        actual_departure = times[3] if len(times) > 3 else None
+                        
+                        stop_list.append(StopStatus(
+                            code=code,
+                            name=name,
+                            scheduled_arrival=scheduled_arrival,
+                            scheduled_departure=scheduled_departure,
+                            actual_arrival=actual_arrival,
+                            actual_departure=actual_departure,
+                            source_provenance="RunningStatus.in",
+                        ))
             
             resp_ms = (now_millis() - start)
             self.record_success(resp_ms)

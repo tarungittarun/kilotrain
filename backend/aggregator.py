@@ -139,13 +139,24 @@ class FirstWinsAggregator:
                 source.record_failure()
                 results[source.name] = None
 
-        # Determine winner (first source with data)
+        # Determine winner (first source with real data)
         winner = None
+        winner_has_actuals = False
         for source in self.get_healthy_sources():
             if source.name in results and results[source.name]:
                 r = results[source.name]
-                if r.stops or r.current_status != "no source answered":
+                # Skip sources with error statuses
+                if r.current_status in ("device_only", "source_unavailable", "error"):
+                    continue
+                # Check if this source has actual times
+                has_actuals = any(s.actual_arrival or s.actual_departure for s in r.stops)
+                if winner is None:
                     winner = source.name
+                    winner_has_actuals = has_actuals
+                elif has_actuals and not winner_has_actuals:
+                    # Prefer source that actually has actual data
+                    winner = source.name
+                    winner_has_actuals = True
                     break
 
         if not winner:
